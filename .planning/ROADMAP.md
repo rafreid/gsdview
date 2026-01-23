@@ -203,7 +203,11 @@ Plans:
   2. Activity over time chart shows editing patterns
   3. Details panel shows file diff for recently changed files
   4. Diff display highlights added lines in green and removed lines in red
-**Plans**: Not yet planned
+**Plans**: 2 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — Statistics panel with file ranking and activity chart
+- [ ] 11-02-PLAN.md — Git diff preview in details panel
 
 ### Phase 12: Timeline Replay
 **Goal**: User can scrub through activity history and replay file changes over time
@@ -239,9 +243,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 8. Activity Feed & Change Indicators | 3/3 | Complete | 2026-01-23 |
 | 9. Heat Map Visualization | 2/2 | Complete | 2026-01-23 |
 | 10. Git Integration | 3/3 | Complete | 2026-01-23 |
-| 11. Statistics & Diff Preview | 0/— | Pending | — |
+| 11. Statistics & Diff Preview | 0/2 | Pending | — |
 | 12. Timeline Replay | 0/— | Pending | — |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-23 (Phase 10 planned)*
+*Last updated: 2026-01-23 (Phase 11 planned)*
