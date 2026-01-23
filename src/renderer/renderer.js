@@ -374,11 +374,119 @@ function updateActivityPanelForTimeline() {
 }
 
 // Update graph to show file state at current timeline position
-// (Full implementation in Task 3)
 function updateGraphForTimeline() {
-  // Will be fully implemented in Task 3
-  // For now, just log the state
-  console.log('[Timeline] Position:', timelinePosition === null ? 'LIVE' : new Date(timelinePosition).toLocaleTimeString());
+  console.log('[Timeline] Updating graph for position:', timelinePosition === null ? 'LIVE' : new Date(timelinePosition).toLocaleTimeString());
+
+  // If in live mode, restore all nodes to full opacity
+  if (timelinePosition === null) {
+    restoreAllNodeOpacity();
+    return;
+  }
+
+  // Get file state at current timeline position
+  const fileState = getFileStateAtTime(timelinePosition);
+
+  // Update each node's opacity based on file state
+  currentGraphData.nodes.forEach(node => {
+    if (node.type !== 'file' || !node.__threeObj) return;
+
+    // Build relative path key (matching activity entry format)
+    let relativePath;
+    if (node.sourceType === 'planning') {
+      relativePath = '.planning/' + node.path;
+    } else if (node.sourceType === 'src') {
+      relativePath = 'src/' + node.path;
+    } else {
+      relativePath = node.path;
+    }
+
+    const state = fileState.get(relativePath);
+    let targetOpacity = 0.85; // Default opacity for files
+
+    if (state === undefined) {
+      // File not in activity history at this time - show normally
+      targetOpacity = 0.85;
+    } else if (state === 'exists') {
+      // File exists at this time - show normally
+      targetOpacity = 0.85;
+    } else if (state === 'deleted') {
+      // File was deleted - show faded
+      targetOpacity = 0.3;
+    } else if (state === 'not-yet-created') {
+      // File hasn't been created yet - show very faded
+      targetOpacity = 0.1;
+    }
+
+    setNodeOpacity(node, targetOpacity);
+  });
+}
+
+// Get file state map at a given timestamp
+// Returns Map<relativePath, 'exists' | 'deleted' | 'not-yet-created'>
+function getFileStateAtTime(timestamp) {
+  const fileState = new Map();
+
+  // Sort entries by timestamp (oldest first)
+  const sortedEntries = [...activityEntries].sort((a, b) => a.timestamp - b.timestamp);
+
+  // Track all files that have any activity
+  const allFiles = new Set();
+  sortedEntries.forEach(entry => allFiles.add(entry.relativePath));
+
+  // Build state by replaying events up to timestamp
+  sortedEntries.forEach(entry => {
+    if (entry.timestamp > timestamp) return; // Skip future events
+
+    const path = entry.relativePath;
+    if (entry.event === 'created') {
+      fileState.set(path, 'exists');
+    } else if (entry.event === 'modified') {
+      fileState.set(path, 'exists');
+    } else if (entry.event === 'deleted') {
+      fileState.set(path, 'deleted');
+    }
+  });
+
+  // For files that have future activity but no state yet,
+  // they haven't been created yet at this point
+  allFiles.forEach(path => {
+    if (!fileState.has(path)) {
+      // Check if first event is after timestamp
+      const firstEvent = sortedEntries.find(e => e.relativePath === path);
+      if (firstEvent && firstEvent.timestamp > timestamp) {
+        fileState.set(path, 'not-yet-created');
+      }
+    }
+  });
+
+  return fileState;
+}
+
+// Set node opacity (updates Three.js material)
+function setNodeOpacity(node, opacity) {
+  const threeObj = node.__threeObj;
+  if (!threeObj) return;
+
+  const materials = [];
+  if (threeObj.material) materials.push(threeObj.material);
+  if (threeObj.children) {
+    threeObj.children.forEach(child => {
+      if (child.material) materials.push(child.material);
+    });
+  }
+
+  materials.forEach(m => {
+    m.transparent = true;
+    m.opacity = opacity;
+  });
+}
+
+// Restore all nodes to their normal opacity
+function restoreAllNodeOpacity() {
+  currentGraphData.nodes.forEach(node => {
+    if (node.type !== 'file' || !node.__threeObj) return;
+    setNodeOpacity(node, 0.85); // Default file opacity
+  });
 }
 
 // Get relative path for display in activity feed
