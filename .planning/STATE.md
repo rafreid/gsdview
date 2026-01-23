@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-01-23)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** Phase 10 - Git Integration (v1.1) - COMPLETE
+**Current focus:** Phase 11 - Statistics & Diff Preview (v1.1) - COMPLETE
 
 ## Current Position
 
-Phase: 10 of 12 (Git Integration)
-Plan: 3 of 3 complete
+Phase: 11 of 12 (Statistics & Diff Preview)
+Plan: 2 of 2 complete
 Status: Phase complete
-Last activity: 2026-01-23 - Completed 10-03-PLAN.md (Commits & Branch Display)
+Last activity: 2026-01-23 - Completed 11-02-PLAN.md (Diff Preview)
 
-Progress: [█████████░] 86% (v1.0: 6/12 phases + v1.1: Phases 7-10)
+Progress: [██████████░] 92% (v1.0: 6/12 phases + v1.1: Phases 7-11)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 27 (22 from v1.0 + 09-01 + 09-02 + 10-01 + 10-02 + 10-03)
+- Total plans completed: 29 (22 from v1.0 + 09-01 + 09-02 + 10-01 + 10-02 + 10-03 + 11-01 + 11-02)
 - Average duration: Session duration
 - Total execution time: 1 day (v1.0)
 
@@ -44,7 +44,7 @@ Progress: [█████████░] 86% (v1.0: 6/12 phases + v1.1: Phases
 | 8. Activity Feed & Change Indicators | 3 | 3/3 complete | FED-01-04, CHG-01-03 |
 | 9. Heat Map Visualization | 2 | 2/2 complete | HET-01-03 |
 | 10. Git Integration | 3 | 3/3 complete | GIT-01-04 |
-| 11. Statistics & Diff Preview | - | Pending | STS-01-03, DIF-01-03 |
+| 11. Statistics & Diff Preview | 2 | 2/2 complete | STS-01-03, DIF-01-03 |
 | 12. Timeline Replay | - | Pending | TML-01-03 |
 
 *Updated after each plan completion*
@@ -95,6 +95,12 @@ Recent decisions affecting current work:
 - Use directory type for "Recent Commits" parent node (10-03)
 - Hexagonal cylinder geometry for commit nodes (10-03)
 - Purple (#9B59B6) for commit nodes (10-03)
+- Statistics panel at 320px width, right side of screen (11-01)
+- File ranking shows top 10 most edited files with bar chart (11-01)
+- Activity chart aggregates changes into 10 time buckets (11-01)
+- Diff compares against HEAD (last committed state) (11-02)
+- Long diffs truncated at 100 lines for UI performance (11-02)
+- refreshDiffSection for efficient targeted diff updates (11-02)
 
 ### Pending Todos
 
@@ -119,6 +125,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 10-03-PLAN.md (Commits & Branch Display)
+Stopped at: Completed 11-02-PLAN.md (Diff Preview)
 Resume file: None
-Next action: Phase 10 complete. Proceed to Phase 11 (Statistics & Diff Preview) when ready.
+Next action: Phase 11 complete. Proceed to Phase 12 (Timeline Replay) when ready.
