@@ -33,9 +33,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Electron app scaffold with basic window
-- [ ] 01-02-PLAN.md — 3d-force-graph integration with placeholder data
-- [ ] 01-03-PLAN.md — Project folder selection dialog
+- [x] 01-01-PLAN.md — Electron app scaffold with basic window
+- [x] 01-02-PLAN.md — 3d-force-graph integration with placeholder data
+- [x] 01-03-PLAN.md — Project folder selection dialog
 
 ### Phase 2: Graph Rendering
 **Goal**: Graph nodes are visually distinct by type, size reflects importance, edges show relationships
@@ -45,12 +45,12 @@ Plans:
   1. Different node types (phases, plans, tasks, requirements, files) have distinct colors
   2. Nodes with more connections appear larger than isolated nodes
   3. Edges connect related nodes with visible lines
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: Node color coding by type
-- [ ] 02-02: Node sizing based on connection count
-- [ ] 02-03: Edge styling and visibility
+- [ ] 02-01-PLAN.md — Enhanced color palette and color legend
+- [ ] 02-02-PLAN.md — Dynamic node sizing by connection count
+- [ ] 02-03-PLAN.md — Edge styling and directional indicators
 
 ### Phase 3: GSD Parsing
 **Goal**: App understands GSD .planning/ structure and renders it as connected nodes
@@ -128,7 +128,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-01-22 |
-| 2. Graph Rendering | 0/3 | Not started | - |
+| 2. Graph Rendering | 0/3 | Planned | - |
 | 3. GSD Parsing | 0/4 | Not started | - |
 | 4. State Visualization | 0/4 | Not started | - |
 | 5. Interactions | 0/4 | Not started | - |
