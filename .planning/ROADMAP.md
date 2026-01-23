@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Electron app with basic 3d-force-graph rendering and navigation
 - [x] **Phase 2: Graph Rendering** - Color-coded nodes, connection-based sizing, styled edges
-- [ ] **Phase 3: GSD Parsing** - Parse .planning/ structure into hierarchical nodes
+- [x] **Phase 3: GSD Parsing** - Parse .planning/ structure into hierarchical nodes
 - [ ] **Phase 4: State Visualization** - Progress colors, current phase highlight, blocker indicators
 - [ ] **Phase 5: Interactions** - Details panel, tooltips, fly-to navigation, external editor launch
 - [ ] **Phase 6: Polish** - Live file watching, recent projects, window state persistence
@@ -64,10 +64,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Parse ROADMAP.md for phase/plan hierarchy
-- [ ] 03-02-PLAN.md — Parse REQUIREMENTS.md and link to phases
-- [ ] 03-03-PLAN.md — Directory tree parsing for .planning/ folder
-- [ ] 03-04-PLAN.md — Graph builder and renderer integration
+- [x] 03-01-PLAN.md — Parse ROADMAP.md for phase/plan hierarchy
+- [x] 03-02-PLAN.md — Parse REQUIREMENTS.md and link to phases
+- [x] 03-03-PLAN.md — Directory tree parsing for .planning/ folder
+- [x] 03-04-PLAN.md — Graph builder and renderer integration
 
 ### Phase 4: State Visualization
 **Goal**: User can see project progress, current focus, and blockers at a glance
@@ -129,7 +129,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-01-22 |
 | 2. Graph Rendering | 3/3 | Complete | 2026-01-22 |
-| 3. GSD Parsing | 0/4 | Not started | - |
+| 3. GSD Parsing | 4/4 | Complete | 2026-01-22 |
 | 4. State Visualization | 0/4 | Not started | - |
 | 5. Interactions | 0/4 | Not started | - |
 | 6. Polish | 0/5 | Not started | - |
