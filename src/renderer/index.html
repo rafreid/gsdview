@@ -645,7 +645,20 @@
     }
 
     .activity-entry:hover {
-      background: rgba(78, 205, 196, 0.1);
+      background: rgba(78, 205, 196, 0.2);
+      cursor: pointer;
+    }
+
+    .activity-entry.created:hover {
+      background: rgba(46, 204, 113, 0.2);
+    }
+
+    .activity-entry.modified:hover {
+      background: rgba(243, 156, 18, 0.2);
+    }
+
+    .activity-entry.deleted:hover {
+      background: rgba(231, 76, 60, 0.2);
     }
 
     .activity-entry .entry-icon,
