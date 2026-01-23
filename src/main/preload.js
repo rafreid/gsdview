@@ -16,5 +16,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   addRecentProject: (projectPath) => ipcRenderer.invoke('add-recent-project', projectPath),
   getGitStatus: (projectPath) => ipcRenderer.invoke('get-git-status', projectPath),
   getGitBranch: (projectPath) => ipcRenderer.invoke('get-git-branch', projectPath),
-  getGitCommits: (projectPath, limit) => ipcRenderer.invoke('get-git-commits', projectPath, limit)
+  getGitCommits: (projectPath, limit) => ipcRenderer.invoke('get-git-commits', projectPath, limit),
+  getGitDiff: (projectPath, filePath) => ipcRenderer.invoke('get-git-diff', projectPath, filePath)
 });

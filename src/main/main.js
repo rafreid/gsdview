@@ -413,6 +413,30 @@ app.whenReady().then(() => {
     }
   });
 
+  // IPC handler for getting file diff against HEAD
+  ipcMain.handle('get-git-diff', async (event, projectPath, filePath) => {
+    try {
+      // Get diff for specific file against HEAD (last commit)
+      // filePath is relative to project root (e.g., 'src/main.js' or '.planning/STATE.md')
+      const output = runGitCommand(`git diff HEAD -- "${filePath}"`, projectPath);
+
+      // If null or empty, check if file is untracked
+      if (output === null || output === '') {
+        // Check if file is untracked (new file not yet committed)
+        const status = runGitCommand(`git status --porcelain -- "${filePath}"`, projectPath);
+        if (status && status.startsWith('??')) {
+          return { diff: null, status: 'untracked', message: 'New file (not yet committed)' };
+        }
+        return { diff: null, status: 'unchanged', message: 'No changes since last commit' };
+      }
+
+      return { diff: output, status: 'changed' };
+    } catch (error) {
+      console.error('Error getting git diff:', error);
+      return { diff: null, error: error.message };
+    }
+  });
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
