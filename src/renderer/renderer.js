@@ -1554,6 +1554,14 @@ async function showDetailsPanel(node) {
     html += `<p><strong>Extension:</strong> <span style="color: ${extensionColors[node.extension] || '#888'}">${node.extension}</span></p>`;
   }
 
+  // For commit nodes, show hash and message
+  if (node.type === 'commit') {
+    html += `<p><strong>Commit Hash:</strong> <code style="font-family: monospace; background: #2a2a4e; padding: 2px 6px; border-radius: 3px;">${node.hash}</code></p>`;
+    if (node.fullMessage) {
+      html += `<p><strong>Message:</strong><br>${node.fullMessage}</p>`;
+    }
+  }
+
   // Add open button for nodes with file paths
   const filePath = node.path || node.file;
   let fullPath = null;
