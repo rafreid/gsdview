@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-23)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** Phase 7 - Expanded File Scope (v1.1)
+**Current focus:** Phase 7 - Expanded File Scope (v1.1) - COMPLETE
 
 ## Current Position
 
 Phase: 7 of 12 (Expanded File Scope)
-Plan: 2 of 3 complete (07-01, 07-02 done, remaining: 07-03)
-Status: In progress - Phase 7
-Last activity: 2026-01-23 — Completed 07-02-PLAN.md
+Plan: 3 of 3 complete (07-01, 07-02, 07-03 done)
+Status: Phase 7 complete
+Last activity: 2026-01-23 - Completed 07-03-PLAN.md
 
-Progress: [███████░░░] 59% (v1.0: 6/12 phases + v1.1: 2/3 plans in Phase 7)
+Progress: [███████░░░] 64% (v1.0: 6/12 phases + v1.1: 3/3 plans in Phase 7)
 
 ## Performance Metrics
 
@@ -40,12 +40,12 @@ Progress: [███████░░░] 59% (v1.0: 6/12 phases + v1.1: 2/3 pl
 
 | Phase | Plans | Status | Target |
 |-------|-------|--------|--------|
-| 7. Expanded File Scope | 3 | 2/3 complete | EXP-01-03 |
-| 8. Activity Feed & Change Indicators | — | Pending | FED-01-04, CHG-01-03 |
-| 9. Heat Map Visualization | — | Pending | HET-01-03 |
-| 10. Git Integration | — | Pending | GIT-01-04 |
-| 11. Statistics & Diff Preview | — | Pending | STS-01-03, DIF-01-03 |
-| 12. Timeline Replay | — | Pending | TML-01-03 |
+| 7. Expanded File Scope | 3 | 3/3 complete | EXP-01-03 |
+| 8. Activity Feed & Change Indicators | - | Pending | FED-01-04, CHG-01-03 |
+| 9. Heat Map Visualization | - | Pending | HET-01-03 |
+| 10. Git Integration | - | Pending | GIT-01-04 |
+| 11. Statistics & Diff Preview | - | Pending | STS-01-03, DIF-01-03 |
+| 12. Timeline Replay | - | Pending | TML-01-03 |
 
 *Updated after each plan completion*
 
@@ -66,6 +66,9 @@ Recent decisions affecting current work:
 - Node IDs prefixed with sourceType to avoid collisions (07-01)
 - File watcher monitors both .planning/ and src/ simultaneously (07-02)
 - sourceType property included in file change events (07-02)
+- src/ files use cooler blue tones (#7EC8E3 for files, #5B9BD5 for directories) (07-03)
+- src/ files use icosahedron geometry, planning/ uses octahedron (07-03)
+- applySourceTint shifts colors toward blue for visual differentiation (07-03)
 
 ### Pending Todos
 
@@ -90,6 +93,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 07-02-PLAN.md (dual-directory file watcher)
+Stopped at: Completed 07-03-PLAN.md (visual differentiation)
 Resume file: None
-Next action: Execute 07-03-PLAN.md (visual differentiation of directory trees)
+Next action: Phase 7 complete - ready for Phase 8 (Activity Feed & Change Indicators)
