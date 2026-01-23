@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 Phase: 12 of 12 (Timeline Replay)
 Plan: 1 of 1 complete
 Status: v1.1 COMPLETE
-Last activity: 2026-01-23 - Completed quick task 008: Fix path error
+Last activity: 2026-01-23 - Completed quick task 009: Resizable panel divider
 
 Progress: [███████████] 100% (v1.0: 6/6 phases + v1.1: 6/6 phases)
 
@@ -126,6 +126,7 @@ None.
 | 006 | Add 2D/3D toggle switch to change graph view | 2026-01-23 | [006-add-2d-3d-toggle-switch](./quick/006-add-2d-3d-toggle-switch-to-change-graph-/) |
 | 007 | Fix 2D zoom, file change detection, and color coding | 2026-01-23 | [007-fix-2d-zoom-file-change-detection-and-co](./quick/007-fix-2d-zoom-file-change-detection-and-co/) |
 | 008 | Fix path error - missing sourceType in graph node building | 2026-01-23 | [008-fix-path-error-missing-sourcetype](./quick/008-fix-path-error-missing-sourcetype/) |
+| 009 | Resizable divider between file tree panel and graph | 2026-01-23 | [009-resizable-panel-divider](./quick/009-resizable-panel-divider/) |
 
 ## Session Continuity
 
