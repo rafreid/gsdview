@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-01-23)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** Phase 11 - Statistics & Diff Preview (v1.1) - COMPLETE
+**Current focus:** Phase 12 - Timeline Replay (v1.1) - COMPLETE
 
 ## Current Position
 
-Phase: 11 of 12 (Statistics & Diff Preview)
-Plan: 2 of 2 complete
-Status: Phase complete
-Last activity: 2026-01-23 - Completed 11-02-PLAN.md (Diff Preview)
+Phase: 12 of 12 (Timeline Replay)
+Plan: 1 of 1 complete
+Status: v1.1 COMPLETE
+Last activity: 2026-01-23 - Completed 12-01-PLAN.md (Timeline Replay)
 
-Progress: [██████████░] 92% (v1.0: 6/12 phases + v1.1: Phases 7-11)
+Progress: [███████████] 100% (v1.0: 6/6 phases + v1.1: 6/6 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 29 (22 from v1.0 + 09-01 + 09-02 + 10-01 + 10-02 + 10-03 + 11-01 + 11-02)
+- Total plans completed: 30 (22 from v1.0 + 09-01 + 09-02 + 10-01 + 10-02 + 10-03 + 11-01 + 11-02 + 12-01)
 - Average duration: Session duration
 - Total execution time: 1 day (v1.0)
 
@@ -36,7 +36,7 @@ Progress: [██████████░] 92% (v1.0: 6/12 phases + v1.1: Pha
 | 5. Interactions | 4 | Complete | -- |
 | 6. Polish | 5 | Complete | -- |
 
-*v1.1 (Current):*
+*v1.1 (Complete):*
 
 | Phase | Plans | Status | Target |
 |-------|-------|--------|--------|
@@ -45,7 +45,7 @@ Progress: [██████████░] 92% (v1.0: 6/12 phases + v1.1: Pha
 | 9. Heat Map Visualization | 2 | 2/2 complete | HET-01-03 |
 | 10. Git Integration | 3 | 3/3 complete | GIT-01-04 |
 | 11. Statistics & Diff Preview | 2 | 2/2 complete | STS-01-03, DIF-01-03 |
-| 12. Timeline Replay | - | Pending | TML-01-03 |
+| 12. Timeline Replay | 1 | 1/1 complete | TML-01-03 |
 
 *Updated after each plan completion*
 
@@ -101,6 +101,10 @@ Recent decisions affecting current work:
 - Diff compares against HEAD (last committed state) (11-02)
 - Long diffs truncated at 100 lines for UI performance (11-02)
 - refreshDiffSection for efficient targeted diff updates (11-02)
+- Timeline slider range 0-100 mapped to timestamp range (12-01)
+- 500ms playback speed for timeline replay (12-01)
+- null for live mode, timestamp for historical (12-01)
+- File opacity levels: 10% not-created, 30% deleted, 85% existing (12-01)
 
 ### Pending Todos
 
@@ -125,6 +129,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 11-02-PLAN.md (Diff Preview)
+Stopped at: Completed 12-01-PLAN.md (Timeline Replay)
 Resume file: None
-Next action: Phase 11 complete. Proceed to Phase 12 (Timeline Replay) when ready.
+Next action: v1.1 milestone complete. Ready for v1.2 planning or production release.
