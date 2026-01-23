@@ -119,6 +119,29 @@ const heatGradient = [
 // Track heat state per node: nodeId -> { lastChangeTime, originalColor }
 const nodeHeatMap = new Map();
 
+// Format duration in seconds to human-readable string
+function formatHeatDuration(seconds) {
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.round(seconds / 60);
+  return `${minutes}m`;
+}
+
+// Load heat decay setting from store
+async function loadHeatDecaySetting() {
+  try {
+    const saved = await window.electronAPI.store.get('heatDecaySeconds');
+    if (saved && typeof saved === 'number') {
+      heatDecayDuration = saved * 1000; // Convert to ms
+      const slider = document.getElementById('heat-decay-slider');
+      const valueDisplay = document.getElementById('heat-decay-value');
+      if (slider) slider.value = saved;
+      if (valueDisplay) valueDisplay.textContent = formatHeatDuration(saved);
+    }
+  } catch (err) {
+    console.log('[Heat] Using default decay duration:', HEAT_MAX_DURATION / 1000, 'seconds');
+  }
+}
+
 // Color interpolation helper for flash animation
 function lerpColor(color1, color2, t) {
   const r1 = (color1 >> 16) & 0xFF, g1 = (color1 >> 8) & 0xFF, b1 = color1 & 0xFF;
@@ -2092,5 +2115,25 @@ function initActivityInteractions() {
 
 // Initialize activity interactions
 initActivityInteractions();
+
+// Heat decay slider handler
+document.getElementById('heat-decay-slider')?.addEventListener('input', async (e) => {
+  const seconds = parseInt(e.target.value, 10);
+  heatDecayDuration = seconds * 1000; // Convert to ms
+
+  // Update display
+  const valueDisplay = document.getElementById('heat-decay-value');
+  if (valueDisplay) valueDisplay.textContent = formatHeatDuration(seconds);
+
+  // Save to store
+  try {
+    await window.electronAPI.store.set('heatDecaySeconds', seconds);
+  } catch (err) {
+    console.log('[Heat] Could not save setting:', err);
+  }
+});
+
+// Load heat decay setting on startup
+loadHeatDecaySetting();
 
 console.log('GSD Viewer initialized - select a project folder to visualize');

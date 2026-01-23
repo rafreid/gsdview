@@ -81854,6 +81854,25 @@ var<${access}> ${name} : ${structName};`;
     // null = use node's original color
   ];
   var nodeHeatMap = /* @__PURE__ */ new Map();
+  function formatHeatDuration(seconds) {
+    if (seconds < 60) return `${seconds}s`;
+    const minutes = Math.round(seconds / 60);
+    return `${minutes}m`;
+  }
+  async function loadHeatDecaySetting() {
+    try {
+      const saved = await window.electronAPI.store.get("heatDecaySeconds");
+      if (saved && typeof saved === "number") {
+        heatDecayDuration = saved * 1e3;
+        const slider = document.getElementById("heat-decay-slider");
+        const valueDisplay = document.getElementById("heat-decay-value");
+        if (slider) slider.value = saved;
+        if (valueDisplay) valueDisplay.textContent = formatHeatDuration(saved);
+      }
+    } catch (err) {
+      console.log("[Heat] Using default decay duration:", HEAT_MAX_DURATION / 1e3, "seconds");
+    }
+  }
   function lerpColor(color1, color2, t2) {
     const r1 = color1 >> 16 & 255, g12 = color1 >> 8 & 255, b1 = color1 & 255;
     const r2 = color2 >> 16 & 255, g2 = color2 >> 8 & 255, b2 = color2 & 255;
@@ -83258,6 +83277,18 @@ ${node.goal}`;
     });
   }
   initActivityInteractions();
+  document.getElementById("heat-decay-slider")?.addEventListener("input", async (e2) => {
+    const seconds = parseInt(e2.target.value, 10);
+    heatDecayDuration = seconds * 1e3;
+    const valueDisplay = document.getElementById("heat-decay-value");
+    if (valueDisplay) valueDisplay.textContent = formatHeatDuration(seconds);
+    try {
+      await window.electronAPI.store.set("heatDecaySeconds", seconds);
+    } catch (err) {
+      console.log("[Heat] Could not save setting:", err);
+    }
+  });
+  loadHeatDecaySetting();
   console.log("GSD Viewer initialized - select a project folder to visualize");
 })();
 /*! Bundled license information:
