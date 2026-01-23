@@ -17,15 +17,40 @@ const extensionColors = {
   '.md': '#5DADE2',      // Blue - markdown
   '.js': '#F7DC6F',      // Yellow - javascript
   '.ts': '#3498DB',      // Dark blue - typescript
+  '.tsx': '#3498DB',     // Dark blue - typescript react
+  '.jsx': '#F7DC6F',     // Yellow - javascript react
   '.json': '#27AE60',    // Green - json
   '.html': '#E74C3C',    // Red - html
   '.css': '#9B59B6',     // Purple - css
+  '.scss': '#CC6699',    // Pink - sass
+  '.less': '#1D365D',    // Dark blue - less
   '.py': '#2ECC71',      // Green - python
   '.yaml': '#F39C12',    // Orange - yaml
   '.yml': '#F39C12',     // Orange - yaml
+  '.toml': '#F39C12',    // Orange - toml
   '.txt': '#BDC3C7',     // Gray - text
   '.sh': '#1ABC9C',      // Teal - shell
-  '.gitignore': '#7F8C8D' // Dark gray - git files
+  '.bash': '#1ABC9C',    // Teal - bash
+  '.zsh': '#1ABC9C',     // Teal - zsh
+  '.gitignore': '#7F8C8D', // Dark gray - git files
+  '.env': '#F1C40F',     // Yellow - environment
+  '.lock': '#95A5A6',    // Gray - lock files
+  '.log': '#7F8C8D',     // Dark gray - logs
+  '.svg': '#FF6B6B',     // Coral - svg images
+  '.png': '#E91E63',     // Pink - png images
+  '.jpg': '#E91E63',     // Pink - jpg images
+  '.jpeg': '#E91E63',    // Pink - jpeg images
+  '.gif': '#E91E63',     // Pink - gif images
+  '.sql': '#336791',     // PostgreSQL blue - sql
+  '.prisma': '#2D3748',  // Dark - prisma
+  '.graphql': '#E10098', // GraphQL pink
+  '.gql': '#E10098',     // GraphQL pink
+  '.rs': '#DEA584',      // Rust orange
+  '.go': '#00ADD8',      // Go cyan
+  '.rb': '#CC342D',      // Ruby red
+  '.java': '#B07219',    // Java orange
+  '.vue': '#4FC08D',     // Vue green
+  '.svelte': '#FF3E00'   // Svelte orange
 };
 
 // Status-based colors (progress visualization)
@@ -784,9 +809,16 @@ function populateColorLegend() {
   const extLabels = {
     '.md': 'Markdown',
     '.js': 'JavaScript',
+    '.ts': 'TypeScript',
+    '.jsx': 'JSX',
+    '.tsx': 'TSX',
     '.json': 'JSON',
     '.html': 'HTML',
-    '.css': 'CSS'
+    '.css': 'CSS',
+    '.py': 'Python',
+    '.yaml': 'YAML',
+    '.sh': 'Shell',
+    '.txt': 'Text'
   };
 
   for (const [ext, label] of Object.entries(extLabels)) {
