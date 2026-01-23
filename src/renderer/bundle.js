@@ -81719,9 +81719,15 @@ var<${access}> ${name} : ${structName};`;
     requirement: "#F7DC6F",
     // Gold - specifications
     file: "#DDA0DD",
-    // Plum - source references (default)
+    // Plum - source references (default for .planning/)
     directory: "#BB8FCE"
-    // Purple - directories
+    // Purple - directories (default for .planning/)
+  };
+  var srcNodeColors = {
+    file: "#7EC8E3",
+    // Cool blue (vs #DDA0DD plum for planning)
+    directory: "#5B9BD5"
+    // Steel blue (vs #BB8FCE purple for planning)
   };
   var extensionColors = {
     ".md": "#5DADE2",
@@ -81730,24 +81736,74 @@ var<${access}> ${name} : ${structName};`;
     // Yellow - javascript
     ".ts": "#3498DB",
     // Dark blue - typescript
+    ".tsx": "#3498DB",
+    // Dark blue - typescript react
+    ".jsx": "#F7DC6F",
+    // Yellow - javascript react
     ".json": "#27AE60",
     // Green - json
     ".html": "#E74C3C",
     // Red - html
     ".css": "#9B59B6",
     // Purple - css
+    ".scss": "#CC6699",
+    // Pink - sass
+    ".less": "#1D365D",
+    // Dark blue - less
     ".py": "#2ECC71",
     // Green - python
     ".yaml": "#F39C12",
     // Orange - yaml
     ".yml": "#F39C12",
     // Orange - yaml
+    ".toml": "#F39C12",
+    // Orange - toml
     ".txt": "#BDC3C7",
     // Gray - text
     ".sh": "#1ABC9C",
     // Teal - shell
-    ".gitignore": "#7F8C8D"
+    ".bash": "#1ABC9C",
+    // Teal - bash
+    ".zsh": "#1ABC9C",
+    // Teal - zsh
+    ".gitignore": "#7F8C8D",
     // Dark gray - git files
+    ".env": "#F1C40F",
+    // Yellow - environment
+    ".lock": "#95A5A6",
+    // Gray - lock files
+    ".log": "#7F8C8D",
+    // Dark gray - logs
+    ".svg": "#FF6B6B",
+    // Coral - svg images
+    ".png": "#E91E63",
+    // Pink - png images
+    ".jpg": "#E91E63",
+    // Pink - jpg images
+    ".jpeg": "#E91E63",
+    // Pink - jpeg images
+    ".gif": "#E91E63",
+    // Pink - gif images
+    ".sql": "#336791",
+    // PostgreSQL blue - sql
+    ".prisma": "#2D3748",
+    // Dark - prisma
+    ".graphql": "#E10098",
+    // GraphQL pink
+    ".gql": "#E10098",
+    // GraphQL pink
+    ".rs": "#DEA584",
+    // Rust orange
+    ".go": "#00ADD8",
+    // Go cyan
+    ".rb": "#CC342D",
+    // Ruby red
+    ".java": "#B07219",
+    // Java orange
+    ".vue": "#4FC08D",
+    // Vue green
+    ".svelte": "#FF3E00"
+    // Svelte orange
   };
   var statusColors = {
     complete: "#2ECC71",
@@ -81782,20 +81838,33 @@ var<${access}> ${name} : ${structName};`;
     return r3 << 16 | g3 << 8 | b;
   }
   function findNodeIdFromPath(changedPath) {
-    const planningIndex = changedPath.indexOf(".planning/");
-    if (planningIndex === -1) {
-      console.log("[Flash] Path not in .planning:", changedPath);
-      return null;
+    const normalizedPath = changedPath.replace(/\\/g, "/");
+    const planningIndex = normalizedPath.indexOf(".planning/");
+    if (planningIndex !== -1) {
+      const relativePath = normalizedPath.substring(planningIndex + ".planning/".length);
+      console.log("[Flash] Looking for planning node with path:", relativePath);
+      const node = currentGraphData.nodes.find(
+        (n2) => n2.path === relativePath && n2.sourceType === "planning"
+      );
+      if (node) {
+        console.log("[Flash] Found planning node:", node.id);
+        return node.id;
+      }
     }
-    const relativePath = changedPath.substring(planningIndex + ".planning/".length);
-    console.log("[Flash] Looking for node with path:", relativePath);
-    const node = currentGraphData.nodes.find((n2) => n2.path === relativePath);
-    if (node) {
-      console.log("[Flash] Found node:", node.id);
-    } else {
-      console.log("[Flash] No node found for path:", relativePath);
+    const srcIndex = normalizedPath.indexOf("/src/");
+    if (srcIndex !== -1) {
+      const relativePath = normalizedPath.substring(srcIndex + "/src/".length);
+      console.log("[Flash] Looking for src node with path:", relativePath);
+      const node = currentGraphData.nodes.find(
+        (n2) => n2.path === relativePath && n2.sourceType === "src"
+      );
+      if (node) {
+        console.log("[Flash] Found src node:", node.id);
+        return node.id;
+      }
     }
-    return node ? node.id : null;
+    console.log("[Flash] No node found for path:", changedPath);
+    return null;
   }
   function flashNode(nodeId) {
     const node = currentGraphData.nodes.find((n2) => n2.id === nodeId);
@@ -81884,6 +81953,16 @@ var<${access}> ${name} : ${structName};`;
     const scale2 = Math.min(connections / 6, 1);
     return minSize + (maxSize - minSize) * scale2;
   }
+  function applySourceTint(hexColor, sourceType) {
+    if (sourceType !== "src") return hexColor;
+    const hex = hexColor.replace("#", "");
+    let r2 = parseInt(hex.substr(0, 2), 16);
+    let g2 = parseInt(hex.substr(2, 2), 16);
+    let b = parseInt(hex.substr(4, 2), 16);
+    r2 = Math.max(0, Math.round(r2 * 0.85));
+    b = Math.min(255, Math.round(b * 1.15 + 20));
+    return "#" + [r2, g2, b].map((x3) => x3.toString(16).padStart(2, "0")).join("");
+  }
   function getNodeColor(node) {
     const statusTypes = ["phase", "plan", "task", "requirement"];
     if (statusTypes.includes(node.type) && node.status) {
@@ -81895,8 +81974,18 @@ var<${access}> ${name} : ${structName};`;
       }
       return statusColors[node.status] || nodeColors[node.type] || DEFAULT_NODE_COLOR;
     }
-    if (node.type === "file" && node.extension) {
-      return extensionColors[node.extension] || nodeColors.file;
+    if (node.type === "file") {
+      let baseColor = extensionColors[node.extension] || nodeColors.file;
+      if (node.sourceType === "src") {
+        baseColor = applySourceTint(baseColor, "src");
+      }
+      return baseColor;
+    }
+    if (node.type === "directory") {
+      if (node.sourceType === "src") {
+        return srcNodeColors.directory;
+      }
+      return nodeColors.directory;
     }
     return nodeColors[node.type] || DEFAULT_NODE_COLOR;
   }
@@ -81970,7 +82059,12 @@ ${node.goal}`;
       return group;
     }
     if (node.type === "file") {
-      const geometry = new OctahedronGeometry(size * 0.8);
+      let geometry;
+      if (node.sourceType === "src") {
+        geometry = new IcosahedronGeometry(size * 0.7);
+      } else {
+        geometry = new OctahedronGeometry(size * 0.8);
+      }
       const material = new MeshBasicMaterial({
         color: color2,
         transparent: true,
@@ -81979,7 +82073,11 @@ ${node.goal}`;
       const mesh = new Mesh(geometry, material);
       mesh.name = node.id;
       const edges = new EdgesGeometry(geometry);
-      const lineMaterial = new LineBasicMaterial({ color: 16777215, opacity: 0.3, transparent: true });
+      const lineMaterial = new LineBasicMaterial({
+        color: 16777215,
+        opacity: 0.3,
+        transparent: true
+      });
       const wireframe = new LineSegments(edges, lineMaterial);
       mesh.add(wireframe);
       return mesh;
@@ -82018,18 +82116,26 @@ ${node.goal}`;
     return false;
   }).linkColor((link) => getLinkColor(link, currentGraphData)).linkWidth((link) => getLinkWidth(link, currentGraphData)).linkOpacity(0.6).linkDirectionalArrowLength(3.5).linkDirectionalArrowRelPos(1).backgroundColor("#1a1a2e").showNavInfo(false).onNodeClick((node) => {
     const distance3 = 50 + getNodeSize(node, connectionCounts) * 4;
-    const distRatio = 1 + distance3 / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
-    Graph.cameraPosition(
-      {
-        x: (node.x || 0) * distRatio,
-        y: (node.y || 0) * distRatio,
-        z: (node.z || 0) * distRatio
-      },
-      node,
-      // lookAt target
-      1e3
-      // transition duration ms
-    );
+    if (is3D) {
+      const distRatio = 1 + distance3 / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
+      Graph.cameraPosition(
+        {
+          x: (node.x || 0) * distRatio,
+          y: (node.y || 0) * distRatio,
+          z: (node.z || 0) * distRatio
+        },
+        node,
+        // lookAt target
+        1e3
+        // transition duration ms
+      );
+    } else {
+      Graph.cameraPosition(
+        { x: node.x || 0, y: node.y || 0, z: distance3 + 100 },
+        node,
+        1e3
+      );
+    }
     showDetailsPanel(node);
   }).onNodeHover((node) => {
     const tooltip = document.getElementById("tooltip");
@@ -82190,6 +82296,11 @@ ${node.goal}`;
       treeData = buildTreeStructure(storedDirectoryData);
       if (treeData && treeData.length > 0) {
         treeExpanded.add(treeData[0].id);
+        if (treeData[0].children) {
+          treeData[0].children.forEach((child) => {
+            treeExpanded.add(child.id);
+          });
+        }
       }
       updateTreePanel();
     }
@@ -82297,9 +82408,16 @@ ${node.goal}`;
     const extLabels = {
       ".md": "Markdown",
       ".js": "JavaScript",
+      ".ts": "TypeScript",
+      ".jsx": "JSX",
+      ".tsx": "TSX",
       ".json": "JSON",
       ".html": "HTML",
-      ".css": "CSS"
+      ".css": "CSS",
+      ".py": "Python",
+      ".yaml": "YAML",
+      ".sh": "Shell",
+      ".txt": "Text"
     };
     for (const [ext, label2] of Object.entries(extLabels)) {
       const item = document.createElement("div");
@@ -82497,10 +82615,10 @@ ${node.goal}`;
   });
   if (window.electronAPI && window.electronAPI.onFilesChanged) {
     window.electronAPI.onFilesChanged((data) => {
-      console.log("Files changed:", data);
+      console.log("Files changed:", data.event, data.path, "sourceType:", data.sourceType);
       if (selectedProjectPath) {
         if (data.path) {
-          console.log("[FileChange] Received:", data.event, data.path);
+          console.log("[FileChange] Received:", data.event, data.path, "sourceType:", data.sourceType);
           const nodeId = findNodeIdFromPath(data.path);
           if (nodeId) {
             flashNode(nodeId);
@@ -82566,8 +82684,16 @@ ${node.goal}`;
     return extIcons[node.extension] || "\u{1F4C4}";
   }
   function getTreeColor(node) {
-    if (node.type === "directory") return "#BB8FCE";
-    return extensionColors[node.extension] || "#DDA0DD";
+    if (node.type === "directory") {
+      if (node.sourceType === "src") return "#5B9BD5";
+      if (node.sourceType === "root") return "#FFFFFF";
+      return "#BB8FCE";
+    }
+    let baseColor = extensionColors[node.extension] || "#DDA0DD";
+    if (node.sourceType === "src") {
+      baseColor = applySourceTint(baseColor, "src");
+    }
+    return baseColor;
   }
   function renderTree(nodes, depth2 = 0) {
     let html = "";
@@ -82658,16 +82784,24 @@ ${node.goal}`;
     });
     if (graphNode.x !== void 0) {
       const distance3 = 50 + getNodeSize(graphNode, connectionCounts) * 4;
-      const distRatio = 1 + distance3 / Math.hypot(graphNode.x || 0, graphNode.y || 0, graphNode.z || 0);
-      Graph.cameraPosition(
-        {
-          x: (graphNode.x || 0) * distRatio,
-          y: (graphNode.y || 0) * distRatio,
-          z: (graphNode.z || 0) * distRatio
-        },
-        graphNode,
-        1e3
-      );
+      if (is3D) {
+        const distRatio = 1 + distance3 / Math.hypot(graphNode.x || 0, graphNode.y || 0, graphNode.z || 0);
+        Graph.cameraPosition(
+          {
+            x: (graphNode.x || 0) * distRatio,
+            y: (graphNode.y || 0) * distRatio,
+            z: (graphNode.z || 0) * distRatio
+          },
+          graphNode,
+          1e3
+        );
+      } else {
+        Graph.cameraPosition(
+          { x: graphNode.x || 0, y: graphNode.y || 0, z: distance3 + 100 },
+          graphNode,
+          1e3
+        );
+      }
       flashNode(nodeId);
     }
     showDetailsPanel(graphNode);
