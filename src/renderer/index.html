@@ -810,6 +810,52 @@
       font-style: italic;
     }
 
+    /* Diff View Styles */
+    .diff-container {
+      margin-top: 16px;
+      border: 1px solid #333;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .diff-header {
+      background: #2a2a4e;
+      padding: 8px 12px;
+      font-weight: bold;
+      border-bottom: 1px solid #333;
+    }
+    .diff-content {
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .diff-line {
+      padding: 2px 8px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .diff-line.added {
+      background: rgba(46, 204, 113, 0.2);
+      color: #2ECC71;
+    }
+    .diff-line.removed {
+      background: rgba(231, 76, 60, 0.2);
+      color: #E74C3C;
+    }
+    .diff-line.header {
+      background: rgba(52, 152, 219, 0.2);
+      color: #3498DB;
+    }
+    .diff-line.context {
+      color: #888;
+    }
+    .diff-status {
+      padding: 12px;
+      color: #888;
+      font-style: italic;
+    }
+
     /* Heat Decay Slider */
     #heat-decay-container {
       display: flex;
@@ -886,6 +932,257 @@
       background: rgba(128, 128, 128, 0.15);
       border-color: rgba(128, 128, 128, 0.4);
     }
+
+    /* Statistics Toggle Button */
+    #statistics-toggle {
+      position: fixed;
+      right: 10px;
+      bottom: 10px;
+      background: rgba(78, 205, 196, 0.9);
+      color: #1a1a2e;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      z-index: 95;
+      transition: right 0.3s ease, background 0.2s;
+    }
+
+    #statistics-toggle:hover {
+      background: #45B7D1;
+    }
+
+    #statistics-toggle.panel-open {
+      right: 330px;
+    }
+
+    /* Statistics Panel */
+    #statistics-panel {
+      position: fixed;
+      right: 0;
+      top: 50px;
+      width: 320px;
+      height: calc(100% - 50px);
+      background: rgba(26, 26, 46, 0.98);
+      border-left: 1px solid #333;
+      z-index: 90;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #statistics-panel.visible {
+      transform: translateX(0);
+    }
+
+    #statistics-panel .panel-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    #statistics-panel .panel-header span {
+      font-size: 14px;
+      font-weight: 500;
+      color: #4ECDC4;
+    }
+
+    #stats-refresh {
+      background: transparent;
+      border: 1px solid #555;
+      color: #888;
+      padding: 4px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    #stats-refresh:hover {
+      border-color: #4ECDC4;
+      color: #4ECDC4;
+    }
+
+    #stats-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px;
+    }
+
+    .stats-section {
+      margin-bottom: 20px;
+    }
+
+    .stats-section h4 {
+      font-size: 12px;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    /* File Ranking Styles */
+    #stats-file-ranking {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ranking-entry {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+
+    .ranking-entry:hover {
+      background: rgba(78, 205, 196, 0.15);
+    }
+
+    .ranking-entry .ranking-path {
+      font-size: 12px;
+      color: #ccc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ranking-entry .ranking-bar-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ranking-entry .ranking-bar {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .ranking-entry .ranking-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .ranking-entry .ranking-count {
+      font-size: 11px;
+      font-weight: 600;
+      color: #888;
+      min-width: 30px;
+      text-align: right;
+    }
+
+    /* Bar fill colors by dominant event type */
+    .ranking-bar-fill.created { background: #2ECC71; }
+    .ranking-bar-fill.modified { background: #F39C12; }
+    .ranking-bar-fill.deleted { background: #E74C3C; }
+
+    /* Stats empty state */
+    .stats-empty {
+      padding: 20px;
+      text-align: center;
+      color: #666;
+      font-size: 12px;
+      font-style: italic;
+    }
+
+    /* Activity Chart Styles */
+    .activity-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      height: 150px;
+      gap: 2px;
+      padding: 0 4px;
+    }
+
+    .chart-bar {
+      flex: 1;
+      min-width: 8px;
+      background: linear-gradient(to top, #4ECDC4, #45B7D1);
+      border-radius: 2px 2px 0 0;
+      position: relative;
+      cursor: pointer;
+      transition: height 0.3s ease, opacity 0.2s;
+    }
+
+    .chart-bar:hover {
+      opacity: 0.8;
+    }
+
+    .chart-bar .bar-value {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: #888;
+      display: none;
+    }
+
+    .chart-bar:hover .bar-value {
+      display: block;
+    }
+
+    .chart-axis {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 4px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .chart-axis span {
+      font-size: 10px;
+      color: #666;
+    }
+
+    /* Adjust graph container when statistics panel is open */
+    #graph-container.statistics-open {
+      right: 320px;
+      width: calc(100% - 320px);
+    }
+
+    /* Adjust when both tree and statistics are open */
+    #graph-container.tree-open.statistics-open {
+      width: calc(100% - 280px - 320px);
+    }
+
+    /* Custom scrollbar for stats content */
+    #stats-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #stats-content::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    #stats-content::-webkit-scrollbar-thumb {
+      background: #4ECDC4;
+      border-radius: 3px;
+    }
+
+    #stats-content::-webkit-scrollbar-thumb:hover {
+      background: #45B7D1;
+    }
   </style>
 </head>
 <body>
@@ -913,6 +1210,9 @@
     <span>Activity</span>
     <span id="activity-badge"></span>
   </button>
+  <button id="statistics-toggle" title="Toggle statistics panel">
+    <span>&#128202; Stats</span>
+  </button>
   <div id="activity-panel">
     <div id="activity-header">
       <h3>Activity Feed</h3>
@@ -920,6 +1220,22 @@
     </div>
     <div id="activity-content">
       <div class="activity-empty">No recent activity</div>
+    </div>
+  </div>
+  <div id="statistics-panel" class="panel collapsed">
+    <div class="panel-header">
+      <span>Activity Statistics</span>
+      <button id="stats-refresh" title="Refresh statistics">&#8635;</button>
+    </div>
+    <div id="stats-content">
+      <div class="stats-section">
+        <h4>Most Edited Files</h4>
+        <div id="stats-file-ranking"></div>
+      </div>
+      <div class="stats-section">
+        <h4>Activity Over Time</h4>
+        <div id="stats-chart"></div>
+      </div>
     </div>
   </div>
   <div id="tree-panel">

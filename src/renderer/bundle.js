@@ -81720,8 +81720,10 @@ var<${access}> ${name} : ${structName};`;
     // Gold - specifications
     file: "#DDA0DD",
     // Plum - source references (default for .planning/)
-    directory: "#BB8FCE"
+    directory: "#BB8FCE",
     // Purple - directories (default for .planning/)
+    commit: "#9B59B6"
+    // Purple - git commits
   };
   var srcNodeColors = {
     file: "#7EC8E3",
@@ -81840,6 +81842,14 @@ var<${access}> ${name} : ${structName};`;
     // Orange
     deleted: 15158332
     // Red
+  };
+  var gitStatusColors = {
+    staged: 3066993,
+    // Green - ready to commit
+    modified: 15965202,
+    // Orange - uncommitted changes
+    untracked: 10181046
+    // Purple - new untracked file
   };
   var HEAT_MAX_DURATION = 3e5;
   var heatDecayDuration = HEAT_MAX_DURATION;
@@ -82214,6 +82224,28 @@ var<${access}> ${name} : ${structName};`;
     b = Math.min(255, Math.round(b * 1.15 + 20));
     return "#" + [r2, g2, b].map((x3) => x3.toString(16).padStart(2, "0")).join("");
   }
+  function getNodeGitStatus(node) {
+    if (node.type !== "file" || !node.path) return null;
+    const normalizedPath = node.path.replace(/\\/g, "/");
+    let fullRelativePath;
+    if (node.sourceType === "planning") {
+      fullRelativePath = ".planning/" + normalizedPath;
+    } else if (node.sourceType === "src") {
+      fullRelativePath = "src/" + normalizedPath;
+    } else {
+      fullRelativePath = normalizedPath;
+    }
+    if (gitStatusData.staged.some((p2) => p2.endsWith(normalizedPath) || p2 === fullRelativePath)) {
+      return "staged";
+    }
+    if (gitStatusData.modified.some((p2) => p2.endsWith(normalizedPath) || p2 === fullRelativePath)) {
+      return "modified";
+    }
+    if (gitStatusData.untracked.some((p2) => p2.endsWith(normalizedPath) || p2 === fullRelativePath)) {
+      return "untracked";
+    }
+    return null;
+  }
   function getNodeColor(node) {
     const statusTypes = ["phase", "plan", "task", "requirement"];
     if (statusTypes.includes(node.type) && node.status) {
@@ -82331,6 +82363,20 @@ ${node.goal}`;
       });
       const wireframe = new LineSegments(edges, lineMaterial);
       mesh.add(wireframe);
+      const gitStatus = getNodeGitStatus(node);
+      if (gitStatus && gitStatusColors[gitStatus]) {
+        const ringGeometry = new RingGeometry(size * 1.1, size * 1.4, 16);
+        const ringMaterial = new MeshBasicMaterial({
+          color: gitStatusColors[gitStatus],
+          transparent: true,
+          opacity: 0.7,
+          side: DoubleSide
+        });
+        const ring = new Mesh(ringGeometry, ringMaterial);
+        mesh.userData = mesh.userData || {};
+        mesh.userData.gitStatus = gitStatus;
+        mesh.add(ring);
+      }
       return mesh;
     }
     if (node.type === "phase" && currentState && currentState.currentPhase) {
@@ -82354,6 +82400,27 @@ ${node.goal}`;
         sphere.add(ring);
         return sphere;
       }
+    }
+    if (node.type === "commit") {
+      const geometry = new CylinderGeometry(size * 0.6, size * 0.6, size * 0.4, 6);
+      const material = new MeshBasicMaterial({
+        color: nodeColors.commit,
+        transparent: true,
+        opacity: 0.85
+      });
+      const mesh = new Mesh(geometry, material);
+      mesh.name = node.id;
+      mesh.rotation.x = Math.PI / 2;
+      const edges = new EdgesGeometry(geometry);
+      const lineMaterial = new LineBasicMaterial({
+        color: 16777215,
+        opacity: 0.5,
+        transparent: true
+      });
+      const wireframe = new LineSegments(edges, lineMaterial);
+      wireframe.rotation.x = Math.PI / 2;
+      mesh.add(wireframe);
+      return mesh;
     }
     if (node.type === "root") {
       const geometry = new IcosahedronGeometry(size * 1.2);
@@ -82400,6 +82467,11 @@ ${node.goal}`;
         if (node.extension) {
           content += ` (${node.extension})`;
         }
+      } else if (node.type === "commit") {
+        content += "\u{1F4DD} Commit";
+        if (node.hash) {
+          content += `<br><code style="font-family: monospace;">${node.hash.substring(0, 7)}</code>`;
+        }
       } else {
         content += `Type: ${node.type}`;
       }
@@ -82410,6 +82482,12 @@ ${node.goal}`;
       }
       if (node.category) content += `<br>Category: ${node.category}`;
       if (node.path) content += `<br><span style="color: #888; font-size: 10px;">${node.path}</span>`;
+      const gitStatus = getNodeGitStatus(node);
+      if (gitStatus) {
+        const statusColor = "#" + gitStatusColors[gitStatus].toString(16).padStart(6, "0");
+        const statusLabel = gitStatus === "staged" ? "Staged" : gitStatus === "modified" ? "Modified (uncommitted)" : "Untracked";
+        content += `<br><span style="color: ${statusColor}">Git: ${statusLabel}</span>`;
+      }
       tooltip.innerHTML = content;
       tooltip.classList.add("visible");
       container.style.cursor = "pointer";
@@ -82425,7 +82503,9 @@ ${node.goal}`;
     const treeWidth = treePanel && treePanel.classList.contains("visible") ? 280 : 0;
     const activityPanel = document.getElementById("activity-panel");
     const activityHeight = activityPanel && activityPanel.classList.contains("visible") ? 180 : 0;
-    Graph.width(window.innerWidth - treeWidth);
+    const statisticsPanel = document.getElementById("statistics-panel");
+    const statisticsWidth = statisticsPanel && statisticsPanel.classList.contains("visible") ? 320 : 0;
+    Graph.width(window.innerWidth - treeWidth - statisticsWidth);
     Graph.height(window.innerHeight - toolbarHeight - activityHeight);
   }
   window.addEventListener("resize", handleResize);
@@ -82518,6 +82598,27 @@ ${node.goal}`;
         addLink(projectNode.id, "dir-planning", "contains");
       }
     }
+    if (gitCommitsData && gitCommitsData.length > 0) {
+      const gitNode = addNode({
+        id: "git-commits",
+        name: "Recent Commits",
+        type: "directory",
+        // Use directory type for grouping
+        description: `Last ${gitCommitsData.length} commits`
+      });
+      addLink(projectNode.id, gitNode.id, "contains");
+      gitCommitsData.forEach((commit, index5) => {
+        const commitNode = addNode({
+          id: `commit-${commit.hash}`,
+          name: commit.hash.substring(0, 7),
+          type: "commit",
+          description: commit.message,
+          hash: commit.hash,
+          fullMessage: commit.message
+        });
+        addLink(gitNode.id, commitNode.id, "contains");
+      });
+    }
     const { state } = projectData;
     if (state && state.blockers && state.blockers.length > 0) {
       for (const blocker of state.blockers) {
@@ -82573,6 +82674,9 @@ ${node.goal}`;
         return;
       }
       console.log("Project data loaded:", projectData);
+      await fetchGitStatus(projectPath);
+      await fetchGitBranch(projectPath);
+      await fetchGitCommits(projectPath, 10);
       const graphData = buildGraphFromProject(projectData);
       console.log("Graph built:", graphData.nodes.length, "nodes,", graphData.links.length, "links");
       updateGraph(graphData);
@@ -82685,6 +82789,29 @@ ${node.goal}`;
       item.appendChild(labelSpan);
       legendContent.appendChild(item);
     }
+    const gitTitle = document.createElement("div");
+    gitTitle.className = "legend-title";
+    gitTitle.style.marginTop = "12px";
+    gitTitle.textContent = "Git Status";
+    legendContent.appendChild(gitTitle);
+    const gitStatusLabels = {
+      staged: "Staged (ready to commit)",
+      modified: "Modified (uncommitted)",
+      untracked: "Untracked (new file)"
+    };
+    for (const [status, label2] of Object.entries(gitStatusLabels)) {
+      const item = document.createElement("div");
+      item.className = "legend-item";
+      const colorCircle = document.createElement("div");
+      colorCircle.className = "legend-color";
+      colorCircle.style.backgroundColor = "#" + gitStatusColors[status].toString(16).padStart(6, "0");
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "legend-label";
+      labelSpan.textContent = label2;
+      item.appendChild(colorCircle);
+      item.appendChild(labelSpan);
+      legendContent.appendChild(item);
+    }
   }
   populateColorLegend();
   document.getElementById("legend-header").addEventListener("click", () => {
@@ -82748,6 +82875,12 @@ ${node.goal}`;
     }
     if (node.extension) {
       html += `<p><strong>Extension:</strong> <span style="color: ${extensionColors[node.extension] || "#888"}">${node.extension}</span></p>`;
+    }
+    if (node.type === "commit") {
+      html += `<p><strong>Commit Hash:</strong> <code style="font-family: monospace; background: #2a2a4e; padding: 2px 6px; border-radius: 3px;">${node.hash}</code></p>`;
+      if (node.fullMessage) {
+        html += `<p><strong>Message:</strong><br>${node.fullMessage}</p>`;
+      }
     }
     const filePath = node.path || node.file;
     let fullPath = null;
@@ -82871,7 +83004,7 @@ ${node.goal}`;
     }
   });
   if (window.electronAPI && window.electronAPI.onFilesChanged) {
-    window.electronAPI.onFilesChanged((data) => {
+    window.electronAPI.onFilesChanged(async (data) => {
       console.log("Files changed:", data.event, data.path, "sourceType:", data.sourceType);
       if (selectedProjectPath) {
         const entry = addActivityEntry(data.event, data.path, data.sourceType);
@@ -82880,7 +83013,8 @@ ${node.goal}`;
           flashTreeItem(entry.nodeId, entry.event);
         }
         showRefreshIndicator();
-        loadProject(selectedProjectPath);
+        await loadProject(selectedProjectPath);
+        await fetchGitStatus(selectedProjectPath);
       }
     });
   }
@@ -83164,6 +83298,18 @@ ${node.goal}`;
     updateActivityBadge();
     updateActivityPanel();
   });
+  document.getElementById("statistics-toggle").addEventListener("click", () => {
+    const panel = document.getElementById("statistics-panel");
+    const toggle = document.getElementById("statistics-toggle");
+    const graphContainer = document.getElementById("graph-container");
+    panel.classList.toggle("visible");
+    toggle.classList.toggle("panel-open");
+    graphContainer.classList.toggle("statistics-open");
+    if (panel.classList.contains("visible")) {
+      updateStatisticsPanel();
+    }
+    setTimeout(() => handleResize(), 300);
+  });
   setInterval(() => {
     if (activityEntries.length > 0) {
       updateActivityPanel();
@@ -83277,6 +83423,92 @@ ${node.goal}`;
     });
   }
   initActivityInteractions();
+  function updateStatisticsPanel() {
+    updateFileRanking();
+    updateActivityChart();
+  }
+  function updateFileRanking() {
+    const container2 = document.getElementById("stats-file-ranking");
+    if (!container2) return;
+    container2.innerHTML = '<div class="stats-empty">No activity recorded yet</div>';
+  }
+  function updateActivityChart() {
+    const container2 = document.getElementById("stats-chart");
+    if (!container2) return;
+    container2.innerHTML = '<div class="stats-empty">No activity data</div>';
+  }
+  var gitStatusData = { modified: [], staged: [], untracked: [] };
+  var currentBranch = null;
+  var gitCommitsData = [];
+  async function fetchGitStatus(projectPath) {
+    if (!window.electronAPI || !window.electronAPI.getGitStatus) {
+      console.log("[Git] Git API not available");
+      return;
+    }
+    try {
+      const result = await window.electronAPI.getGitStatus(projectPath);
+      if (result && !result.error) {
+        gitStatusData = {
+          modified: result.modified || [],
+          staged: result.staged || [],
+          untracked: result.untracked || []
+        };
+        console.log("[Git] Status loaded:", gitStatusData);
+      } else {
+        gitStatusData = { modified: [], staged: [], untracked: [] };
+        console.log("[Git] Not a git repo or error:", result?.error);
+      }
+    } catch (err) {
+      console.error("[Git] Error fetching status:", err);
+      gitStatusData = { modified: [], staged: [], untracked: [] };
+    }
+  }
+  async function fetchGitBranch(projectPath) {
+    if (!window.electronAPI || !window.electronAPI.getGitBranch) {
+      console.log("[Git] Branch API not available");
+      return;
+    }
+    const branchDisplay = document.getElementById("branch-display");
+    const branchName = document.getElementById("branch-name");
+    try {
+      const result = await window.electronAPI.getGitBranch(projectPath);
+      if (result && result.branch && !result.error) {
+        currentBranch = result.branch;
+        branchName.textContent = result.branch;
+        branchDisplay.classList.remove("no-branch");
+        branchDisplay.title = `Current branch: ${result.branch}`;
+        console.log("[Git] Branch:", result.branch);
+      } else {
+        currentBranch = null;
+        branchName.textContent = "not a git repo";
+        branchDisplay.classList.add("no-branch");
+        branchDisplay.title = "Not a git repository";
+      }
+    } catch (err) {
+      console.error("[Git] Error fetching branch:", err);
+      currentBranch = null;
+      branchName.textContent = "\u2014";
+      branchDisplay.classList.add("no-branch");
+    }
+  }
+  async function fetchGitCommits(projectPath, limit = 10) {
+    if (!window.electronAPI || !window.electronAPI.getGitCommits) {
+      console.log("[Git] Commits API not available");
+      return;
+    }
+    try {
+      const result = await window.electronAPI.getGitCommits(projectPath, limit);
+      if (result && result.commits && !result.error) {
+        gitCommitsData = result.commits;
+        console.log("[Git] Commits loaded:", gitCommitsData.length);
+      } else {
+        gitCommitsData = [];
+      }
+    } catch (err) {
+      console.error("[Git] Error fetching commits:", err);
+      gitCommitsData = [];
+    }
+  }
   document.getElementById("heat-decay-slider")?.addEventListener("input", async (e2) => {
     const seconds = parseInt(e2.target.value, 10);
     heatDecayDuration = seconds * 1e3;

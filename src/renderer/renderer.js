@@ -1045,7 +1045,9 @@ function handleResize() {
   const treeWidth = treePanel && treePanel.classList.contains('visible') ? 280 : 0;
   const activityPanel = document.getElementById('activity-panel');
   const activityHeight = activityPanel && activityPanel.classList.contains('visible') ? 180 : 0;
-  Graph.width(window.innerWidth - treeWidth);
+  const statisticsPanel = document.getElementById('statistics-panel');
+  const statisticsWidth = statisticsPanel && statisticsPanel.classList.contains('visible') ? 320 : 0;
+  Graph.width(window.innerWidth - treeWidth - statisticsWidth);
   Graph.height(window.innerHeight - toolbarHeight - activityHeight);
 }
 
@@ -2124,6 +2126,25 @@ document.getElementById('activity-clear').addEventListener('click', () => {
   updateActivityPanel();
 });
 
+// Statistics panel toggle button handler
+document.getElementById('statistics-toggle').addEventListener('click', () => {
+  const panel = document.getElementById('statistics-panel');
+  const toggle = document.getElementById('statistics-toggle');
+  const graphContainer = document.getElementById('graph-container');
+
+  panel.classList.toggle('visible');
+  toggle.classList.toggle('panel-open');
+  graphContainer.classList.toggle('statistics-open');
+
+  // Update statistics when panel is opened
+  if (panel.classList.contains('visible')) {
+    updateStatisticsPanel();
+  }
+
+  // Resize graph
+  setTimeout(() => handleResize(), 300);
+});
+
 // Update relative timestamps every 30 seconds
 setInterval(() => {
   if (activityEntries.length > 0) {
@@ -2292,6 +2313,30 @@ function initActivityInteractions() {
 
 // Initialize activity interactions
 initActivityInteractions();
+
+// =====================================================
+// STATISTICS PANEL FUNCTIONALITY
+// =====================================================
+
+// Placeholder - will be fully implemented in Task 2
+function updateStatisticsPanel() {
+  updateFileRanking();
+  updateActivityChart();
+}
+
+// Placeholder function - implemented in Task 2
+function updateFileRanking() {
+  const container = document.getElementById('stats-file-ranking');
+  if (!container) return;
+  container.innerHTML = '<div class="stats-empty">No activity recorded yet</div>';
+}
+
+// Placeholder function - implemented in Task 3
+function updateActivityChart() {
+  const container = document.getElementById('stats-chart');
+  if (!container) return;
+  container.innerHTML = '<div class="stats-empty">No activity data</div>';
+}
 
 // Git status state
 let gitStatusData = { modified: [], staged: [], untracked: [] };
