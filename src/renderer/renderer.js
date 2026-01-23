@@ -95,59 +95,78 @@ function findNodeIdFromPath(changedPath) {
 // Flash a node when its file changes
 function flashNode(nodeId) {
   const node = currentGraphData.nodes.find(n => n.id === nodeId);
-  if (!node) return;
+  if (!node) {
+    console.log('[Flash] Node not found in graph:', nodeId);
+    return;
+  }
 
-  // Get the THREE object - 3d-force-graph stores them on node.__threeObj
   const threeObj = node.__threeObj;
-  if (!threeObj) return;
+  if (!threeObj) {
+    console.log('[Flash] No THREE object for node:', nodeId);
+    return;
+  }
 
-  // Find the material to animate
-  let material;
+  // Collect all materials to animate
+  const materials = [];
   if (threeObj.material) {
-    material = threeObj.material;
-  } else if (threeObj.children) {
-    // For groups, find first mesh with material
-    const mesh = threeObj.children.find(c => c.material);
-    if (mesh) material = mesh.material;
+    materials.push(threeObj.material);
   }
-  if (!material) return;
+  if (threeObj.children) {
+    threeObj.children.forEach(child => {
+      if (child.material) materials.push(child.material);
+    });
+  }
 
-  // Cancel any existing animation for this node
+  if (materials.length === 0) {
+    console.log('[Flash] No materials found for node:', nodeId);
+    return;
+  }
+
+  // Cancel existing animation
   if (flashingNodes.has(nodeId)) {
-    const existingAnimation = flashingNodes.get(nodeId);
-    if (existingAnimation.rafId) {
-      cancelAnimationFrame(existingAnimation.rafId);
-    }
+    const existing = flashingNodes.get(nodeId);
+    if (existing.rafId) cancelAnimationFrame(existing.rafId);
   }
 
-  // Store original color
-  const originalColor = material.color.getHex();
-  const flashColor = 0xFFFF00; // Bright yellow
+  // Store original colors
+  const originalColors = materials.map(m => m.color.getHex());
+  const flashColor = 0xFFFFFF; // Bright white for maximum visibility
 
-  // Animate
+  // Pulsing animation: 3 pulses over 2 seconds
   const duration = 2000;
+  const pulseCount = 3;
   const startTime = Date.now();
 
   function animate() {
     const elapsed = Date.now() - startTime;
     const progress = Math.min(elapsed / duration, 1);
 
-    // Ease out: start bright, fade to original
-    const t = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-    material.color.setHex(lerpColor(flashColor, originalColor, t));
+    // Pulsing: use sine wave for multiple pulses, with decay
+    const pulsePhase = progress * pulseCount * Math.PI * 2;
+    const pulse = Math.max(0, Math.sin(pulsePhase));
+    const decay = 1 - progress; // Fade out over time
+    const intensity = pulse * decay;
+
+    materials.forEach((material, i) => {
+      material.color.setHex(lerpColor(originalColors[i], flashColor, intensity));
+    });
 
     if (progress < 1) {
       const rafId = requestAnimationFrame(animate);
       flashingNodes.set(nodeId, { rafId, startTime });
     } else {
+      // Restore original colors
+      materials.forEach((material, i) => {
+        material.color.setHex(originalColors[i]);
+      });
       flashingNodes.delete(nodeId);
     }
   }
 
-  // Start with bright flash
-  material.color.setHex(flashColor);
+  // Start animation
   const rafId = requestAnimationFrame(animate);
   flashingNodes.set(nodeId, { rafId, startTime });
+  console.log('[Flash] Started graph flash for:', nodeId);
 }
 
 // Flash a tree item
