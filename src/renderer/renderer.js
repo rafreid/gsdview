@@ -9,7 +9,8 @@ const nodeColors = {
   task: '#98D8C8',       // Mint green - granular items
   requirement: '#F7DC6F', // Gold - specifications
   file: '#DDA0DD',       // Plum - source references (default for .planning/)
-  directory: '#BB8FCE'   // Purple - directories (default for .planning/)
+  directory: '#BB8FCE',  // Purple - directories (default for .planning/)
+  commit: '#9B59B6'      // Purple - git commits
 };
 
 // src/ specific node colors (cooler tones for visual differentiation)
@@ -857,6 +858,25 @@ const Graph = ForceGraph3D()(container)
       const wireframe = new THREE.LineSegments(edges, lineMaterial);
       mesh.add(wireframe);
 
+      // Add git status indicator ring if applicable
+      const gitStatus = getNodeGitStatus(node);
+      if (gitStatus && gitStatusColors[gitStatus]) {
+        const ringGeometry = new THREE.RingGeometry(size * 1.1, size * 1.4, 16);
+        const ringMaterial = new THREE.MeshBasicMaterial({
+          color: gitStatusColors[gitStatus],
+          transparent: true,
+          opacity: 0.7,
+          side: THREE.DoubleSide
+        });
+        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+
+        // Store git status on the mesh for tooltip
+        mesh.userData = mesh.userData || {};
+        mesh.userData.gitStatus = gitStatus;
+
+        mesh.add(ring);
+      }
+
       return mesh;
     }
 
@@ -964,6 +984,16 @@ const Graph = ForceGraph3D()(container)
       }
       if (node.category) content += `<br>Category: ${node.category}`;
       if (node.path) content += `<br><span style="color: #888; font-size: 10px;">${node.path}</span>`;
+
+      // Show git status in tooltip
+      const gitStatus = getNodeGitStatus(node);
+      if (gitStatus) {
+        const statusColor = '#' + gitStatusColors[gitStatus].toString(16).padStart(6, '0');
+        const statusLabel = gitStatus === 'staged' ? 'Staged' :
+                            gitStatus === 'modified' ? 'Modified (uncommitted)' :
+                            'Untracked';
+        content += `<br><span style="color: ${statusColor}">Git: ${statusLabel}</span>`;
+      }
 
       tooltip.innerHTML = content;
       tooltip.classList.add('visible');
