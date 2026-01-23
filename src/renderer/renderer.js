@@ -87,11 +87,19 @@ let treeExpanded = new Set(); // Track expanded directories
 let is3D = true; // Track current dimension mode
 
 // Activity feed state
-let activityEntries = []; // Array of {id, path, event, timestamp, sourceType}
+let activityEntries = []; // Array of {id, path, relativePath, event, timestamp, sourceType, nodeId}
 let activityUnreadCount = 0; // Badge counter
+const MAX_ACTIVITY_ENTRIES = 100; // Limit to prevent memory issues
 
 // Track nodes currently flashing (nodeId -> animation state)
 const flashingNodes = new Map();
+
+// Change type colors for type-specific animations
+const changeTypeColors = {
+  created: 0x2ECC71,  // Green
+  modified: 0xF39C12, // Orange
+  deleted: 0xE74C3C   // Red
+};
 
 // Color interpolation helper for flash animation
 function lerpColor(color1, color2, t) {
@@ -101,6 +109,81 @@ function lerpColor(color1, color2, t) {
   const g = Math.round(g1 + (g2 - g1) * t);
   const b = Math.round(b1 + (b2 - b1) * t);
   return (r << 16) | (g << 8) | b;
+}
+
+// Get relative path for display in activity feed
+function getRelativePath(absolutePath) {
+  if (!absolutePath) return '';
+  const normalized = absolutePath.replace(/\\/g, '/');
+
+  // Check for .planning/ path
+  const planningIndex = normalized.indexOf('.planning/');
+  if (planningIndex !== -1) {
+    return '.planning/' + normalized.substring(planningIndex + '.planning/'.length);
+  }
+
+  // Check for src/ path
+  const srcIndex = normalized.indexOf('/src/');
+  if (srcIndex !== -1) {
+    return 'src/' + normalized.substring(srcIndex + '/src/'.length);
+  }
+
+  // Fallback: show last 2 path segments
+  const parts = normalized.split('/');
+  return parts.slice(-2).join('/');
+}
+
+// Add activity entry to feed
+function addActivityEntry(event, filePath, sourceType) {
+  const nodeId = findNodeIdFromPath(filePath);
+
+  // Map chokidar events to user-friendly types
+  const eventMap = {
+    'add': 'created',
+    'change': 'modified',
+    'unlink': 'deleted',
+    'addDir': 'created',
+    'unlinkDir': 'deleted'
+  };
+
+  const entry = {
+    id: Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+    path: filePath,
+    relativePath: getRelativePath(filePath),
+    event: eventMap[event] || event,
+    timestamp: Date.now(),
+    sourceType: sourceType,
+    nodeId: nodeId
+  };
+
+  // Add to front (newest first)
+  activityEntries.unshift(entry);
+
+  // Trim old entries
+  if (activityEntries.length > MAX_ACTIVITY_ENTRIES) {
+    activityEntries = activityEntries.slice(0, MAX_ACTIVITY_ENTRIES);
+  }
+
+  // Update badge if panel is closed
+  const panel = document.getElementById('activity-panel');
+  if (!panel || !panel.classList.contains('visible')) {
+    activityUnreadCount++;
+    updateActivityBadge();
+    // Pulse the toggle button
+    pulseActivityToggle();
+  }
+
+  updateActivityPanel();
+  return entry;
+}
+
+// Pulse the activity toggle button for notification
+function pulseActivityToggle() {
+  const toggle = document.getElementById('activity-toggle');
+  if (!toggle) return;
+
+  toggle.classList.add('pulse');
+  setTimeout(() => toggle.classList.remove('pulse'), 600);
 }
 
 // Find node ID from file path
@@ -149,11 +232,11 @@ function findNodeIdFromPath(changedPath) {
   return null;
 }
 
-// Flash a node when its file changes
-function flashNode(nodeId) {
+// Flash a node with change-type-specific color
+function flashNodeWithType(nodeId, changeType) {
   const node = currentGraphData.nodes.find(n => n.id === nodeId);
   if (!node) {
-    console.log('[Flash] Node not found in graph:', nodeId);
+    console.log('[Flash] Node not found:', nodeId);
     return;
   }
 
@@ -174,10 +257,7 @@ function flashNode(nodeId) {
     });
   }
 
-  if (materials.length === 0) {
-    console.log('[Flash] No materials found for node:', nodeId);
-    return;
-  }
+  if (materials.length === 0) return;
 
   // Cancel existing animation
   if (flashingNodes.has(nodeId)) {
@@ -185,64 +265,83 @@ function flashNode(nodeId) {
     if (existing.rafId) cancelAnimationFrame(existing.rafId);
   }
 
-  // Store original colors
   const originalColors = materials.map(m => m.color.getHex());
-  const flashColor = 0xFFFFFF; // Bright white for maximum visibility
+  const flashColor = changeTypeColors[changeType] || 0xFFFFFF;
 
-  // Pulsing animation: 3 pulses over 2 seconds
+  // Animation parameters
   const duration = 2000;
   const pulseCount = 3;
   const startTime = Date.now();
+
+  // For deleted nodes, we'll fade out at the end
+  const isDelete = changeType === 'deleted';
+  const originalOpacities = materials.map(m => m.opacity || 1);
 
   function animate() {
     const elapsed = Date.now() - startTime;
     const progress = Math.min(elapsed / duration, 1);
 
-    // Pulsing: use sine wave for multiple pulses, with decay
+    // Pulsing effect
     const pulsePhase = progress * pulseCount * Math.PI * 2;
     const pulse = Math.max(0, Math.sin(pulsePhase));
-    const decay = 1 - progress; // Fade out over time
+    const decay = 1 - progress;
     const intensity = pulse * decay;
 
     materials.forEach((material, i) => {
+      // Color pulse
       material.color.setHex(lerpColor(originalColors[i], flashColor, intensity));
+
+      // For delete: fade out opacity in last 50% of animation
+      if (isDelete && progress > 0.5) {
+        const fadeProgress = (progress - 0.5) * 2; // 0 to 1 over second half
+        material.opacity = originalOpacities[i] * (1 - fadeProgress * 0.7);
+      }
     });
 
     if (progress < 1) {
       const rafId = requestAnimationFrame(animate);
-      flashingNodes.set(nodeId, { rafId, startTime });
+      flashingNodes.set(nodeId, { rafId, startTime, changeType });
     } else {
-      // Restore original colors
+      // Restore original state (or leave faded for deleted)
       materials.forEach((material, i) => {
         material.color.setHex(originalColors[i]);
+        if (!isDelete) {
+          material.opacity = originalOpacities[i];
+        }
+        // For deleted nodes, leave them faded as visual indicator
       });
       flashingNodes.delete(nodeId);
     }
   }
 
-  // Start animation
   const rafId = requestAnimationFrame(animate);
-  flashingNodes.set(nodeId, { rafId, startTime });
-  console.log('[Flash] Started graph flash for:', nodeId);
+  flashingNodes.set(nodeId, { rafId, startTime, changeType });
+  console.log('[Flash] Started', changeType, 'flash for:', nodeId);
 }
 
-// Flash a tree item
-function flashTreeItem(nodeId) {
+// Flash a node when its file changes (fallback for manual flashes like tree clicks)
+function flashNode(nodeId) {
+  flashNodeWithType(nodeId, 'modified');
+}
+
+// Flash a tree item with change-type-specific color
+function flashTreeItem(nodeId, changeType = 'modified') {
   const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);
   if (!treeItem) return;
 
-  // Remove existing animation
-  treeItem.classList.remove('tree-flash');
+  // Remove existing animation classes
+  treeItem.classList.remove('tree-flash', 'tree-flash-created', 'tree-flash-modified', 'tree-flash-deleted');
 
   // Force reflow to restart animation
   void treeItem.offsetWidth;
 
-  // Add animation class
-  treeItem.classList.add('tree-flash');
+  // Add type-specific animation class
+  const className = `tree-flash-${changeType}`;
+  treeItem.classList.add(className);
 
   // Remove class after animation completes
   setTimeout(() => {
-    treeItem.classList.remove('tree-flash');
+    treeItem.classList.remove(className);
   }, 2000);
 }
 
@@ -1181,14 +1280,13 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
   window.electronAPI.onFilesChanged((data) => {
     console.log('Files changed:', data.event, data.path, 'sourceType:', data.sourceType);
     if (selectedProjectPath) {
-      // Flash the changed file node if it exists in the graph
-      if (data.path) {
-        console.log('[FileChange] Received:', data.event, data.path, 'sourceType:', data.sourceType);
-        const nodeId = findNodeIdFromPath(data.path);
-        if (nodeId) {
-          flashNode(nodeId);
-          flashTreeItem(nodeId);
-        }
+      // Add to activity feed and get entry with mapped event type
+      const entry = addActivityEntry(data.event, data.path, data.sourceType);
+
+      // Flash the node with type-appropriate animation
+      if (entry.nodeId) {
+        flashNodeWithType(entry.nodeId, entry.event);
+        flashTreeItem(entry.nodeId, entry.event);
       }
 
       showRefreshIndicator();
@@ -1496,6 +1594,16 @@ function updateActivityBadge() {
   }
 }
 
+// Get icon for activity entry based on event type
+function getActivityIcon(event) {
+  switch (event) {
+    case 'created': return '+';
+    case 'modified': return '~';
+    case 'deleted': return '-';
+    default: return '?';
+  }
+}
+
 // Update activity panel content
 function updateActivityPanel() {
   const content = document.getElementById('activity-content');
@@ -1506,18 +1614,20 @@ function updateActivityPanel() {
     return;
   }
 
-  // Render entries (newest first)
+  // Render entries (newest first, already sorted)
   content.innerHTML = activityEntries.map(entry => {
-    const icon = entry.event === 'add' ? '✨' : entry.event === 'change' ? '📝' : '🗑️';
-    const typeLabel = entry.event === 'add' ? 'created' : entry.event === 'change' ? 'modified' : 'deleted';
-    const typeClass = entry.event === 'add' ? 'created' : entry.event === 'change' ? 'modified' : 'deleted';
+    const icon = getActivityIcon(entry.event);
     const timeAgo = formatTimeAgo(entry.timestamp);
 
-    return `<div class="activity-entry ${typeClass}" data-entry-id="${entry.id}" title="${new Date(entry.timestamp).toLocaleString()}">
-      <span class="entry-icon">${icon}</span>
-      <span class="entry-path">${entry.path}</span>
-      <span class="entry-type">${typeLabel}</span>
-      <span class="entry-time">${timeAgo}</span>
+    return `<div class="activity-entry ${entry.event}"
+         data-entry-id="${entry.id}"
+         data-node-id="${entry.nodeId || ''}"
+         data-timestamp="${entry.timestamp}"
+         title="${new Date(entry.timestamp).toLocaleString()}">
+      <span class="activity-icon">${icon}</span>
+      <span class="activity-path">${entry.relativePath}</span>
+      <span class="activity-type">${entry.event}</span>
+      <span class="activity-time">${timeAgo}</span>
     </div>`;
   }).join('');
 }
@@ -1560,6 +1670,13 @@ document.getElementById('activity-clear').addEventListener('click', () => {
   updateActivityBadge();
   updateActivityPanel();
 });
+
+// Update relative timestamps every 30 seconds
+setInterval(() => {
+  if (activityEntries.length > 0) {
+    updateActivityPanel();
+  }
+}, 30000);
 
 // Store directory data for tree building
 let storedDirectoryData = null;
