@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { execSync } = require('child_process');
 const chokidar = require('chokidar');
 const Store = require('electron-store');
 const { parseRoadmap } = require('./parsers/roadmap-parser');
@@ -11,6 +12,15 @@ const { parseState } = require('./parsers/state-parser');
 const store = new Store();
 let mainWindow;
 let watcher = null;
+
+// Git helper function - runs git commands in specified directory
+function runGitCommand(command, cwd) {
+  try {
+    return execSync(command, { cwd, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+  } catch (err) {
+    return null;
+  }
+}
 
 function createWindow() {
   // Restore window state from previous session
@@ -299,6 +309,108 @@ app.whenReady().then(() => {
     recent = recent.slice(0, 5);
     store.set('recentProjects', recent);
     return recent;
+  });
+
+  // IPC handler for getting git status
+  ipcMain.handle('get-git-status', async (event, projectPath) => {
+    try {
+      const output = runGitCommand('git status --porcelain', projectPath);
+
+      // If null, not a git repo or git not available
+      if (output === null) {
+        return { modified: [], staged: [], untracked: [] };
+      }
+
+      const modified = [];
+      const staged = [];
+      const untracked = [];
+
+      const lines = output.split('\n').filter(line => line.length > 0);
+
+      for (const line of lines) {
+        // Format: XY filename
+        // X = index status, Y = worktree status
+        const indexStatus = line.charAt(0);
+        const worktreeStatus = line.charAt(1);
+        const filename = line.substring(3);
+
+        // Staged changes (first column has non-space, non-?)
+        if (indexStatus !== ' ' && indexStatus !== '?') {
+          staged.push(filename);
+        }
+
+        // Unstaged modifications (second column is M)
+        if (worktreeStatus === 'M') {
+          modified.push(filename);
+        }
+
+        // Untracked files
+        if (indexStatus === '?' && worktreeStatus === '?') {
+          untracked.push(filename);
+        }
+      }
+
+      return { modified, staged, untracked };
+    } catch (error) {
+      console.error('Error getting git status:', error);
+      return { modified: [], staged: [], untracked: [], error: error.message };
+    }
+  });
+
+  // IPC handler for getting current git branch
+  ipcMain.handle('get-git-branch', async (event, projectPath) => {
+    try {
+      // Try to get current branch name
+      let branch = runGitCommand('git branch --show-current', projectPath);
+
+      // If empty (detached HEAD), get short commit hash
+      if (branch === null || branch === '') {
+        branch = runGitCommand('git rev-parse --short HEAD', projectPath);
+        if (branch) {
+          branch = `(${branch})`; // Indicate detached HEAD
+        }
+      }
+
+      // If still null, not a git repo
+      if (branch === null) {
+        return { branch: null };
+      }
+
+      return { branch };
+    } catch (error) {
+      console.error('Error getting git branch:', error);
+      return { branch: null, error: error.message };
+    }
+  });
+
+  // IPC handler for getting recent git commits
+  ipcMain.handle('get-git-commits', async (event, projectPath, limit = 10) => {
+    try {
+      const output = runGitCommand(`git log --oneline -n ${limit}`, projectPath);
+
+      // If null, not a git repo or no commits
+      if (output === null || output === '') {
+        return { commits: [] };
+      }
+
+      const commits = output.split('\n')
+        .filter(line => line.length > 0)
+        .map(line => {
+          const spaceIndex = line.indexOf(' ');
+          if (spaceIndex === -1) {
+            return { hash: line, message: '' };
+          }
+          return {
+            hash: line.substring(0, spaceIndex),
+            message: line.substring(spaceIndex + 1)
+          };
+        });
+
+      return { commits };
+    } catch (error) {
+      console.error('Error getting git commits:', error);
+      return { commits: [], error: error.message };
+    }
   });
 
   app.on('activate', () => {
