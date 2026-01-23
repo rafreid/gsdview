@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const { parseRoadmap } = require('./parsers/roadmap-parser');
 const { parseRequirements } = require('./parsers/requirements-parser');
@@ -94,6 +94,21 @@ app.whenReady().then(() => {
       };
     } catch (error) {
       console.error('Error parsing project:', error);
+      return { error: error.message };
+    }
+  });
+
+  // IPC handler for opening files in external editor
+  ipcMain.handle('open-file', async (event, filePath) => {
+    try {
+      const result = await shell.openPath(filePath);
+      if (result) {
+        // shell.openPath returns empty string on success, error message on failure
+        return { error: result };
+      }
+      return { success: true };
+    } catch (error) {
+      console.error('Error opening file:', error);
       return { error: error.message };
     }
   });

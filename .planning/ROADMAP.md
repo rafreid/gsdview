@@ -15,8 +15,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation** - Electron app with basic 3d-force-graph rendering and navigation
 - [x] **Phase 2: Graph Rendering** - Color-coded nodes, connection-based sizing, styled edges
 - [x] **Phase 3: GSD Parsing** - Parse .planning/ structure into hierarchical nodes
-- [ ] **Phase 4: State Visualization** - Progress colors, current phase highlight, blocker indicators
-- [ ] **Phase 5: Interactions** - Details panel, tooltips, fly-to navigation, external editor launch
+- [x] **Phase 4: State Visualization** - Progress colors, current phase highlight, blocker indicators
+- [x] **Phase 5: Interactions** - Details panel, tooltips, fly-to navigation, external editor launch
 - [ ] **Phase 6: Polish** - Live file watching, recent projects, window state persistence
 
 ## Phase Details
@@ -80,10 +80,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Parse STATE.md for current position and blockers
-- [ ] 04-02-PLAN.md — Progress-based node coloring (green/yellow/gray)
-- [ ] 04-03-PLAN.md — Current phase highlighting with glow/pulse effect
-- [ ] 04-04-PLAN.md — Blocker visualization with red connection indicators
+- [x] 04-01-PLAN.md — Parse STATE.md for current position and blockers
+- [x] 04-02-PLAN.md — Progress-based node coloring (green/yellow/gray)
+- [x] 04-03-PLAN.md — Current phase highlighting with glow/pulse effect
+- [x] 04-04-PLAN.md — Blocker visualization with red connection indicators
 
 ### Phase 5: Interactions
 **Goal**: User can inspect nodes, get quick info, fly to items of interest, and open files externally
@@ -94,13 +94,13 @@ Plans:
   2. Clicking a node opens a details panel showing contents/metadata
   3. Hovering over a node shows tooltip with quick summary
   4. User can open the underlying file in their external editor from any node
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 05-01: Click-to-fly navigation
-- [ ] 05-02: Details panel component
-- [ ] 05-03: Hover tooltips
-- [ ] 05-04: External editor integration
+- [x] 05-01-PLAN.md — Click-to-fly navigation
+- [x] 05-02-PLAN.md — Details panel component
+- [x] 05-03-PLAN.md — Hover tooltips
+- [x] 05-04-PLAN.md — External editor integration
 
 ### Phase 6: Polish
 **Goal**: App feels responsive with live updates and remembers user preferences
@@ -130,8 +130,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Foundation | 3/3 | Complete | 2026-01-22 |
 | 2. Graph Rendering | 3/3 | Complete | 2026-01-22 |
 | 3. GSD Parsing | 4/4 | Complete | 2026-01-22 |
-| 4. State Visualization | 0/4 | Planned | - |
-| 5. Interactions | 0/4 | Not started | - |
+| 4. State Visualization | 4/4 | Complete | 2026-01-22 |
+| 5. Interactions | 4/4 | Complete | 2026-01-22 |
 | 6. Polish | 0/5 | Not started | - |
 
 ---

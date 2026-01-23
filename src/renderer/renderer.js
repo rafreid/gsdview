@@ -34,6 +34,7 @@ let currentGraphData = {
 // Store selected project path and state
 let selectedProjectPath = null;
 let currentState = null;
+let selectedNode = null;
 
 // Calculate connection count for each node
 function calculateConnectionCounts(graphData) {
@@ -170,7 +171,46 @@ const Graph = ForceGraph3D()(container)
   .linkDirectionalArrowRelPos(1)
   .linkLineDash(link => link.type === 'blocked' ? [2, 2] : null)
   .backgroundColor('#1a1a2e')
-  .showNavInfo(false);
+  .showNavInfo(false)
+  // Click-to-fly navigation
+  .onNodeClick(node => {
+    // Calculate distance based on node size for optimal viewing
+    const distance = 50 + getNodeSize(node, connectionCounts) * 4;
+
+    // Animate camera to node position
+    const distRatio = 1 + distance / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
+    Graph.cameraPosition(
+      {
+        x: (node.x || 0) * distRatio,
+        y: (node.y || 0) * distRatio,
+        z: (node.z || 0) * distRatio
+      },
+      node, // lookAt target
+      1000 // transition duration ms
+    );
+
+    // Show details panel
+    showDetailsPanel(node);
+  })
+  // Hover tooltips
+  .onNodeHover(node => {
+    const tooltip = document.getElementById('tooltip');
+    if (node) {
+      let content = `<strong>${node.name}</strong><br>`;
+      content += `<span style="color: ${getNodeColor(node)}; text-transform: capitalize;">Type: ${node.type}</span>`;
+      if (node.status) {
+        const statusColor = statusColors[node.status] || '#888';
+        content += `<br><span style="color: ${statusColor}">Status: ${node.status}</span>`;
+      }
+      if (node.category) content += `<br>Category: ${node.category}`;
+      tooltip.innerHTML = content;
+      tooltip.classList.add('visible');
+      container.style.cursor = 'pointer';
+    } else {
+      tooltip.classList.remove('visible');
+      container.style.cursor = 'grab';
+    }
+  });
 
 // Handle window resize
 function handleResize() {
@@ -445,5 +485,111 @@ function populateColorLegend() {
 }
 
 populateColorLegend();
+
+// Track mouse for tooltip positioning
+container.addEventListener('mousemove', (e) => {
+  const tooltip = document.getElementById('tooltip');
+  tooltip.style.left = e.clientX + 15 + 'px';
+  tooltip.style.top = e.clientY + 15 + 'px';
+});
+
+// Details panel functions
+function showDetailsPanel(node) {
+  selectedNode = node;
+  const panel = document.getElementById('details-panel');
+  const title = document.getElementById('panel-title');
+  const content = document.getElementById('panel-content');
+
+  title.textContent = node.name;
+
+  let html = `<p><strong>Type:</strong> <span style="color: ${getNodeColor(node)}; text-transform: capitalize;">${node.type}</span></p>`;
+
+  if (node.status) {
+    const statusColor = statusColors[node.status] || '#888';
+    html += `<p><strong>Status:</strong> <span style="color: ${statusColor}">${node.status}</span></p>`;
+  }
+
+  if (node.description) {
+    html += `<p><strong>Description:</strong><br>${node.description}</p>`;
+  }
+
+  if (node.goal) {
+    html += `<p><strong>Goal:</strong><br>${node.goal}</p>`;
+  }
+
+  if (node.category) {
+    html += `<p><strong>Category:</strong> ${node.category}</p>`;
+  }
+
+  if (node.path) {
+    html += `<p><strong>Path:</strong> ${node.path}</p>`;
+  }
+
+  if (node.file) {
+    html += `<p><strong>File:</strong> ${node.file}</p>`;
+  }
+
+  if (node.extension) {
+    html += `<p><strong>Extension:</strong> ${node.extension}</p>`;
+  }
+
+  // Add open button for nodes with file paths
+  const filePath = node.path || node.file;
+  if (filePath && selectedProjectPath) {
+    html += `<button id="open-file-btn" class="panel-btn">Open in Editor</button>`;
+  }
+
+  content.innerHTML = html;
+
+  // Add click handler for open button
+  const openBtn = document.getElementById('open-file-btn');
+  if (openBtn) {
+    openBtn.addEventListener('click', async () => {
+      let fullPath;
+      if (node.path) {
+        // Directory/file node - path is relative to .planning
+        fullPath = `${selectedProjectPath}/.planning/${node.path}`;
+      } else if (node.file) {
+        // Plan node - file is in phases directory
+        const phaseMatch = node.id.match(/plan-phase-(\d+)/);
+        if (phaseMatch) {
+          const phaseNum = phaseMatch[1].padStart(2, '0');
+          fullPath = `${selectedProjectPath}/.planning/phases/${phaseNum}-*/`;
+          // For now, just try to open the plan file directly
+          fullPath = `${selectedProjectPath}/.planning/phases/${node.file}`;
+        } else {
+          fullPath = `${selectedProjectPath}/.planning/${node.file}`;
+        }
+      }
+
+      if (fullPath && window.electronAPI && window.electronAPI.openFile) {
+        const result = await window.electronAPI.openFile(fullPath);
+        if (result.error) {
+          console.error('Error opening file:', result.error);
+        }
+      }
+    });
+  }
+
+  panel.classList.remove('hidden');
+  panel.classList.add('visible');
+}
+
+function hideDetailsPanel() {
+  const panel = document.getElementById('details-panel');
+  panel.classList.remove('visible');
+  panel.classList.add('hidden');
+  selectedNode = null;
+}
+
+// Close panel button handler
+document.getElementById('close-panel').addEventListener('click', hideDetailsPanel);
+
+// Close panel when clicking on background (optional - ESC key)
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    hideDetailsPanel();
+  }
+});
 
 console.log('GSD Viewer initialized - select a project folder to visualize');
