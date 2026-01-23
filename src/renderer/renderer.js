@@ -2473,6 +2473,9 @@ function applyTreePanelWidth(width) {
   }
 }
 
+// Apply default tree panel width on startup (tree opens by default)
+applyTreePanelWidth(treePanelWidth);
+
 // =====================================================
 // ACTIVITY FEED FUNCTIONALITY
 // =====================================================

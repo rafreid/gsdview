@@ -1331,7 +1331,7 @@
     <span id="selected-path">No project selected</span>
   </div>
   <div id="refresh-indicator">Refreshing...</div>
-  <button id="tree-toggle" title="Toggle file tree">📁</button>
+  <button id="tree-toggle" class="panel-open" title="Toggle file tree">◀</button>
   <button id="activity-toggle" title="Toggle activity feed">
     <span>Activity</span>
     <span id="activity-badge"></span>
@@ -1370,14 +1370,14 @@
       </div>
     </div>
   </div>
-  <div id="tree-panel">
+  <div id="tree-panel" class="visible">
     <div id="tree-header">
       <h3>📂 File Tree</h3>
     </div>
     <div id="tree-content"></div>
     <div id="tree-resizer"></div>
   </div>
-  <div id="graph-container"></div>
+  <div id="graph-container" class="tree-open"></div>
   <div id="color-legend">
     <div id="legend-header">
       <span class="legend-header-title">Legend</span>

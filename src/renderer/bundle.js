@@ -83527,6 +83527,7 @@ ${node.goal}`;
       graphContainer.style.width = `calc(100% - ${width}px - ${statsWidth}px)`;
     }
   }
+  applyTreePanelWidth(treePanelWidth);
   function updateActivityBadge() {
     const badge = document.getElementById("activity-badge");
     if (!badge) return;
