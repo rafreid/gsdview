@@ -187,7 +187,12 @@ Plans:
   2. Staged files are visually distinct from unstaged files
   3. Recent commits appear as nodes in the graph showing bundled changes
   4. Current git branch name is visible in the UI header
-**Plans**: Not yet planned
+**Plans**: 3 plans
+
+Plans:
+- [ ] 10-01-PLAN.md — Git backend operations and IPC API
+- [ ] 10-02-PLAN.md — Git status visual indicators on file nodes
+- [ ] 10-03-PLAN.md — Commit nodes and branch display
 
 ### Phase 11: Statistics & Diff Preview
 **Goal**: User can analyze activity patterns and see what changed in files
@@ -233,10 +238,10 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 7. Expanded File Scope | 3/3 | Complete | 2026-01-23 |
 | 8. Activity Feed & Change Indicators | 3/3 | Complete | 2026-01-23 |
 | 9. Heat Map Visualization | 2/2 | Complete | 2026-01-23 |
-| 10. Git Integration | 0/— | Pending | — |
+| 10. Git Integration | 0/3 | Planned | — |
 | 11. Statistics & Diff Preview | 0/— | Pending | — |
 | 12. Timeline Replay | 0/— | Pending | — |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-23 (Phase 9 complete)*
+*Last updated: 2026-01-23 (Phase 10 planned)*
