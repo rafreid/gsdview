@@ -653,6 +653,89 @@
       font-weight: 500;
     }
 
+    /* Timeline Controls */
+    #timeline-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    #timeline-scrubber {
+      width: 120px;
+      height: 4px;
+      -webkit-appearance: none;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    #timeline-scrubber::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      background: #4ECDC4;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #timeline-scrubber::-webkit-slider-thumb:hover {
+      background: #45B7D1;
+    }
+
+    #timeline-play {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #4ECDC4;
+      border: none;
+      color: #1a1a2e;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      transition: background 0.2s;
+      padding: 0;
+    }
+
+    #timeline-play:hover {
+      background: #45B7D1;
+    }
+
+    #timeline-position {
+      font-size: 11px;
+      color: #888;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    #timeline-live {
+      font-size: 10px;
+      color: #2ECC71;
+      font-weight: bold;
+      padding: 2px 6px;
+      background: rgba(46, 204, 113, 0.2);
+      border-radius: 3px;
+      display: none;
+    }
+
+    #timeline-live.visible {
+      display: inline-block;
+    }
+
+    /* Timeline mode indicator */
+    .timeline-historical-mode #activity-panel {
+      border-top-color: #F39C12;
+    }
+
+    .activity-entry.future {
+      opacity: 0.4;
+    }
+
     #activity-clear {
       background: transparent;
       border: 1px solid #555;
@@ -1216,6 +1299,12 @@
   <div id="activity-panel">
     <div id="activity-header">
       <h3>Activity Feed</h3>
+      <div id="timeline-controls">
+        <button id="timeline-play" title="Play/Pause timeline">&#9658;</button>
+        <input type="range" id="timeline-scrubber" min="0" max="100" value="100" title="Timeline position">
+        <span id="timeline-position">Live</span>
+        <span id="timeline-live" class="visible">LIVE</span>
+      </div>
       <button id="activity-clear">Clear</button>
     </div>
     <div id="activity-content">

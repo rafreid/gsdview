@@ -92,6 +92,12 @@ let activityEntries = []; // Array of {id, path, relativePath, event, timestamp,
 let activityUnreadCount = 0; // Badge counter
 const MAX_ACTIVITY_ENTRIES = 100; // Limit to prevent memory issues
 
+// Timeline replay state
+let timelinePosition = null; // null = live mode (tracking latest), number = historical timestamp
+let isTimelinePlaying = false;
+let playbackInterval = null;
+const PLAYBACK_SPEED = 500; // ms between steps during playback
+
 // Track nodes currently flashing (nodeId -> animation state)
 const flashingNodes = new Map();
 
@@ -275,6 +281,81 @@ function stopHeatDecayLoop() {
     cancelAnimationFrame(heatLoopRafId);
     heatLoopRafId = null;
   }
+}
+
+// =====================================================
+// TIMELINE REPLAY HELPER FUNCTIONS
+// =====================================================
+
+// Get timeline range from activity entries
+function getTimelineRange() {
+  if (activityEntries.length === 0) {
+    const now = Date.now();
+    return { min: now, max: now };
+  }
+
+  const timestamps = activityEntries.map(e => e.timestamp);
+  return {
+    min: Math.min(...timestamps),
+    max: Math.max(...timestamps)
+  };
+}
+
+// Update timeline UI to reflect current position
+function updateTimelineUI() {
+  const scrubber = document.getElementById('timeline-scrubber');
+  const positionDisplay = document.getElementById('timeline-position');
+  const liveIndicator = document.getElementById('timeline-live');
+  const playButton = document.getElementById('timeline-play');
+
+  if (!scrubber || !positionDisplay) return;
+
+  const { min, max } = getTimelineRange();
+
+  if (timelinePosition === null) {
+    // Live mode
+    scrubber.value = 100;
+    positionDisplay.textContent = 'Live';
+    if (liveIndicator) liveIndicator.classList.add('visible');
+    document.body.classList.remove('timeline-historical-mode');
+  } else {
+    // Historical mode
+    const range = max - min;
+    const sliderValue = range > 0 ? ((timelinePosition - min) / range) * 100 : 100;
+    scrubber.value = Math.round(sliderValue);
+
+    // Format position time
+    const date = new Date(timelinePosition);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const mins = date.getMinutes().toString().padStart(2, '0');
+    const secs = date.getSeconds().toString().padStart(2, '0');
+    positionDisplay.textContent = `${hours}:${mins}:${secs}`;
+
+    if (liveIndicator) liveIndicator.classList.remove('visible');
+    document.body.classList.add('timeline-historical-mode');
+  }
+
+  // Update play button icon
+  if (playButton) {
+    playButton.innerHTML = isTimelinePlaying ? '&#10074;&#10074;' : '&#9658;';
+    playButton.title = isTimelinePlaying ? 'Pause timeline' : 'Play timeline';
+  }
+}
+
+// Set timeline to live mode
+function setTimelineToLive() {
+  timelinePosition = null;
+
+  // Stop any playback
+  if (playbackInterval) {
+    clearInterval(playbackInterval);
+    playbackInterval = null;
+  }
+  isTimelinePlaying = false;
+
+  updateTimelineUI();
+  updateGraphForTimeline();
+  updateActivityPanelForTimeline();
 }
 
 // Get relative path for display in activity feed
