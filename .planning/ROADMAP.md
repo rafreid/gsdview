@@ -61,13 +61,13 @@ Plans:
   2. Requirement nodes connect to the Phases they map to
   3. File dependency relationships appear as edges
   4. Directory tree of .planning/ folder is represented as navigable nodes
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 03-01: Parse ROADMAP.md for phase/plan structure
-- [ ] 03-02: Parse REQUIREMENTS.md and link to phases
-- [ ] 03-03: Directory tree parsing for .planning/ folder
-- [ ] 03-04: File dependency detection
+- [ ] 03-01-PLAN.md — Parse ROADMAP.md for phase/plan hierarchy
+- [ ] 03-02-PLAN.md — Parse REQUIREMENTS.md and link to phases
+- [ ] 03-03-PLAN.md — Directory tree parsing for .planning/ folder
+- [ ] 03-04-PLAN.md — Graph builder and renderer integration
 
 ### Phase 4: State Visualization
 **Goal**: User can see project progress, current focus, and blockers at a glance
