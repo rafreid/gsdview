@@ -61,12 +61,15 @@ function startWatching(projectPath) {
   watcher = chokidar.watch(planningPath, {
     ignoreInitial: true,
     persistent: true,
-    ignored: /(^|[\/\\])\../ // Ignore dotfiles
+    depth: 10 // Ensure deep watching
+    // Remove ignored pattern - we explicitly want to watch .planning contents
   });
 
   let debounceTimer = null;
 
   watcher.on('all', (event, filePath) => {
+    console.log('[Watcher] Event:', event, filePath);
+
     // Debounce to avoid rapid updates
     if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
