@@ -81832,6 +81832,7 @@ var<${access}> ${name} : ${structName};`;
   var activityUnreadCount = 0;
   var MAX_ACTIVITY_ENTRIES = 100;
   var flashingNodes = /* @__PURE__ */ new Map();
+  var highlightedNodeId = null;
   var changeTypeColors = {
     created: 3066993,
     // Green
@@ -81891,6 +81892,7 @@ var<${access}> ${name} : ${structName};`;
       pulseActivityToggle();
     }
     updateActivityPanel();
+    scrollActivityToTop();
     return entry;
   }
   function pulseActivityToggle() {
@@ -81993,6 +81995,52 @@ var<${access}> ${name} : ${structName};`;
   }
   function flashNode(nodeId) {
     flashNodeWithType(nodeId, "modified");
+  }
+  function highlightNodeInGraph(nodeId) {
+    if (highlightedNodeId === nodeId) return;
+    clearNodeHighlight();
+    const node = currentGraphData.nodes.find((n2) => n2.id === nodeId);
+    if (!node || !node.__threeObj) return;
+    highlightedNodeId = nodeId;
+    const threeObj = node.__threeObj;
+    if (!threeObj.userData) threeObj.userData = {};
+    threeObj.userData.originalScale = threeObj.scale.clone();
+    threeObj.scale.multiplyScalar(1.3);
+    const materials = [];
+    if (threeObj.material) materials.push(threeObj.material);
+    if (threeObj.children) {
+      threeObj.children.forEach((child) => {
+        if (child.material) materials.push(child.material);
+      });
+    }
+    materials.forEach((m3) => {
+      m3.userData = m3.userData || {};
+      m3.userData.originalOpacity = m3.opacity;
+      m3.opacity = Math.min(1, m3.opacity * 1.3);
+    });
+  }
+  function clearNodeHighlight() {
+    if (!highlightedNodeId) return;
+    const node = currentGraphData.nodes.find((n2) => n2.id === highlightedNodeId);
+    if (node && node.__threeObj) {
+      const threeObj = node.__threeObj;
+      if (threeObj.userData && threeObj.userData.originalScale) {
+        threeObj.scale.copy(threeObj.userData.originalScale);
+      }
+      const materials = [];
+      if (threeObj.material) materials.push(threeObj.material);
+      if (threeObj.children) {
+        threeObj.children.forEach((child) => {
+          if (child.material) materials.push(child.material);
+        });
+      }
+      materials.forEach((m3) => {
+        if (m3.userData && m3.userData.originalOpacity !== void 0) {
+          m3.opacity = m3.userData.originalOpacity;
+        }
+      });
+    }
+    highlightedNodeId = null;
   }
   function flashTreeItem(nodeId, changeType = "modified") {
     const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);
@@ -82956,6 +83004,12 @@ ${node.goal}`;
     if (hours < 24) return `${hours}h ago`;
     return `${Math.floor(hours / 24)}d ago`;
   }
+  function scrollActivityToTop() {
+    const content = document.getElementById("activity-content");
+    if (content) {
+      content.scrollTop = 0;
+    }
+  }
   document.getElementById("activity-toggle").addEventListener("click", () => {
     const panel = document.getElementById("activity-panel");
     const toggle = document.getElementById("activity-toggle");
@@ -83001,6 +83055,93 @@ ${node.goal}`;
       }, 100);
     }
   });
+  function handleActivityEntryClick(nodeId, eventType, entryElement) {
+    if (eventType === "deleted") {
+      showDeletedFileMessage(entryElement);
+      return;
+    }
+    if (!nodeId) {
+      console.log("[Activity] No nodeId for entry");
+      return;
+    }
+    const graphNode = findNodeById(nodeId);
+    if (!graphNode) {
+      console.log("[Activity] Node not found in graph:", nodeId);
+      showDeletedFileMessage(entryElement);
+      return;
+    }
+    if (graphNode.x !== void 0) {
+      const distance3 = 50 + getNodeSize(graphNode, connectionCounts) * 4;
+      if (is3D) {
+        const distRatio = 1 + distance3 / Math.hypot(graphNode.x || 0, graphNode.y || 0, graphNode.z || 0);
+        Graph.cameraPosition(
+          {
+            x: (graphNode.x || 0) * distRatio,
+            y: (graphNode.y || 0) * distRatio,
+            z: (graphNode.z || 0) * distRatio
+          },
+          graphNode,
+          1e3
+        );
+      } else {
+        Graph.cameraPosition(
+          { x: graphNode.x || 0, y: graphNode.y || 0, z: distance3 + 100 },
+          graphNode,
+          1e3
+        );
+      }
+      flashNode(nodeId);
+    }
+    showDetailsPanel(graphNode);
+    highlightTreeItem(nodeId);
+  }
+  function showDeletedFileMessage(entryElement) {
+    const existingMsg = document.querySelector(".activity-deleted-msg");
+    if (existingMsg) existingMsg.remove();
+    const msg = document.createElement("div");
+    msg.className = "activity-deleted-msg";
+    msg.textContent = "File no longer exists";
+    msg.style.cssText = `
+    position: fixed;
+    background: rgba(231, 76, 60, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1000;
+    pointer-events: none;
+  `;
+    const rect = entryElement.getBoundingClientRect();
+    msg.style.left = rect.left + "px";
+    msg.style.top = rect.top - 35 + "px";
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 2e3);
+  }
+  function initActivityInteractions() {
+    const content = document.getElementById("activity-content");
+    if (!content) return;
+    content.addEventListener("click", (e2) => {
+      const entry = e2.target.closest(".activity-entry");
+      if (!entry) return;
+      const nodeId = entry.dataset.nodeId;
+      const entryEvent = entry.classList.contains("deleted") ? "deleted" : entry.classList.contains("created") ? "created" : "modified";
+      handleActivityEntryClick(nodeId, entryEvent, entry);
+    });
+    content.addEventListener("mouseover", (e2) => {
+      const entry = e2.target.closest(".activity-entry");
+      if (!entry) return;
+      const nodeId = entry.dataset.nodeId;
+      if (nodeId) {
+        highlightNodeInGraph(nodeId);
+      }
+    });
+    content.addEventListener("mouseout", (e2) => {
+      const entry = e2.target.closest(".activity-entry");
+      if (!entry) return;
+      clearNodeHighlight();
+    });
+  }
+  initActivityInteractions();
   console.log("GSD Viewer initialized - select a project folder to visualize");
 })();
 /*! Bundled license information:

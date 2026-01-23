@@ -94,6 +94,9 @@ const MAX_ACTIVITY_ENTRIES = 100; // Limit to prevent memory issues
 // Track nodes currently flashing (nodeId -> animation state)
 const flashingNodes = new Map();
 
+// Track currently highlighted node (for hover effect)
+let highlightedNodeId = null;
+
 // Change type colors for type-specific animations
 const changeTypeColors = {
   created: 0x2ECC71,  // Green
@@ -174,6 +177,10 @@ function addActivityEntry(event, filePath, sourceType) {
   }
 
   updateActivityPanel();
+
+  // Auto-scroll to top to show newest entry
+  scrollActivityToTop();
+
   return entry;
 }
 
@@ -322,6 +329,75 @@ function flashNodeWithType(nodeId, changeType) {
 // Flash a node when its file changes (fallback for manual flashes like tree clicks)
 function flashNode(nodeId) {
   flashNodeWithType(nodeId, 'modified');
+}
+
+// Highlight a node in the graph (for hover effect from activity entries)
+function highlightNodeInGraph(nodeId) {
+  // Skip if already highlighted
+  if (highlightedNodeId === nodeId) return;
+
+  // Clear previous highlight
+  clearNodeHighlight();
+
+  const node = currentGraphData.nodes.find(n => n.id === nodeId);
+  if (!node || !node.__threeObj) return;
+
+  highlightedNodeId = nodeId;
+
+  // Store original scale and apply highlight
+  const threeObj = node.__threeObj;
+  if (!threeObj.userData) threeObj.userData = {};
+  threeObj.userData.originalScale = threeObj.scale.clone();
+
+  // Scale up slightly for highlight effect
+  threeObj.scale.multiplyScalar(1.3);
+
+  // Add emissive glow if material supports it
+  const materials = [];
+  if (threeObj.material) materials.push(threeObj.material);
+  if (threeObj.children) {
+    threeObj.children.forEach(child => {
+      if (child.material) materials.push(child.material);
+    });
+  }
+
+  materials.forEach(m => {
+    m.userData = m.userData || {};
+    m.userData.originalOpacity = m.opacity;
+    m.opacity = Math.min(1, m.opacity * 1.3);
+  });
+}
+
+// Clear node highlight (for mouseout from activity entries)
+function clearNodeHighlight() {
+  if (!highlightedNodeId) return;
+
+  const node = currentGraphData.nodes.find(n => n.id === highlightedNodeId);
+  if (node && node.__threeObj) {
+    const threeObj = node.__threeObj;
+
+    // Restore original scale
+    if (threeObj.userData && threeObj.userData.originalScale) {
+      threeObj.scale.copy(threeObj.userData.originalScale);
+    }
+
+    // Restore opacity
+    const materials = [];
+    if (threeObj.material) materials.push(threeObj.material);
+    if (threeObj.children) {
+      threeObj.children.forEach(child => {
+        if (child.material) materials.push(child.material);
+      });
+    }
+
+    materials.forEach(m => {
+      if (m.userData && m.userData.originalOpacity !== undefined) {
+        m.opacity = m.userData.originalOpacity;
+      }
+    });
+  }
+
+  highlightedNodeId = null;
 }
 
 // Flash a tree item with change-type-specific color
@@ -1643,6 +1719,14 @@ function formatTimeAgo(timestamp) {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
+// Auto-scroll activity feed to top to show newest entry
+function scrollActivityToTop() {
+  const content = document.getElementById('activity-content');
+  if (content) {
+    content.scrollTop = 0;
+  }
+}
+
 // Activity feed toggle button handler
 document.getElementById('activity-toggle').addEventListener('click', () => {
   const panel = document.getElementById('activity-panel');
@@ -1709,5 +1793,135 @@ document.getElementById('dimension-toggle').addEventListener('click', () => {
     }, 100);
   }
 });
+
+// =====================================================
+// ACTIVITY ENTRY INTERACTIONS
+// =====================================================
+
+// Handle click on activity entry - navigate to node
+function handleActivityEntryClick(nodeId, eventType, entryElement) {
+  // Handle deleted files specially
+  if (eventType === 'deleted') {
+    // Show message that file no longer exists
+    showDeletedFileMessage(entryElement);
+    return;
+  }
+
+  // Navigate to node if it exists
+  if (!nodeId) {
+    console.log('[Activity] No nodeId for entry');
+    return;
+  }
+
+  const graphNode = findNodeById(nodeId);
+  if (!graphNode) {
+    console.log('[Activity] Node not found in graph:', nodeId);
+    showDeletedFileMessage(entryElement);
+    return;
+  }
+
+  // Fly to node (reuse selectTreeItem logic for consistency)
+  if (graphNode.x !== undefined) {
+    const distance = 50 + getNodeSize(graphNode, connectionCounts) * 4;
+
+    if (is3D) {
+      const distRatio = 1 + distance / Math.hypot(graphNode.x || 0, graphNode.y || 0, graphNode.z || 0);
+      Graph.cameraPosition(
+        {
+          x: (graphNode.x || 0) * distRatio,
+          y: (graphNode.y || 0) * distRatio,
+          z: (graphNode.z || 0) * distRatio
+        },
+        graphNode,
+        1000
+      );
+    } else {
+      Graph.cameraPosition(
+        { x: graphNode.x || 0, y: graphNode.y || 0, z: distance + 100 },
+        graphNode,
+        1000
+      );
+    }
+
+    // Flash the node
+    flashNode(nodeId);
+  }
+
+  // Open details panel
+  showDetailsPanel(graphNode);
+
+  // Highlight in tree panel too
+  highlightTreeItem(nodeId);
+}
+
+// Show message for deleted file entries
+function showDeletedFileMessage(entryElement) {
+  // Create tooltip-like message near the entry
+  const existingMsg = document.querySelector('.activity-deleted-msg');
+  if (existingMsg) existingMsg.remove();
+
+  const msg = document.createElement('div');
+  msg.className = 'activity-deleted-msg';
+  msg.textContent = 'File no longer exists';
+  msg.style.cssText = `
+    position: fixed;
+    background: rgba(231, 76, 60, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1000;
+    pointer-events: none;
+  `;
+
+  // Position near the entry
+  const rect = entryElement.getBoundingClientRect();
+  msg.style.left = rect.left + 'px';
+  msg.style.top = (rect.top - 35) + 'px';
+
+  document.body.appendChild(msg);
+
+  // Remove after 2 seconds
+  setTimeout(() => msg.remove(), 2000);
+}
+
+// Initialize activity entry interactions (call once)
+function initActivityInteractions() {
+  const content = document.getElementById('activity-content');
+  if (!content) return;
+
+  // Use event delegation for entries - click handler
+  content.addEventListener('click', (e) => {
+    const entry = e.target.closest('.activity-entry');
+    if (!entry) return;
+
+    const nodeId = entry.dataset.nodeId;
+    const entryEvent = entry.classList.contains('deleted') ? 'deleted' :
+                       entry.classList.contains('created') ? 'created' : 'modified';
+
+    handleActivityEntryClick(nodeId, entryEvent, entry);
+  });
+
+  // Hover handler for highlighting
+  content.addEventListener('mouseover', (e) => {
+    const entry = e.target.closest('.activity-entry');
+    if (!entry) return;
+
+    const nodeId = entry.dataset.nodeId;
+    if (nodeId) {
+      highlightNodeInGraph(nodeId);
+    }
+  });
+
+  content.addEventListener('mouseout', (e) => {
+    const entry = e.target.closest('.activity-entry');
+    if (!entry) return;
+
+    clearNodeHighlight();
+  });
+}
+
+// Initialize activity interactions
+initActivityInteractions();
 
 console.log('GSD Viewer initialized - select a project folder to visualize');
