@@ -1211,16 +1211,15 @@ async function loadProject(projectPath) {
 
     console.log('Project data loaded:', projectData);
 
+    // Fetch git data before building graph so commit nodes can be added
+    await fetchGitStatus(projectPath);
+    await fetchGitBranch(projectPath);
+    await fetchGitCommits(projectPath, 10);
+
     const graphData = buildGraphFromProject(projectData);
     console.log('Graph built:', graphData.nodes.length, 'nodes,', graphData.links.length, 'links');
 
     updateGraph(graphData);
-
-    // Fetch git status for the project
-    await fetchGitStatus(projectPath);
-
-    // Fetch git branch for the project
-    await fetchGitBranch(projectPath);
 
     document.getElementById('selected-path').textContent = projectPath;
     selectedProjectPath = projectPath;
@@ -1353,6 +1352,36 @@ function populateColorLegend() {
     const colorCircle = document.createElement('div');
     colorCircle.className = 'legend-color';
     colorCircle.style.backgroundColor = extensionColors[ext];
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'legend-label';
+    labelSpan.textContent = label;
+
+    item.appendChild(colorCircle);
+    item.appendChild(labelSpan);
+    legendContent.appendChild(item);
+  }
+
+  // Git Status section
+  const gitTitle = document.createElement('div');
+  gitTitle.className = 'legend-title';
+  gitTitle.style.marginTop = '12px';
+  gitTitle.textContent = 'Git Status';
+  legendContent.appendChild(gitTitle);
+
+  const gitStatusLabels = {
+    staged: 'Staged (ready to commit)',
+    modified: 'Modified (uncommitted)',
+    untracked: 'Untracked (new file)'
+  };
+
+  for (const [status, label] of Object.entries(gitStatusLabels)) {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+
+    const colorCircle = document.createElement('div');
+    colorCircle.className = 'legend-color';
+    colorCircle.style.backgroundColor = '#' + gitStatusColors[status].toString(16).padStart(6, '0');
 
     const labelSpan = document.createElement('span');
     labelSpan.className = 'legend-label';
@@ -2255,6 +2284,27 @@ async function fetchGitBranch(projectPath) {
     currentBranch = null;
     branchName.textContent = '\u2014';
     branchDisplay.classList.add('no-branch');
+  }
+}
+
+// Fetch recent git commits
+async function fetchGitCommits(projectPath, limit = 10) {
+  if (!window.electronAPI || !window.electronAPI.getGitCommits) {
+    console.log('[Git] Commits API not available');
+    return;
+  }
+
+  try {
+    const result = await window.electronAPI.getGitCommits(projectPath, limit);
+    if (result && result.commits && !result.error) {
+      gitCommitsData = result.commits;
+      console.log('[Git] Commits loaded:', gitCommitsData.length);
+    } else {
+      gitCommitsData = [];
+    }
+  } catch (err) {
+    console.error('[Git] Error fetching commits:', err);
+    gitCommitsData = [];
   }
 }
 
