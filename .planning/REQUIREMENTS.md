@@ -79,10 +79,10 @@ Requirements for milestone v1.1: Real-time Activity Visualization.
 
 ### Git Integration
 
-- [ ] **GIT-01**: Nodes show indicator for uncommitted changes (modified files)
-- [ ] **GIT-02**: Staged files are visually distinguished from unstaged files
-- [ ] **GIT-03**: Recent commits appear as nodes in the graph
-- [ ] **GIT-04**: Current branch name is displayed in the UI
+- [x] **GIT-01**: Nodes show indicator for uncommitted changes (modified files)
+- [x] **GIT-02**: Staged files are visually distinguished from unstaged files
+- [x] **GIT-03**: Recent commits appear as nodes in the graph
+- [x] **GIT-04**: Current branch name is displayed in the UI
 
 ### Change Type Indicators
 
@@ -170,10 +170,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HET-01 | Phase 9 | Complete |
 | HET-02 | Phase 9 | Complete |
 | HET-03 | Phase 9 | Complete |
-| GIT-01 | Phase 10 | Pending |
-| GIT-02 | Phase 10 | Pending |
-| GIT-03 | Phase 10 | Pending |
-| GIT-04 | Phase 10 | Pending |
+| GIT-01 | Phase 10 | Complete |
+| GIT-02 | Phase 10 | Complete |
+| GIT-03 | Phase 10 | Complete |
+| GIT-04 | Phase 10 | Complete |
 | STS-01 | Phase 11 | Pending |
 | STS-02 | Phase 11 | Pending |
 | STS-03 | Phase 11 | Pending |

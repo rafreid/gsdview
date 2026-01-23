@@ -26,7 +26,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 7: Expanded File Scope** - Include src/ directory in graph and file watcher
 - [x] **Phase 8: Activity Feed & Change Indicators** - Live activity feed with change type animations
 - [x] **Phase 9: Heat Map Visualization** - Recent changes glow hot, cool down over time
-- [ ] **Phase 10: Git Integration** - Show uncommitted/staged changes and recent commits
+- [x] **Phase 10: Git Integration** - Show uncommitted/staged changes and recent commits
 - [ ] **Phase 11: Statistics & Diff Preview** - Activity analytics and file diffs
 - [ ] **Phase 12: Timeline Replay** - Scrub through activity history with playback controls
 
@@ -190,9 +190,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 10-01-PLAN.md — Git backend operations and IPC API
-- [ ] 10-02-PLAN.md — Git status visual indicators on file nodes
-- [ ] 10-03-PLAN.md — Commit nodes and branch display
+- [x] 10-01-PLAN.md — Git backend operations and IPC API
+- [x] 10-02-PLAN.md — Git status visual indicators on file nodes
+- [x] 10-03-PLAN.md — Commit nodes and branch display
 
 ### Phase 11: Statistics & Diff Preview
 **Goal**: User can analyze activity patterns and see what changed in files
@@ -238,7 +238,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 7. Expanded File Scope | 3/3 | Complete | 2026-01-23 |
 | 8. Activity Feed & Change Indicators | 3/3 | Complete | 2026-01-23 |
 | 9. Heat Map Visualization | 2/2 | Complete | 2026-01-23 |
-| 10. Git Integration | 0/3 | Planned | — |
+| 10. Git Integration | 3/3 | Complete | 2026-01-23 |
 | 11. Statistics & Diff Preview | 0/— | Pending | — |
 | 12. Timeline Replay | 0/— | Pending | — |
 
