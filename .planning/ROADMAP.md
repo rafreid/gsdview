@@ -25,7 +25,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 7: Expanded File Scope** - Include src/ directory in graph and file watcher
 - [x] **Phase 8: Activity Feed & Change Indicators** - Live activity feed with change type animations
-- [ ] **Phase 9: Heat Map Visualization** - Recent changes glow hot, cool down over time
+- [x] **Phase 9: Heat Map Visualization** - Recent changes glow hot, cool down over time
 - [ ] **Phase 10: Git Integration** - Show uncommitted/staged changes and recent commits
 - [ ] **Phase 11: Statistics & Diff Preview** - Activity analytics and file diffs
 - [ ] **Phase 12: Timeline Replay** - Scrub through activity history with playback controls
@@ -175,8 +175,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — Heat state tracking, color gradient, and decay animation loop
-- [ ] 09-02-PLAN.md — Heat decay slider UI and persistence
+- [x] 09-01-PLAN.md — Heat state tracking, color gradient, and decay animation loop
+- [x] 09-02-PLAN.md — Heat decay slider UI and persistence
 
 ### Phase 10: Git Integration
 **Goal**: User can see git status directly in the graph (uncommitted, staged, commits, branch)
@@ -232,11 +232,11 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 |-------|----------------|--------|-----------|
 | 7. Expanded File Scope | 3/3 | Complete | 2026-01-23 |
 | 8. Activity Feed & Change Indicators | 3/3 | Complete | 2026-01-23 |
-| 9. Heat Map Visualization | 0/2 | Planned | — |
+| 9. Heat Map Visualization | 2/2 | Complete | 2026-01-23 |
 | 10. Git Integration | 0/— | Pending | — |
 | 11. Statistics & Diff Preview | 0/— | Pending | — |
 | 12. Timeline Replay | 0/— | Pending | — |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-23 (Phase 9 planned)*
+*Last updated: 2026-01-23 (Phase 9 complete)*

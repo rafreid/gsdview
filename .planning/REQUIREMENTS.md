@@ -73,9 +73,9 @@ Requirements for milestone v1.1: Real-time Activity Visualization.
 
 ### Heat Map Visualization
 
-- [ ] **HET-01**: Recently changed files display hot color (red/orange glow)
-- [ ] **HET-02**: File heat color cools down over time (red → orange → yellow → normal)
-- [ ] **HET-03**: User can configure heat decay rate (how fast files cool down)
+- [x] **HET-01**: Recently changed files display hot color (red/orange glow)
+- [x] **HET-02**: File heat color cools down over time (red → orange → yellow → normal)
+- [x] **HET-03**: User can configure heat decay rate (how fast files cool down)
 
 ### Git Integration
 
@@ -167,9 +167,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHG-01 | Phase 8 | Complete |
 | CHG-02 | Phase 8 | Complete |
 | CHG-03 | Phase 8 | Complete |
-| HET-01 | Phase 9 | Pending |
-| HET-02 | Phase 9 | Pending |
-| HET-03 | Phase 9 | Pending |
+| HET-01 | Phase 9 | Complete |
+| HET-02 | Phase 9 | Complete |
+| HET-03 | Phase 9 | Complete |
 | GIT-01 | Phase 10 | Pending |
 | GIT-02 | Phase 10 | Pending |
 | GIT-03 | Phase 10 | Pending |
