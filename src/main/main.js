@@ -5,7 +5,7 @@ const chokidar = require('chokidar');
 const Store = require('electron-store');
 const { parseRoadmap } = require('./parsers/roadmap-parser');
 const { parseRequirements } = require('./parsers/requirements-parser');
-const { parseDirectory, flattenTree } = require('./parsers/directory-parser');
+const { parseDirectory, parseDirectories, flattenTree, DEFAULT_SRC_IGNORE_PATTERNS } = require('./parsers/directory-parser');
 const { parseState } = require('./parsers/state-parser');
 
 const store = new Store();
@@ -143,14 +143,29 @@ app.whenReady().then(() => {
 
       const roadmap = parseRoadmap(planningPath);
       const requirements = parseRequirements(planningPath);
-      const directory = parseDirectory(planningPath);
-      const dirFlattened = flattenTree(directory.tree);
+
+      // Build directory configs for multi-directory parsing
+      const directoryConfigs = [
+        {
+          path: path.join(projectPath, '.planning'),
+          sourceType: 'planning',
+          ignorePatterns: []
+        },
+        {
+          path: path.join(projectPath, 'src'),
+          sourceType: 'src',
+          ignorePatterns: DEFAULT_SRC_IGNORE_PATTERNS
+        }
+      ];
+
+      // Use parseDirectories for unified multi-directory tree
+      const directory = parseDirectories(directoryConfigs, projectPath);
       const state = parseState(planningPath);
 
       return {
         roadmap,
         requirements,
-        directory: { ...directory, ...dirFlattened },
+        directory,
         state,
         projectPath
       };
