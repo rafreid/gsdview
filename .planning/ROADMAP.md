@@ -77,13 +77,13 @@ Plans:
   1. Current/active phase node has a visible glow or pulse effect
   2. Completed items are green, in-progress are yellow, pending are gray
   3. Blocked items have red connection indicators visible from any zoom level
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 04-01: Parse STATE.md for current position
-- [ ] 04-02: Progress-based node coloring
-- [ ] 04-03: Current phase highlighting (glow/pulse)
-- [ ] 04-04: Blocker visualization
+- [ ] 04-01-PLAN.md — Parse STATE.md for current position and blockers
+- [ ] 04-02-PLAN.md — Progress-based node coloring (green/yellow/gray)
+- [ ] 04-03-PLAN.md — Current phase highlighting with glow/pulse effect
+- [ ] 04-04-PLAN.md — Blocker visualization with red connection indicators
 
 ### Phase 5: Interactions
 **Goal**: User can inspect nodes, get quick info, fly to items of interest, and open files externally
@@ -130,7 +130,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Foundation | 3/3 | Complete | 2026-01-22 |
 | 2. Graph Rendering | 3/3 | Complete | 2026-01-22 |
 | 3. GSD Parsing | 4/4 | Complete | 2026-01-22 |
-| 4. State Visualization | 0/4 | Not started | - |
+| 4. State Visualization | 0/4 | Planned | - |
 | 5. Interactions | 0/4 | Not started | - |
 | 6. Polish | 0/5 | Not started | - |
 
