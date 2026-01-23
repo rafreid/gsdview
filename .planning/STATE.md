@@ -2,28 +2,30 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-01-22)
+See: .planning/PROJECT.md (updated 2026-01-23)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** Milestone Complete
+**Current focus:** v1.1 Real-time Activity Visualization
 
 ## Current Position
 
-Phase: 6 of 6 (Polish)
-Plan: 5 of 5 in current phase
-Status: Complete
-Last activity: 2026-01-23 -- Completed quick task 007: Fix 2D zoom, file change detection, and color coding
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-01-23 — Milestone v1.1 started
 
-Progress: [##########] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
+- Total plans completed: 22 (from v1.0)
 - Average duration: --
 - Total execution time: Session duration
 
 **By Phase:**
+
+*v1.0 (Complete):*
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
@@ -34,9 +36,11 @@ Progress: [##########] 100%
 | 5. Interactions | 4 | Complete | -- |
 | 6. Polish | 5 | Complete | -- |
 
-**Recent Trend:**
-- All plans executed successfully
-- Trend: Complete
+*v1.1 (Current):*
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| TBD | — | — | — |
 
 *Updated after each plan completion*
 
@@ -51,16 +55,18 @@ Recent decisions affecting current work:
 - Electron app with context isolation for security
 - chokidar for file watching, electron-store for persistence
 - Single unified 3D graph view (not multiple views)
+- esbuild for bundling ES modules
+- Limit file scope to .planning/ + src/ for performance
 
 ### Pending Todos
 
-None - milestone complete.
+None.
 
 ### Blockers/Concerns
 
 None.
 
-### Quick Tasks Completed
+### Quick Tasks Completed (v1.0)
 
 | # | Description | Date | Directory |
 |---|-------------|------|-----------|
@@ -75,5 +81,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed quick task 007
+Stopped at: Starting milestone v1.1
 Resume file: None
