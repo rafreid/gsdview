@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Phase: 9 of 12 (Heat Map Visualization)
-Plan: Not yet planned
-Status: Ready for Phase 9
-Last activity: 2026-01-23 - Completed Phase 8 (Activity Feed & Change Indicators)
+Plan: 1 of 2 complete
+Status: In progress
+Last activity: 2026-01-23 - Completed 09-01-PLAN.md (Heat State Tracking & Decay Animation)
 
-Progress: [████████░░] 75% (v1.0: 6/12 phases + v1.1: Phase 7 + Phase 8 complete)
+Progress: [████████░░] 77% (v1.0: 6/12 phases + v1.1: Phase 7 + Phase 8 + 09-01 complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22 (from v1.0)
+- Total plans completed: 23 (22 from v1.0 + 09-01)
 - Average duration: Session duration
 - Total execution time: 1 day (v1.0)
 
@@ -42,7 +42,7 @@ Progress: [████████░░] 75% (v1.0: 6/12 phases + v1.1: Phase 
 |-------|-------|--------|--------|
 | 7. Expanded File Scope | 3 | 3/3 complete | EXP-01-03 |
 | 8. Activity Feed & Change Indicators | 3 | 3/3 complete | FED-01-04, CHG-01-03 |
-| 9. Heat Map Visualization | - | Pending | HET-01-03 |
+| 9. Heat Map Visualization | 2 | 1/2 complete | HET-01-03 |
 | 10. Git Integration | - | Pending | GIT-01-04 |
 | 11. Statistics & Diff Preview | - | Pending | STS-01-03, DIF-01-03 |
 | 12. Timeline Replay | - | Pending | TML-01-03 |
@@ -78,6 +78,10 @@ Recent decisions affecting current work:
 - Event delegation on activity-content for entry interactions (08-03)
 - Node highlight 1.3x scale on hover (08-03)
 - Entry click navigates AND opens details panel (08-03)
+- Heat gradient: red (0.0) -> orange (0.3) -> yellow (0.6) -> normal (1.0) (09-01)
+- Default heat decay duration: 5 minutes (300000ms) (09-01)
+- Flash animations take priority over heat colors (09-01)
+- Deleted files excluded from heat tracking (09-01)
 
 ### Pending Todos
 
@@ -102,6 +106,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed Phase 8 (Activity Feed & Change Indicators)
+Stopped at: Completed 09-01-PLAN.md (Heat State Tracking & Decay Animation)
 Resume file: None
-Next action: `/gsd:plan-phase 9` to plan Phase 9: Heat Map Visualization
+Next action: Execute 09-02-PLAN.md (Heat UI Controls)
