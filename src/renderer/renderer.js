@@ -908,6 +908,34 @@ const Graph = ForceGraph3D()(container)
       }
     }
 
+    // Commit nodes: small hexagonal shape
+    if (node.type === 'commit') {
+      const geometry = new THREE.CylinderGeometry(size * 0.6, size * 0.6, size * 0.4, 6);
+      const material = new THREE.MeshBasicMaterial({
+        color: nodeColors.commit,
+        transparent: true,
+        opacity: 0.85
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.name = node.id;
+
+      // Rotate to show hexagonal face
+      mesh.rotation.x = Math.PI / 2;
+
+      // Add wireframe for clarity
+      const edges = new THREE.EdgesGeometry(geometry);
+      const lineMaterial = new THREE.LineBasicMaterial({
+        color: 0xffffff,
+        opacity: 0.5,
+        transparent: true
+      });
+      const wireframe = new THREE.LineSegments(edges, lineMaterial);
+      wireframe.rotation.x = Math.PI / 2;
+      mesh.add(wireframe);
+
+      return mesh;
+    }
+
     // Root node: larger icosahedron
     if (node.type === 'root') {
       const geometry = new THREE.IcosahedronGeometry(size * 1.2);
@@ -972,6 +1000,11 @@ const Graph = ForceGraph3D()(container)
         content += '📄 File';
         if (node.extension) {
           content += ` (${node.extension})`;
+        }
+      } else if (node.type === 'commit') {
+        content += '📝 Commit';
+        if (node.hash) {
+          content += `<br><code style="font-family: monospace;">${node.hash.substring(0, 7)}</code>`;
         }
       } else {
         content += `Type: ${node.type}`;
@@ -1128,6 +1161,34 @@ function buildGraphFromProject(projectData) {
     if (nodeMap.has('dir-planning')) {
       addLink(projectNode.id, 'dir-planning', 'contains');
     }
+  }
+
+  // Process git commits
+  if (gitCommitsData && gitCommitsData.length > 0) {
+    // Add git commits parent node
+    const gitNode = addNode({
+      id: 'git-commits',
+      name: 'Recent Commits',
+      type: 'directory',  // Use directory type for grouping
+      description: `Last ${gitCommitsData.length} commits`
+    });
+
+    // Link to project root
+    addLink(projectNode.id, gitNode.id, 'contains');
+
+    // Add individual commit nodes
+    gitCommitsData.forEach((commit, index) => {
+      const commitNode = addNode({
+        id: `commit-${commit.hash}`,
+        name: commit.hash.substring(0, 7),
+        type: 'commit',
+        description: commit.message,
+        hash: commit.hash,
+        fullMessage: commit.message
+      });
+
+      addLink(gitNode.id, commitNode.id, 'contains');
+    });
   }
 
   // Add blocker links if any
@@ -1650,7 +1711,7 @@ document.getElementById('recent-projects').addEventListener('change', async (e) 
 
 // Listen for file changes (auto-refresh)
 if (window.electronAPI && window.electronAPI.onFilesChanged) {
-  window.electronAPI.onFilesChanged((data) => {
+  window.electronAPI.onFilesChanged(async (data) => {
     console.log('Files changed:', data.event, data.path, 'sourceType:', data.sourceType);
     if (selectedProjectPath) {
       // Add to activity feed and get entry with mapped event type
@@ -1663,7 +1724,7 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
       }
 
       showRefreshIndicator();
-      loadProject(selectedProjectPath);
+      await loadProject(selectedProjectPath);
 
       // Refresh git status after file changes
       await fetchGitStatus(selectedProjectPath);
