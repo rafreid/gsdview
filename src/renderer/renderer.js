@@ -1146,6 +1146,9 @@ async function loadProject(projectPath) {
 
     updateGraph(graphData);
 
+    // Fetch git status for the project
+    await fetchGitStatus(projectPath);
+
     document.getElementById('selected-path').textContent = projectPath;
     selectedProjectPath = projectPath;
 
@@ -1559,6 +1562,9 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
 
       showRefreshIndicator();
       loadProject(selectedProjectPath);
+
+      // Refresh git status after file changes
+      await fetchGitStatus(selectedProjectPath);
     }
   });
 }
@@ -2115,6 +2121,35 @@ function initActivityInteractions() {
 
 // Initialize activity interactions
 initActivityInteractions();
+
+// Git status state
+let gitStatusData = { modified: [], staged: [], untracked: [] };
+
+// Fetch git status for the current project
+async function fetchGitStatus(projectPath) {
+  if (!window.electronAPI || !window.electronAPI.getGitStatus) {
+    console.log('[Git] Git API not available');
+    return;
+  }
+
+  try {
+    const result = await window.electronAPI.getGitStatus(projectPath);
+    if (result && !result.error) {
+      gitStatusData = {
+        modified: result.modified || [],
+        staged: result.staged || [],
+        untracked: result.untracked || []
+      };
+      console.log('[Git] Status loaded:', gitStatusData);
+    } else {
+      gitStatusData = { modified: [], staged: [], untracked: [] };
+      console.log('[Git] Not a git repo or error:', result?.error);
+    }
+  } catch (err) {
+    console.error('[Git] Error fetching status:', err);
+    gitStatusData = { modified: [], staged: [], untracked: [] };
+  }
+}
 
 // Heat decay slider handler
 document.getElementById('heat-decay-slider')?.addEventListener('input', async (e) => {
