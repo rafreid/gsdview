@@ -83466,8 +83466,67 @@ ${node.goal}`;
     toggle.classList.toggle("panel-open");
     graphContainer.classList.toggle("tree-open");
     toggle.textContent = panel.classList.contains("visible") ? "\u25C0" : "\u{1F4C1}";
+    if (panel.classList.contains("visible")) {
+      applyTreePanelWidth(treePanelWidth);
+    } else {
+      panel.style.width = "";
+      toggle.style.left = "";
+      graphContainer.style.left = "";
+      graphContainer.style.width = "";
+    }
     setTimeout(() => handleResize(), 300);
   });
+  var treePanelWidth = 280;
+  var MIN_TREE_WIDTH = 150;
+  var MAX_TREE_WIDTH = 600;
+  var treeResizer = document.getElementById("tree-resizer");
+  if (treeResizer) {
+    let isResizing = false;
+    let startX = 0;
+    let startWidth = 0;
+    treeResizer.addEventListener("mousedown", (e2) => {
+      isResizing = true;
+      startX = e2.clientX;
+      startWidth = treePanelWidth;
+      treeResizer.classList.add("active");
+      document.body.classList.add("resizing");
+      e2.preventDefault();
+    });
+    document.addEventListener("mousemove", (e2) => {
+      if (!isResizing) return;
+      const deltaX = e2.clientX - startX;
+      let newWidth = startWidth + deltaX;
+      newWidth = Math.max(MIN_TREE_WIDTH, Math.min(MAX_TREE_WIDTH, newWidth));
+      treePanelWidth = newWidth;
+      applyTreePanelWidth(newWidth);
+    });
+    document.addEventListener("mouseup", () => {
+      if (isResizing) {
+        isResizing = false;
+        treeResizer.classList.remove("active");
+        document.body.classList.remove("resizing");
+        handleResize();
+      }
+    });
+  }
+  function applyTreePanelWidth(width) {
+    const panel = document.getElementById("tree-panel");
+    const toggle = document.getElementById("tree-toggle");
+    const graphContainer = document.getElementById("graph-container");
+    const statsPanel = document.getElementById("statistics-panel");
+    if (panel) {
+      panel.style.width = width + "px";
+    }
+    if (toggle && panel && panel.classList.contains("visible")) {
+      toggle.style.left = width + 10 + "px";
+    }
+    if (graphContainer && panel && panel.classList.contains("visible")) {
+      graphContainer.style.left = width + "px";
+      const statsOpen = statsPanel && statsPanel.classList.contains("visible");
+      const statsWidth = statsOpen ? 320 : 0;
+      graphContainer.style.width = `calc(100% - ${width}px - ${statsWidth}px)`;
+    }
+  }
   function updateActivityBadge() {
     const badge = document.getElementById("activity-badge");
     if (!badge) return;

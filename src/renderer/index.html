@@ -356,6 +356,49 @@
       transform: translateX(0);
     }
 
+    #tree-resizer {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 6px;
+      height: 100%;
+      cursor: col-resize;
+      background: transparent;
+      z-index: 100;
+      transition: background 0.2s;
+    }
+
+    #tree-resizer:hover,
+    #tree-resizer.active {
+      background: rgba(78, 205, 196, 0.5);
+    }
+
+    #tree-resizer::after {
+      content: '';
+      position: absolute;
+      left: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2px;
+      height: 40px;
+      background: rgba(78, 205, 196, 0.3);
+      border-radius: 1px;
+    }
+
+    #tree-resizer:hover::after,
+    #tree-resizer.active::after {
+      background: rgba(78, 205, 196, 0.8);
+    }
+
+    body.resizing {
+      cursor: col-resize !important;
+      user-select: none;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
     #tree-toggle {
       position: fixed;
       left: 10px;
@@ -1332,6 +1375,7 @@
       <h3>📂 File Tree</h3>
     </div>
     <div id="tree-content"></div>
+    <div id="tree-resizer"></div>
   </div>
   <div id="graph-container"></div>
   <div id="color-legend">
