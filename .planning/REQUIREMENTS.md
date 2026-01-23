@@ -60,9 +60,9 @@ Requirements for milestone v1.1: Real-time Activity Visualization.
 
 ### Expanded File Scope
 
-- [ ] **EXP-01**: Graph includes files from both `.planning/` and `src/` directories
-- [ ] **EXP-02**: Tree panel shows combined `.planning/` + `src/` structure
-- [ ] **EXP-03**: File watcher monitors both directories for changes
+- [x] **EXP-01**: Graph includes files from both `.planning/` and `src/` directories
+- [x] **EXP-02**: Tree panel shows combined `.planning/` + `src/` structure
+- [x] **EXP-03**: File watcher monitors both directories for changes
 
 ### Activity Feed
 
@@ -157,9 +157,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EXP-01 | Phase 7 | Pending |
-| EXP-02 | Phase 7 | Pending |
-| EXP-03 | Phase 7 | Pending |
+| EXP-01 | Phase 7 | Complete |
+| EXP-02 | Phase 7 | Complete |
+| EXP-03 | Phase 7 | Complete |
 | FED-01 | Phase 8 | Pending |
 | FED-02 | Phase 8 | Pending |
 | FED-03 | Phase 8 | Pending |
