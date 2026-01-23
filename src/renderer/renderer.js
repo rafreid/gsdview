@@ -182,6 +182,70 @@ function applyNodeHeatColor(nodeId) {
   });
 }
 
+// Heat decay animation loop
+let heatLoopRunning = false;
+let heatLoopRafId = null;
+
+// Start the heat decay animation loop
+function startHeatDecayLoop() {
+  if (heatLoopRunning) return;
+  heatLoopRunning = true;
+
+  function heatLoop() {
+    if (!heatLoopRunning) return;
+
+    const now = Date.now();
+    const nodesToRemove = [];
+
+    // Update all heated nodes
+    nodeHeatMap.forEach((heatState, nodeId) => {
+      const elapsed = now - heatState.lastChangeTime;
+
+      // Remove from heat map if fully cooled
+      if (elapsed >= heatDecayDuration) {
+        nodesToRemove.push(nodeId);
+        // Restore original color
+        const node = currentGraphData.nodes.find(n => n.id === nodeId);
+        if (node && node.__threeObj && !flashingNodes.has(nodeId)) {
+          const materials = [];
+          if (node.__threeObj.material) materials.push(node.__threeObj.material);
+          if (node.__threeObj.children) {
+            node.__threeObj.children.forEach(child => {
+              if (child.material) materials.push(child.material);
+            });
+          }
+          materials.forEach(m => m.color.setHex(heatState.originalColor));
+        }
+      } else {
+        // Apply current heat color
+        applyNodeHeatColor(nodeId);
+      }
+    });
+
+    // Clean up fully cooled nodes
+    nodesToRemove.forEach(id => nodeHeatMap.delete(id));
+
+    // Continue loop if there are still heated nodes
+    if (nodeHeatMap.size > 0) {
+      heatLoopRafId = requestAnimationFrame(heatLoop);
+    } else {
+      heatLoopRunning = false;
+      heatLoopRafId = null;
+    }
+  }
+
+  heatLoopRafId = requestAnimationFrame(heatLoop);
+}
+
+// Stop heat decay loop (for cleanup)
+function stopHeatDecayLoop() {
+  heatLoopRunning = false;
+  if (heatLoopRafId) {
+    cancelAnimationFrame(heatLoopRafId);
+    heatLoopRafId = null;
+  }
+}
+
 // Get relative path for display in activity feed
 function getRelativePath(absolutePath) {
   if (!absolutePath) return '';
@@ -268,6 +332,9 @@ function addActivityEntry(event, filePath, sourceType) {
         lastChangeTime: Date.now(),
         originalColor: originalColor
       });
+
+      // Start heat decay loop if not already running
+      startHeatDecayLoop();
     }
   }
 
@@ -401,7 +468,13 @@ function flashNodeWithType(nodeId, changeType) {
     } else {
       // Restore original state (or leave faded for deleted)
       materials.forEach((material, i) => {
-        material.color.setHex(originalColors[i]);
+        // After flash, apply heat color if node is heated, else original
+        const heatState = nodeHeatMap.get(nodeId);
+        if (heatState && !isDelete) {
+          material.color.setHex(calculateHeatColor(nodeId, originalColors[i]));
+        } else {
+          material.color.setHex(originalColors[i]);
+        }
         if (!isDelete) {
           material.opacity = originalOpacities[i];
         }

@@ -81841,6 +81841,18 @@ var<${access}> ${name} : ${structName};`;
     deleted: 15158332
     // Red
   };
+  var HEAT_MAX_DURATION = 3e5;
+  var heatDecayDuration = HEAT_MAX_DURATION;
+  var heatGradient = [
+    { pos: 0, color: 16729156 },
+    // Hot red
+    { pos: 0.3, color: 16747520 },
+    // Orange
+    { pos: 0.6, color: 16766720 },
+    // Yellow/gold
+    { pos: 1, color: null }
+    // null = use node's original color
+  ];
   var nodeHeatMap = /* @__PURE__ */ new Map();
   function lerpColor(color1, color2, t2) {
     const r1 = color1 >> 16 & 255, g12 = color1 >> 8 & 255, b1 = color1 & 255;
@@ -81849,6 +81861,82 @@ var<${access}> ${name} : ${structName};`;
     const g3 = Math.round(g12 + (g2 - g12) * t2);
     const b = Math.round(b1 + (b2 - b1) * t2);
     return r3 << 16 | g3 << 8 | b;
+  }
+  function calculateHeatColor(nodeId, originalColorHex) {
+    const heatState = nodeHeatMap.get(nodeId);
+    if (!heatState) return originalColorHex;
+    const elapsed = Date.now() - heatState.lastChangeTime;
+    const progress = Math.min(elapsed / heatDecayDuration, 1);
+    for (let i2 = 0; i2 < heatGradient.length - 1; i2++) {
+      const start = heatGradient[i2];
+      const end = heatGradient[i2 + 1];
+      if (progress >= start.pos && progress <= end.pos) {
+        const segmentProgress = (progress - start.pos) / (end.pos - start.pos);
+        if (end.color === null) {
+          return lerpColor(start.color, originalColorHex, segmentProgress);
+        }
+        return lerpColor(start.color, end.color, segmentProgress);
+      }
+    }
+    return originalColorHex;
+  }
+  function applyNodeHeatColor(nodeId) {
+    const node = currentGraphData.nodes.find((n2) => n2.id === nodeId);
+    if (!node || !node.__threeObj) return;
+    const heatState = nodeHeatMap.get(nodeId);
+    if (!heatState) return;
+    if (flashingNodes.has(nodeId)) return;
+    const threeObj = node.__threeObj;
+    const materials = [];
+    if (threeObj.material) materials.push(threeObj.material);
+    if (threeObj.children) {
+      threeObj.children.forEach((child) => {
+        if (child.material) materials.push(child.material);
+      });
+    }
+    if (materials.length === 0) return;
+    const heatColor = calculateHeatColor(nodeId, heatState.originalColor);
+    materials.forEach((m3) => {
+      m3.color.setHex(heatColor);
+    });
+  }
+  var heatLoopRunning = false;
+  var heatLoopRafId = null;
+  function startHeatDecayLoop() {
+    if (heatLoopRunning) return;
+    heatLoopRunning = true;
+    function heatLoop() {
+      if (!heatLoopRunning) return;
+      const now4 = Date.now();
+      const nodesToRemove = [];
+      nodeHeatMap.forEach((heatState, nodeId) => {
+        const elapsed = now4 - heatState.lastChangeTime;
+        if (elapsed >= heatDecayDuration) {
+          nodesToRemove.push(nodeId);
+          const node = currentGraphData.nodes.find((n2) => n2.id === nodeId);
+          if (node && node.__threeObj && !flashingNodes.has(nodeId)) {
+            const materials = [];
+            if (node.__threeObj.material) materials.push(node.__threeObj.material);
+            if (node.__threeObj.children) {
+              node.__threeObj.children.forEach((child) => {
+                if (child.material) materials.push(child.material);
+              });
+            }
+            materials.forEach((m3) => m3.color.setHex(heatState.originalColor));
+          }
+        } else {
+          applyNodeHeatColor(nodeId);
+        }
+      });
+      nodesToRemove.forEach((id) => nodeHeatMap.delete(id));
+      if (nodeHeatMap.size > 0) {
+        heatLoopRafId = requestAnimationFrame(heatLoop);
+      } else {
+        heatLoopRunning = false;
+        heatLoopRafId = null;
+      }
+    }
+    heatLoopRafId = requestAnimationFrame(heatLoop);
   }
   function getRelativePath(absolutePath) {
     if (!absolutePath) return "";
@@ -81909,6 +81997,7 @@ var<${access}> ${name} : ${structName};`;
           lastChangeTime: Date.now(),
           originalColor
         });
+        startHeatDecayLoop();
       }
     }
     return entry;
@@ -81999,7 +82088,12 @@ var<${access}> ${name} : ${structName};`;
         flashingNodes.set(nodeId, { rafId: rafId2, startTime, changeType });
       } else {
         materials.forEach((material, i2) => {
-          material.color.setHex(originalColors[i2]);
+          const heatState = nodeHeatMap.get(nodeId);
+          if (heatState && !isDelete) {
+            material.color.setHex(calculateHeatColor(nodeId, originalColors[i2]));
+          } else {
+            material.color.setHex(originalColors[i2]);
+          }
           if (!isDelete) {
             material.opacity = originalOpacities[i2];
           }
