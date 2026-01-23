@@ -408,16 +408,26 @@ const Graph = ForceGraph3D()(container)
     const distance = 50 + getNodeSize(node, connectionCounts) * 4;
 
     // Animate camera to node position
-    const distRatio = 1 + distance / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
-    Graph.cameraPosition(
-      {
-        x: (node.x || 0) * distRatio,
-        y: (node.y || 0) * distRatio,
-        z: (node.z || 0) * distRatio
-      },
-      node, // lookAt target
-      1000 // transition duration ms
-    );
+    if (is3D) {
+      // 3D mode: calculate position relative to node position
+      const distRatio = 1 + distance / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
+      Graph.cameraPosition(
+        {
+          x: (node.x || 0) * distRatio,
+          y: (node.y || 0) * distRatio,
+          z: (node.z || 0) * distRatio
+        },
+        node, // lookAt target
+        1000 // transition duration ms
+      );
+    } else {
+      // 2D mode: position camera above the node looking down
+      Graph.cameraPosition(
+        { x: node.x || 0, y: node.y || 0, z: distance + 100 },
+        node,
+        1000
+      );
+    }
 
     // Show details panel
     showDetailsPanel(node);
@@ -1267,16 +1277,27 @@ function selectTreeItem(nodeId) {
   // Fly to node in graph
   if (graphNode.x !== undefined) {
     const distance = 50 + getNodeSize(graphNode, connectionCounts) * 4;
-    const distRatio = 1 + distance / Math.hypot(graphNode.x || 0, graphNode.y || 0, graphNode.z || 0);
-    Graph.cameraPosition(
-      {
-        x: (graphNode.x || 0) * distRatio,
-        y: (graphNode.y || 0) * distRatio,
-        z: (graphNode.z || 0) * distRatio
-      },
-      graphNode,
-      1000
-    );
+
+    if (is3D) {
+      // 3D mode: calculate position relative to node position
+      const distRatio = 1 + distance / Math.hypot(graphNode.x || 0, graphNode.y || 0, graphNode.z || 0);
+      Graph.cameraPosition(
+        {
+          x: (graphNode.x || 0) * distRatio,
+          y: (graphNode.y || 0) * distRatio,
+          z: (graphNode.z || 0) * distRatio
+        },
+        graphNode,
+        1000
+      );
+    } else {
+      // 2D mode: position camera above the node looking down
+      Graph.cameraPosition(
+        { x: graphNode.x || 0, y: graphNode.y || 0, z: distance + 100 },
+        graphNode,
+        1000
+      );
+    }
 
     // Flash the graph node
     flashNode(nodeId);
