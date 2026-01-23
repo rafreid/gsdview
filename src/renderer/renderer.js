@@ -104,6 +104,13 @@ const changeTypeColors = {
   deleted: 0xE74C3C   // Red
 };
 
+// Git status colors for node indicators
+const gitStatusColors = {
+  staged: 0x2ECC71,    // Green - ready to commit
+  modified: 0xF39C12,  // Orange - uncommitted changes
+  untracked: 0x9B59B6  // Purple - new untracked file
+};
+
 // Heat map configuration
 const HEAT_MAX_DURATION = 300000; // 5 minutes default (ms) - time for full cool down
 let heatDecayDuration = HEAT_MAX_DURATION; // User-configurable via slider
@@ -652,6 +659,39 @@ function applySourceTint(hexColor, sourceType) {
   return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
 }
 
+// Get git status for a file node
+function getNodeGitStatus(node) {
+  if (node.type !== 'file' || !node.path) return null;
+
+  // Normalize path for comparison (git uses forward slashes)
+  const normalizedPath = node.path.replace(/\\/g, '/');
+
+  // Build full relative path based on sourceType
+  let fullRelativePath;
+  if (node.sourceType === 'planning') {
+    fullRelativePath = '.planning/' + normalizedPath;
+  } else if (node.sourceType === 'src') {
+    fullRelativePath = 'src/' + normalizedPath;
+  } else {
+    fullRelativePath = normalizedPath;
+  }
+
+  // Check staged first (takes priority)
+  if (gitStatusData.staged.some(p => p.endsWith(normalizedPath) || p === fullRelativePath)) {
+    return 'staged';
+  }
+  // Check modified (unstaged changes)
+  if (gitStatusData.modified.some(p => p.endsWith(normalizedPath) || p === fullRelativePath)) {
+    return 'modified';
+  }
+  // Check untracked
+  if (gitStatusData.untracked.some(p => p.endsWith(normalizedPath) || p === fullRelativePath)) {
+    return 'untracked';
+  }
+
+  return null;
+}
+
 // Get node color based on type and status
 function getNodeColor(node) {
   // For phases, plans, tasks, requirements - use status colors if available
@@ -1148,6 +1188,9 @@ async function loadProject(projectPath) {
 
     // Fetch git status for the project
     await fetchGitStatus(projectPath);
+
+    // Fetch git branch for the project
+    await fetchGitBranch(projectPath);
 
     document.getElementById('selected-path').textContent = projectPath;
     selectedProjectPath = projectPath;
@@ -2124,6 +2167,8 @@ initActivityInteractions();
 
 // Git status state
 let gitStatusData = { modified: [], staged: [], untracked: [] };
+let currentBranch = null;
+let gitCommitsData = [];
 
 // Fetch git status for the current project
 async function fetchGitStatus(projectPath) {
@@ -2148,6 +2193,38 @@ async function fetchGitStatus(projectPath) {
   } catch (err) {
     console.error('[Git] Error fetching status:', err);
     gitStatusData = { modified: [], staged: [], untracked: [] };
+  }
+}
+
+// Fetch and display current git branch
+async function fetchGitBranch(projectPath) {
+  if (!window.electronAPI || !window.electronAPI.getGitBranch) {
+    console.log('[Git] Branch API not available');
+    return;
+  }
+
+  const branchDisplay = document.getElementById('branch-display');
+  const branchName = document.getElementById('branch-name');
+
+  try {
+    const result = await window.electronAPI.getGitBranch(projectPath);
+    if (result && result.branch && !result.error) {
+      currentBranch = result.branch;
+      branchName.textContent = result.branch;
+      branchDisplay.classList.remove('no-branch');
+      branchDisplay.title = `Current branch: ${result.branch}`;
+      console.log('[Git] Branch:', result.branch);
+    } else {
+      currentBranch = null;
+      branchName.textContent = 'not a git repo';
+      branchDisplay.classList.add('no-branch');
+      branchDisplay.title = 'Not a git repository';
+    }
+  } catch (err) {
+    console.error('[Git] Error fetching branch:', err);
+    currentBranch = null;
+    branchName.textContent = '\u2014';
+    branchDisplay.classList.add('no-branch');
   }
 }
 

@@ -855,6 +855,37 @@
       color: rgba(255,255,255,0.6);
       min-width: 35px;
     }
+
+    /* Git Branch Display */
+    #branch-display {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(46, 204, 113, 0.15);
+      border: 1px solid rgba(46, 204, 113, 0.4);
+      border-radius: 4px;
+      font-size: 12px;
+      color: #2ECC71;
+    }
+
+    #branch-display .branch-icon {
+      font-size: 14px;
+    }
+
+    #branch-name {
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #branch-display.no-branch {
+      opacity: 0.5;
+      color: #888;
+      background: rgba(128, 128, 128, 0.15);
+      border-color: rgba(128, 128, 128, 0.4);
+    }
   </style>
 </head>
 <body>
@@ -869,6 +900,10 @@
       <span id="heat-decay-label">Heat:</span>
       <input type="range" id="heat-decay-slider" min="30" max="600" value="300" title="Heat decay duration (seconds)">
       <span id="heat-decay-value">5m</span>
+    </div>
+    <div id="branch-display" title="Current git branch">
+      <span class="branch-icon">&#9095;</span>
+      <span id="branch-name">&#8212;</span>
     </div>
     <span id="selected-path">No project selected</span>
   </div>
