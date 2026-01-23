@@ -86,6 +86,10 @@ let treeData = null; // Hierarchical tree structure
 let treeExpanded = new Set(); // Track expanded directories
 let is3D = true; // Track current dimension mode
 
+// Activity feed state
+let activityEntries = []; // Array of {id, path, event, timestamp, sourceType}
+let activityUnreadCount = 0; // Badge counter
+
 // Track nodes currently flashing (nodeId -> animation state)
 const flashingNodes = new Map();
 
@@ -575,8 +579,10 @@ function handleResize() {
   const toolbarHeight = toolbar ? toolbar.offsetHeight : 50;
   const treePanel = document.getElementById('tree-panel');
   const treeWidth = treePanel && treePanel.classList.contains('visible') ? 280 : 0;
+  const activityPanel = document.getElementById('activity-panel');
+  const activityHeight = activityPanel && activityPanel.classList.contains('visible') ? 180 : 0;
   Graph.width(window.innerWidth - treeWidth);
-  Graph.height(window.innerHeight - toolbarHeight);
+  Graph.height(window.innerHeight - toolbarHeight - activityHeight);
 }
 
 window.addEventListener('resize', handleResize);
@@ -1471,6 +1477,88 @@ document.getElementById('tree-toggle').addEventListener('click', () => {
 
   // Resize graph
   setTimeout(() => handleResize(), 300);
+});
+
+// =====================================================
+// ACTIVITY FEED FUNCTIONALITY
+// =====================================================
+
+// Update activity badge
+function updateActivityBadge() {
+  const badge = document.getElementById('activity-badge');
+  if (!badge) return;
+
+  if (activityUnreadCount > 0) {
+    badge.textContent = activityUnreadCount > 99 ? '99+' : activityUnreadCount;
+    badge.classList.add('visible', 'pulse');
+  } else {
+    badge.classList.remove('visible', 'pulse');
+  }
+}
+
+// Update activity panel content
+function updateActivityPanel() {
+  const content = document.getElementById('activity-content');
+  if (!content) return;
+
+  if (activityEntries.length === 0) {
+    content.innerHTML = '<div class="activity-empty">No recent activity</div>';
+    return;
+  }
+
+  // Render entries (newest first)
+  content.innerHTML = activityEntries.map(entry => {
+    const icon = entry.event === 'add' ? '✨' : entry.event === 'change' ? '📝' : '🗑️';
+    const typeLabel = entry.event === 'add' ? 'created' : entry.event === 'change' ? 'modified' : 'deleted';
+    const typeClass = entry.event === 'add' ? 'created' : entry.event === 'change' ? 'modified' : 'deleted';
+    const timeAgo = formatTimeAgo(entry.timestamp);
+
+    return `<div class="activity-entry ${typeClass}" data-entry-id="${entry.id}" title="${new Date(entry.timestamp).toLocaleString()}">
+      <span class="entry-icon">${icon}</span>
+      <span class="entry-path">${entry.path}</span>
+      <span class="entry-type">${typeLabel}</span>
+      <span class="entry-time">${timeAgo}</span>
+    </div>`;
+  }).join('');
+}
+
+// Format relative time
+function formatTimeAgo(timestamp) {
+  const seconds = Math.floor((Date.now() - timestamp) / 1000);
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
+// Activity feed toggle button handler
+document.getElementById('activity-toggle').addEventListener('click', () => {
+  const panel = document.getElementById('activity-panel');
+  const toggle = document.getElementById('activity-toggle');
+  const graphContainer = document.getElementById('graph-container');
+
+  panel.classList.toggle('visible');
+  toggle.classList.toggle('panel-open');
+  graphContainer.classList.toggle('activity-open');
+
+  // Clear unread count when opening
+  if (panel.classList.contains('visible')) {
+    activityUnreadCount = 0;
+    updateActivityBadge();
+  }
+
+  // Resize graph
+  setTimeout(() => handleResize(), 300);
+});
+
+// Clear button handler
+document.getElementById('activity-clear').addEventListener('click', () => {
+  activityEntries = [];
+  activityUnreadCount = 0;
+  updateActivityBadge();
+  updateActivityPanel();
 });
 
 // Store directory data for tree building

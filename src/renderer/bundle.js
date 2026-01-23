@@ -81828,6 +81828,8 @@ var<${access}> ${name} : ${structName};`;
   var treeData = null;
   var treeExpanded = /* @__PURE__ */ new Set();
   var is3D = true;
+  var activityEntries = [];
+  var activityUnreadCount = 0;
   var flashingNodes = /* @__PURE__ */ new Map();
   function lerpColor(color1, color2, t2) {
     const r1 = color1 >> 16 & 255, g12 = color1 >> 8 & 255, b1 = color1 & 255;
@@ -82172,8 +82174,10 @@ ${node.goal}`;
     const toolbarHeight = toolbar ? toolbar.offsetHeight : 50;
     const treePanel = document.getElementById("tree-panel");
     const treeWidth = treePanel && treePanel.classList.contains("visible") ? 280 : 0;
+    const activityPanel = document.getElementById("activity-panel");
+    const activityHeight = activityPanel && activityPanel.classList.contains("visible") ? 180 : 0;
     Graph.width(window.innerWidth - treeWidth);
-    Graph.height(window.innerHeight - toolbarHeight);
+    Graph.height(window.innerHeight - toolbarHeight - activityHeight);
   }
   window.addEventListener("resize", handleResize);
   handleResize();
@@ -82831,6 +82835,64 @@ ${node.goal}`;
     graphContainer.classList.toggle("tree-open");
     toggle.textContent = panel.classList.contains("visible") ? "\u25C0" : "\u{1F4C1}";
     setTimeout(() => handleResize(), 300);
+  });
+  function updateActivityBadge() {
+    const badge = document.getElementById("activity-badge");
+    if (!badge) return;
+    if (activityUnreadCount > 0) {
+      badge.textContent = activityUnreadCount > 99 ? "99+" : activityUnreadCount;
+      badge.classList.add("visible", "pulse");
+    } else {
+      badge.classList.remove("visible", "pulse");
+    }
+  }
+  function updateActivityPanel() {
+    const content = document.getElementById("activity-content");
+    if (!content) return;
+    if (activityEntries.length === 0) {
+      content.innerHTML = '<div class="activity-empty">No recent activity</div>';
+      return;
+    }
+    content.innerHTML = activityEntries.map((entry) => {
+      const icon = entry.event === "add" ? "\u2728" : entry.event === "change" ? "\u{1F4DD}" : "\u{1F5D1}\uFE0F";
+      const typeLabel = entry.event === "add" ? "created" : entry.event === "change" ? "modified" : "deleted";
+      const typeClass = entry.event === "add" ? "created" : entry.event === "change" ? "modified" : "deleted";
+      const timeAgo = formatTimeAgo(entry.timestamp);
+      return `<div class="activity-entry ${typeClass}" data-entry-id="${entry.id}" title="${new Date(entry.timestamp).toLocaleString()}">
+      <span class="entry-icon">${icon}</span>
+      <span class="entry-path">${entry.path}</span>
+      <span class="entry-type">${typeLabel}</span>
+      <span class="entry-time">${timeAgo}</span>
+    </div>`;
+    }).join("");
+  }
+  function formatTimeAgo(timestamp) {
+    const seconds = Math.floor((Date.now() - timestamp) / 1e3);
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return `${Math.floor(hours / 24)}d ago`;
+  }
+  document.getElementById("activity-toggle").addEventListener("click", () => {
+    const panel = document.getElementById("activity-panel");
+    const toggle = document.getElementById("activity-toggle");
+    const graphContainer = document.getElementById("graph-container");
+    panel.classList.toggle("visible");
+    toggle.classList.toggle("panel-open");
+    graphContainer.classList.toggle("activity-open");
+    if (panel.classList.contains("visible")) {
+      activityUnreadCount = 0;
+      updateActivityBadge();
+    }
+    setTimeout(() => handleResize(), 300);
+  });
+  document.getElementById("activity-clear").addEventListener("click", () => {
+    activityEntries = [];
+    activityUnreadCount = 0;
+    updateActivityBadge();
+    updateActivityPanel();
   });
   var storedDirectoryData = null;
   document.getElementById("dimension-toggle").addEventListener("click", () => {
