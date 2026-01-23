@@ -13,5 +13,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   stopWatching: () => ipcRenderer.invoke('stop-watching'),
   onFilesChanged: (callback) => ipcRenderer.on('files-changed', (event, data) => callback(data)),
   getRecentProjects: () => ipcRenderer.invoke('get-recent-projects'),
-  addRecentProject: (projectPath) => ipcRenderer.invoke('add-recent-project', projectPath)
+  addRecentProject: (projectPath) => ipcRenderer.invoke('add-recent-project', projectPath),
+  getGitStatus: (projectPath) => ipcRenderer.invoke('get-git-status', projectPath),
+  getGitBranch: (projectPath) => ipcRenderer.invoke('get-git-branch', projectPath),
+  getGitCommits: (projectPath, limit) => ipcRenderer.invoke('get-git-commits', projectPath, limit)
 });
