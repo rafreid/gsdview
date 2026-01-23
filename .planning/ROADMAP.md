@@ -13,7 +13,7 @@ Transform a GSD project's .planning/ folder into an explorable 3D force-directed
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Electron app with basic 3d-force-graph rendering and navigation
-- [ ] **Phase 2: Graph Rendering** - Color-coded nodes, connection-based sizing, styled edges
+- [x] **Phase 2: Graph Rendering** - Color-coded nodes, connection-based sizing, styled edges
 - [ ] **Phase 3: GSD Parsing** - Parse .planning/ structure into hierarchical nodes
 - [ ] **Phase 4: State Visualization** - Progress colors, current phase highlight, blocker indicators
 - [ ] **Phase 5: Interactions** - Details panel, tooltips, fly-to navigation, external editor launch
@@ -48,9 +48,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Enhanced color palette and color legend
-- [ ] 02-02-PLAN.md — Dynamic node sizing by connection count
-- [ ] 02-03-PLAN.md — Edge styling and directional indicators
+- [x] 02-01-PLAN.md — Enhanced color palette and color legend
+- [x] 02-02-PLAN.md — Dynamic node sizing by connection count
+- [x] 02-03-PLAN.md — Edge styling and directional indicators
 
 ### Phase 3: GSD Parsing
 **Goal**: App understands GSD .planning/ structure and renders it as connected nodes
@@ -128,7 +128,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-01-22 |
-| 2. Graph Rendering | 0/3 | Planned | - |
+| 2. Graph Rendering | 3/3 | Complete | 2026-01-22 |
 | 3. GSD Parsing | 0/4 | Not started | - |
 | 4. State Visualization | 0/4 | Not started | - |
 | 5. Interactions | 0/4 | Not started | - |
