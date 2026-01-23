@@ -1167,11 +1167,11 @@ document.getElementById('recent-projects').addEventListener('change', async (e) 
 // Listen for file changes (auto-refresh)
 if (window.electronAPI && window.electronAPI.onFilesChanged) {
   window.electronAPI.onFilesChanged((data) => {
-    console.log('Files changed:', data);
+    console.log('Files changed:', data.event, data.path, 'sourceType:', data.sourceType);
     if (selectedProjectPath) {
       // Flash the changed file node if it exists in the graph
       if (data.path) {
-        console.log('[FileChange] Received:', data.event, data.path);
+        console.log('[FileChange] Received:', data.event, data.path, 'sourceType:', data.sourceType);
         const nodeId = findNodeIdFromPath(data.path);
         if (nodeId) {
           flashNode(nodeId);
