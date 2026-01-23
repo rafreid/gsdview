@@ -1369,7 +1369,8 @@ function buildGraphFromProject(projectData) {
         name: dirNode.name,
         type: dirNode.type, // 'directory' or 'file'
         path: dirNode.path,
-        extension: dirNode.extension
+        extension: dirNode.extension,
+        sourceType: dirNode.sourceType
       });
     }
 

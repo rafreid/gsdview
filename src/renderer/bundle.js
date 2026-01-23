@@ -81833,6 +81833,10 @@ var<${access}> ${name} : ${structName};`;
   var activityEntries = [];
   var activityUnreadCount = 0;
   var MAX_ACTIVITY_ENTRIES = 100;
+  var timelinePosition = null;
+  var isTimelinePlaying = false;
+  var playbackInterval = null;
+  var PLAYBACK_SPEED = 500;
   var flashingNodes = /* @__PURE__ */ new Map();
   var highlightedNodeId = null;
   var changeTypeColors = {
@@ -81966,6 +81970,147 @@ var<${access}> ${name} : ${structName};`;
       }
     }
     heatLoopRafId = requestAnimationFrame(heatLoop);
+  }
+  function getTimelineRange() {
+    if (activityEntries.length === 0) {
+      const now4 = Date.now();
+      return { min: now4, max: now4 };
+    }
+    const timestamps = activityEntries.map((e2) => e2.timestamp);
+    return {
+      min: Math.min(...timestamps),
+      max: Math.max(...timestamps)
+    };
+  }
+  function updateTimelineUI() {
+    const scrubber = document.getElementById("timeline-scrubber");
+    const positionDisplay = document.getElementById("timeline-position");
+    const liveIndicator = document.getElementById("timeline-live");
+    const playButton = document.getElementById("timeline-play");
+    if (!scrubber || !positionDisplay) return;
+    const { min: min2, max: max2 } = getTimelineRange();
+    if (timelinePosition === null) {
+      scrubber.value = 100;
+      positionDisplay.textContent = "Live";
+      if (liveIndicator) liveIndicator.classList.add("visible");
+      document.body.classList.remove("timeline-historical-mode");
+    } else {
+      const range = max2 - min2;
+      const sliderValue = range > 0 ? (timelinePosition - min2) / range * 100 : 100;
+      scrubber.value = Math.round(sliderValue);
+      const date = new Date(timelinePosition);
+      const hours = date.getHours().toString().padStart(2, "0");
+      const mins = date.getMinutes().toString().padStart(2, "0");
+      const secs = date.getSeconds().toString().padStart(2, "0");
+      positionDisplay.textContent = `${hours}:${mins}:${secs}`;
+      if (liveIndicator) liveIndicator.classList.remove("visible");
+      document.body.classList.add("timeline-historical-mode");
+    }
+    if (playButton) {
+      playButton.innerHTML = isTimelinePlaying ? "&#10074;&#10074;" : "&#9658;";
+      playButton.title = isTimelinePlaying ? "Pause timeline" : "Play timeline";
+    }
+  }
+  function setTimelineToLive() {
+    timelinePosition = null;
+    if (playbackInterval) {
+      clearInterval(playbackInterval);
+      playbackInterval = null;
+    }
+    isTimelinePlaying = false;
+    updateTimelineUI();
+    updateGraphForTimeline();
+    updateActivityPanelForTimeline();
+  }
+  function updateActivityPanelForTimeline() {
+    if (!activityEntries.length) return;
+    const entries = document.querySelectorAll(".activity-entry");
+    entries.forEach((entryEl) => {
+      const timestamp = parseInt(entryEl.dataset.timestamp, 10);
+      if (timelinePosition !== null && timestamp > timelinePosition) {
+        entryEl.classList.add("future");
+      } else {
+        entryEl.classList.remove("future");
+      }
+    });
+  }
+  function updateGraphForTimeline() {
+    console.log("[Timeline] Updating graph for position:", timelinePosition === null ? "LIVE" : new Date(timelinePosition).toLocaleTimeString());
+    if (timelinePosition === null) {
+      restoreAllNodeOpacity();
+      return;
+    }
+    const fileState = getFileStateAtTime(timelinePosition);
+    currentGraphData.nodes.forEach((node) => {
+      if (node.type !== "file" || !node.__threeObj) return;
+      let relativePath;
+      if (node.sourceType === "planning") {
+        relativePath = ".planning/" + node.path;
+      } else if (node.sourceType === "src") {
+        relativePath = "src/" + node.path;
+      } else {
+        relativePath = node.path;
+      }
+      const state = fileState.get(relativePath);
+      let targetOpacity = 0.85;
+      if (state === void 0) {
+        targetOpacity = 0.85;
+      } else if (state === "exists") {
+        targetOpacity = 0.85;
+      } else if (state === "deleted") {
+        targetOpacity = 0.3;
+      } else if (state === "not-yet-created") {
+        targetOpacity = 0.1;
+      }
+      setNodeOpacity(node, targetOpacity);
+    });
+  }
+  function getFileStateAtTime(timestamp) {
+    const fileState = /* @__PURE__ */ new Map();
+    const sortedEntries = [...activityEntries].sort((a3, b) => a3.timestamp - b.timestamp);
+    const allFiles = /* @__PURE__ */ new Set();
+    sortedEntries.forEach((entry) => allFiles.add(entry.relativePath));
+    sortedEntries.forEach((entry) => {
+      if (entry.timestamp > timestamp) return;
+      const path = entry.relativePath;
+      if (entry.event === "created") {
+        fileState.set(path, "exists");
+      } else if (entry.event === "modified") {
+        fileState.set(path, "exists");
+      } else if (entry.event === "deleted") {
+        fileState.set(path, "deleted");
+      }
+    });
+    allFiles.forEach((path) => {
+      if (!fileState.has(path)) {
+        const firstEvent = sortedEntries.find((e2) => e2.relativePath === path);
+        if (firstEvent && firstEvent.timestamp > timestamp) {
+          fileState.set(path, "not-yet-created");
+        }
+      }
+    });
+    return fileState;
+  }
+  function setNodeOpacity(node, opacity) {
+    const threeObj = node.__threeObj;
+    if (!threeObj) return;
+    const materials = [];
+    if (threeObj.material) materials.push(threeObj.material);
+    if (threeObj.children) {
+      threeObj.children.forEach((child) => {
+        if (child.material) materials.push(child.material);
+      });
+    }
+    materials.forEach((m3) => {
+      m3.transparent = true;
+      m3.opacity = opacity;
+    });
+  }
+  function restoreAllNodeOpacity() {
+    currentGraphData.nodes.forEach((node) => {
+      if (node.type !== "file" || !node.__threeObj) return;
+      setNodeOpacity(node, 0.85);
+    });
   }
   function getRelativePath(absolutePath) {
     if (!absolutePath) return "";
@@ -82592,7 +82737,8 @@ ${node.goal}`;
           type: dirNode.type,
           // 'directory' or 'file'
           path: dirNode.path,
-          extension: dirNode.extension
+          extension: dirNode.extension,
+          sourceType: dirNode.sourceType
         });
       }
       for (const link of directory.links) {
@@ -83111,6 +83257,9 @@ ${node.goal}`;
         if (selectedNode && selectedNode.type === "file" && entry.nodeId === selectedNode.id) {
           refreshDiffSection();
         }
+        if (timelinePosition === null) {
+          updateTimelineUI();
+        }
         showRefreshIndicator();
         await loadProject(selectedProjectPath);
         await fetchGitStatus(selectedProjectPath);
@@ -83525,6 +83674,68 @@ ${node.goal}`;
     });
   }
   initActivityInteractions();
+  document.getElementById("timeline-scrubber")?.addEventListener("input", (e2) => {
+    const sliderValue = parseInt(e2.target.value, 10);
+    const { min: min2, max: max2 } = getTimelineRange();
+    if (sliderValue >= 100) {
+      setTimelineToLive();
+    } else {
+      const range = max2 - min2;
+      if (range > 0) {
+        timelinePosition = min2 + sliderValue / 100 * range;
+      } else {
+        timelinePosition = min2;
+      }
+      if (isTimelinePlaying) {
+        clearInterval(playbackInterval);
+        playbackInterval = null;
+        isTimelinePlaying = false;
+      }
+      updateTimelineUI();
+      updateGraphForTimeline();
+      updateActivityPanelForTimeline();
+    }
+  });
+  document.getElementById("timeline-play")?.addEventListener("click", () => {
+    if (isTimelinePlaying) {
+      clearInterval(playbackInterval);
+      playbackInterval = null;
+      isTimelinePlaying = false;
+    } else {
+      isTimelinePlaying = true;
+      if (timelinePosition === null && activityEntries.length > 0) {
+        const { min: min2 } = getTimelineRange();
+        timelinePosition = min2;
+      }
+      playbackInterval = setInterval(playbackStep, PLAYBACK_SPEED);
+    }
+    updateTimelineUI();
+  });
+  function playbackStep() {
+    if (!isTimelinePlaying || activityEntries.length === 0) {
+      clearInterval(playbackInterval);
+      playbackInterval = null;
+      isTimelinePlaying = false;
+      updateTimelineUI();
+      return;
+    }
+    const sortedByTime = [...activityEntries].sort((a3, b) => a3.timestamp - b.timestamp);
+    let nextEntry = null;
+    for (const entry of sortedByTime) {
+      if (entry.timestamp > timelinePosition) {
+        nextEntry = entry;
+        break;
+      }
+    }
+    if (nextEntry) {
+      timelinePosition = nextEntry.timestamp;
+      updateTimelineUI();
+      updateGraphForTimeline();
+      updateActivityPanelForTimeline();
+    } else {
+      setTimelineToLive();
+    }
+  }
   function calculateStatistics() {
     const fileCounts = {};
     activityEntries.forEach((entry) => {
