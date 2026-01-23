@@ -81841,6 +81841,7 @@ var<${access}> ${name} : ${structName};`;
     deleted: 15158332
     // Red
   };
+  var nodeHeatMap = /* @__PURE__ */ new Map();
   function lerpColor(color1, color2, t2) {
     const r1 = color1 >> 16 & 255, g12 = color1 >> 8 & 255, b1 = color1 & 255;
     const r2 = color2 >> 16 & 255, g2 = color2 >> 8 & 255, b2 = color2 & 255;
@@ -81893,6 +81894,23 @@ var<${access}> ${name} : ${structName};`;
     }
     updateActivityPanel();
     scrollActivityToTop();
+    if (entry.nodeId && entry.event !== "deleted") {
+      const node = currentGraphData.nodes.find((n2) => n2.id === entry.nodeId);
+      if (node && node.__threeObj) {
+        const materials = [];
+        if (node.__threeObj.material) materials.push(node.__threeObj.material);
+        if (node.__threeObj.children) {
+          node.__threeObj.children.forEach((child) => {
+            if (child.material) materials.push(child.material);
+          });
+        }
+        const originalColor = materials.length > 0 ? materials[0].color.getHex() : 14524637;
+        nodeHeatMap.set(entry.nodeId, {
+          lastChangeTime: Date.now(),
+          originalColor
+        });
+      }
+    }
     return entry;
   }
   function pulseActivityToggle() {

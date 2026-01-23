@@ -104,6 +104,21 @@ const changeTypeColors = {
   deleted: 0xE74C3C   // Red
 };
 
+// Heat map configuration
+const HEAT_MAX_DURATION = 300000; // 5 minutes default (ms) - time for full cool down
+let heatDecayDuration = HEAT_MAX_DURATION; // User-configurable via slider
+
+// Heat color gradient (hot to cool): red -> orange -> yellow -> normal
+const heatGradient = [
+  { pos: 0.0, color: 0xFF4444 },  // Hot red
+  { pos: 0.3, color: 0xFF8C00 },  // Orange
+  { pos: 0.6, color: 0xFFD700 },  // Yellow/gold
+  { pos: 1.0, color: null }       // null = use node's original color
+];
+
+// Track heat state per node: nodeId -> { lastChangeTime, originalColor }
+const nodeHeatMap = new Map();
+
 // Color interpolation helper for flash animation
 function lerpColor(color1, color2, t) {
   const r1 = (color1 >> 16) & 0xFF, g1 = (color1 >> 8) & 0xFF, b1 = color1 & 0xFF;
@@ -112,6 +127,59 @@ function lerpColor(color1, color2, t) {
   const g = Math.round(g1 + (g2 - g1) * t);
   const b = Math.round(b1 + (b2 - b1) * t);
   return (r << 16) | (g << 8) | b;
+}
+
+// Calculate heat color based on time elapsed since last change
+function calculateHeatColor(nodeId, originalColorHex) {
+  const heatState = nodeHeatMap.get(nodeId);
+  if (!heatState) return originalColorHex;
+
+  const elapsed = Date.now() - heatState.lastChangeTime;
+  const progress = Math.min(elapsed / heatDecayDuration, 1.0);
+
+  // Find gradient segment
+  for (let i = 0; i < heatGradient.length - 1; i++) {
+    const start = heatGradient[i];
+    const end = heatGradient[i + 1];
+    if (progress >= start.pos && progress <= end.pos) {
+      const segmentProgress = (progress - start.pos) / (end.pos - start.pos);
+      if (end.color === null) {
+        // Interpolate to original color
+        return lerpColor(start.color, originalColorHex, segmentProgress);
+      }
+      return lerpColor(start.color, end.color, segmentProgress);
+    }
+  }
+
+  return originalColorHex; // Fully cooled
+}
+
+// Apply heat color to node materials
+function applyNodeHeatColor(nodeId) {
+  const node = currentGraphData.nodes.find(n => n.id === nodeId);
+  if (!node || !node.__threeObj) return;
+
+  const heatState = nodeHeatMap.get(nodeId);
+  if (!heatState) return;
+
+  // Skip if node is currently flashing (flash animation takes priority)
+  if (flashingNodes.has(nodeId)) return;
+
+  const threeObj = node.__threeObj;
+  const materials = [];
+  if (threeObj.material) materials.push(threeObj.material);
+  if (threeObj.children) {
+    threeObj.children.forEach(child => {
+      if (child.material) materials.push(child.material);
+    });
+  }
+
+  if (materials.length === 0) return;
+
+  const heatColor = calculateHeatColor(nodeId, heatState.originalColor);
+  materials.forEach(m => {
+    m.color.setHex(heatColor);
+  });
 }
 
 // Get relative path for display in activity feed
@@ -180,6 +248,28 @@ function addActivityEntry(event, filePath, sourceType) {
 
   // Auto-scroll to top to show newest entry
   scrollActivityToTop();
+
+  // Register heat state for this node
+  if (entry.nodeId && entry.event !== 'deleted') {
+    const node = currentGraphData.nodes.find(n => n.id === entry.nodeId);
+    if (node && node.__threeObj) {
+      const materials = [];
+      if (node.__threeObj.material) materials.push(node.__threeObj.material);
+      if (node.__threeObj.children) {
+        node.__threeObj.children.forEach(child => {
+          if (child.material) materials.push(child.material);
+        });
+      }
+
+      // Store original color from first material
+      const originalColor = materials.length > 0 ? materials[0].color.getHex() : 0xDDA0DD;
+
+      nodeHeatMap.set(entry.nodeId, {
+        lastChangeTime: Date.now(),
+        originalColor: originalColor
+      });
+    }
+  }
 
   return entry;
 }
