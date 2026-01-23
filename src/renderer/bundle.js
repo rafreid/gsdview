@@ -82029,6 +82029,10 @@ var<${access}> ${name} : ${structName};`;
         startHeatDecayLoop();
       }
     }
+    const statsPanel = document.getElementById("statistics-panel");
+    if (statsPanel && statsPanel.classList.contains("visible")) {
+      updateStatisticsPanel();
+    }
     return entry;
   }
   function pulseActivityToggle() {
@@ -82844,6 +82848,43 @@ ${node.goal}`;
     }
     return escaped;
   }
+  function escapeHtml(text) {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function renderDiffView(diffResult) {
+    if (!diffResult) return '<div class="diff-status">Unable to load diff</div>';
+    if (diffResult.error) {
+      return `<div class="diff-status">Error: ${diffResult.error}</div>`;
+    }
+    if (!diffResult.diff) {
+      return `<div class="diff-status">${diffResult.message || "No diff available"}</div>`;
+    }
+    if (diffResult.diff.includes("Binary files") || diffResult.diff.includes("GIT binary patch")) {
+      return '<div class="diff-status">Binary file - diff not available</div>';
+    }
+    const lines = diffResult.diff.split("\n");
+    const MAX_DIFF_LINES = 100;
+    const truncated = lines.length > MAX_DIFF_LINES;
+    const displayLines = truncated ? lines.slice(0, MAX_DIFF_LINES) : lines;
+    const htmlLines = displayLines.map((line) => {
+      let className = "diff-line context";
+      if (line.startsWith("+") && !line.startsWith("+++")) {
+        className = "diff-line added";
+      } else if (line.startsWith("-") && !line.startsWith("---")) {
+        className = "diff-line removed";
+      } else if (line.startsWith("@@")) {
+        className = "diff-line header";
+      } else if (line.startsWith("diff ") || line.startsWith("index ") || line.startsWith("---") || line.startsWith("+++")) {
+        className = "diff-line header";
+      }
+      return `<div class="${className}">${escapeHtml(line)}</div>`;
+    }).join("");
+    let truncateMsg = "";
+    if (truncated) {
+      truncateMsg = `<div class="diff-status">... (diff truncated, showing first ${MAX_DIFF_LINES} of ${lines.length} lines)</div>`;
+    }
+    return `<div class="diff-content">${htmlLines}${truncateMsg}</div>`;
+  }
   async function showDetailsPanel(node) {
     selectedNode = node;
     const panel = document.getElementById("details-panel");
@@ -82885,7 +82926,11 @@ ${node.goal}`;
     const filePath = node.path || node.file;
     let fullPath = null;
     if (filePath && selectedProjectPath) {
-      if (node.path) {
+      if (node.sourceType === "src") {
+        fullPath = `${selectedProjectPath}/src/${node.path}`;
+      } else if (node.sourceType === "planning") {
+        fullPath = `${selectedProjectPath}/.planning/${node.path}`;
+      } else if (node.path) {
         fullPath = `${selectedProjectPath}/.planning/${node.path}`;
       } else if (node.file) {
         fullPath = `${selectedProjectPath}/.planning/phases/${node.file}`;
@@ -82897,6 +82942,12 @@ ${node.goal}`;
       <p><strong>File Preview:</strong></p>
       <div id="file-preview-loading">Loading...</div>
       <pre id="file-preview"></pre>
+    </div>`;
+    }
+    if (node.type === "file" && selectedProjectPath && window.electronAPI && window.electronAPI.getGitDiff) {
+      html += `<div class="diff-container">
+      <div class="diff-header">Recent Changes</div>
+      <div id="diff-view-content"><div class="diff-status">Loading diff...</div></div>
     </div>`;
     }
     if (node.type === "directory") {
@@ -82944,6 +82995,29 @@ ${node.goal}`;
           }
         }
       });
+    }
+    if (node.type === "file" && selectedProjectPath && window.electronAPI && window.electronAPI.getGitDiff) {
+      let relativePath;
+      if (node.sourceType === "planning") {
+        relativePath = ".planning/" + node.path;
+      } else if (node.sourceType === "src") {
+        relativePath = "src/" + node.path;
+      } else {
+        relativePath = node.path;
+      }
+      try {
+        const diffResult = await window.electronAPI.getGitDiff(selectedProjectPath, relativePath);
+        const diffContent = document.getElementById("diff-view-content");
+        if (diffContent) {
+          diffContent.innerHTML = renderDiffView(diffResult);
+        }
+      } catch (err) {
+        console.error("Error loading diff:", err);
+        const diffContent = document.getElementById("diff-view-content");
+        if (diffContent) {
+          diffContent.innerHTML = '<div class="diff-status">Error loading diff</div>';
+        }
+      }
     }
     panel.classList.remove("hidden");
     panel.classList.add("visible");
@@ -83423,6 +83497,44 @@ ${node.goal}`;
     });
   }
   initActivityInteractions();
+  function calculateStatistics() {
+    const fileCounts = {};
+    activityEntries.forEach((entry) => {
+      const key = entry.relativePath;
+      if (!fileCounts[key]) {
+        fileCounts[key] = {
+          path: key,
+          count: 0,
+          lastChange: 0,
+          events: { created: 0, modified: 0, deleted: 0 },
+          nodeId: entry.nodeId
+        };
+      }
+      fileCounts[key].count++;
+      fileCounts[key].events[entry.event]++;
+      if (entry.timestamp > fileCounts[key].lastChange) {
+        fileCounts[key].lastChange = entry.timestamp;
+      }
+      if (entry.nodeId) {
+        fileCounts[key].nodeId = entry.nodeId;
+      }
+    });
+    const ranked = Object.values(fileCounts).sort((a3, b) => b.count - a3.count).slice(0, 10);
+    return { ranked, total: activityEntries.length };
+  }
+  function getDominantEventType(events) {
+    if (events.created > events.modified && events.created > events.deleted) {
+      return "created";
+    }
+    if (events.deleted > events.modified && events.deleted > events.created) {
+      return "deleted";
+    }
+    return "modified";
+  }
+  function truncatePath(path, maxLen = 35) {
+    if (path.length <= maxLen) return path;
+    return "..." + path.slice(-(maxLen - 3));
+  }
   function updateStatisticsPanel() {
     updateFileRanking();
     updateActivityChart();
@@ -83430,7 +83542,70 @@ ${node.goal}`;
   function updateFileRanking() {
     const container2 = document.getElementById("stats-file-ranking");
     if (!container2) return;
-    container2.innerHTML = '<div class="stats-empty">No activity recorded yet</div>';
+    if (activityEntries.length === 0) {
+      container2.innerHTML = '<div class="stats-empty">No activity recorded yet</div>';
+      return;
+    }
+    const { ranked } = calculateStatistics();
+    if (ranked.length === 0) {
+      container2.innerHTML = '<div class="stats-empty">No activity recorded yet</div>';
+      return;
+    }
+    const maxCount = ranked[0].count;
+    container2.innerHTML = ranked.map((file) => {
+      const dominantType = getDominantEventType(file.events);
+      const barWidth = Math.round(file.count / maxCount * 100);
+      const truncatedPath = truncatePath(file.path);
+      return `<div class="ranking-entry" data-node-id="${file.nodeId || ""}" title="${file.path}
+${file.count} changes (${file.events.created} created, ${file.events.modified} modified, ${file.events.deleted} deleted)">
+      <span class="ranking-path">${truncatedPath}</span>
+      <div class="ranking-bar-container">
+        <div class="ranking-bar">
+          <div class="ranking-bar-fill ${dominantType}" style="width: ${barWidth}%"></div>
+        </div>
+        <span class="ranking-count">${file.count}</span>
+      </div>
+    </div>`;
+    }).join("");
+    container2.querySelectorAll(".ranking-entry").forEach((entry) => {
+      entry.addEventListener("click", () => {
+        const nodeId = entry.dataset.nodeId;
+        if (nodeId) {
+          handleRankingEntryClick(nodeId);
+        }
+      });
+    });
+  }
+  function handleRankingEntryClick(nodeId) {
+    const graphNode = findNodeById(nodeId);
+    if (!graphNode) {
+      console.log("[Stats] Node not found:", nodeId);
+      return;
+    }
+    if (graphNode.x !== void 0) {
+      const distance3 = 50 + getNodeSize(graphNode, connectionCounts) * 4;
+      if (is3D) {
+        const distRatio = 1 + distance3 / Math.hypot(graphNode.x || 0, graphNode.y || 0, graphNode.z || 0);
+        Graph.cameraPosition(
+          {
+            x: (graphNode.x || 0) * distRatio,
+            y: (graphNode.y || 0) * distRatio,
+            z: (graphNode.z || 0) * distRatio
+          },
+          graphNode,
+          1e3
+        );
+      } else {
+        Graph.cameraPosition(
+          { x: graphNode.x || 0, y: graphNode.y || 0, z: distance3 + 100 },
+          graphNode,
+          1e3
+        );
+      }
+      flashNode(nodeId);
+    }
+    showDetailsPanel(graphNode);
+    highlightTreeItem(nodeId);
   }
   function updateActivityChart() {
     const container2 = document.getElementById("stats-chart");

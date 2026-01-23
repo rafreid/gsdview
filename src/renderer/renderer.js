@@ -369,6 +369,12 @@ function addActivityEntry(event, filePath, sourceType) {
     }
   }
 
+  // Update statistics panel if visible
+  const statsPanel = document.getElementById('statistics-panel');
+  if (statsPanel && statsPanel.classList.contains('visible')) {
+    updateStatisticsPanel();
+  }
+
   return entry;
 }
 
@@ -1751,6 +1757,41 @@ function hideDetailsPanel() {
   selectedNode = null;
 }
 
+// Refresh details panel content (re-renders with current selectedNode)
+function refreshDetailsPanel() {
+  if (selectedNode) {
+    showDetailsPanel(selectedNode);
+  }
+}
+
+// Refresh only the diff section in details panel (more efficient than full refresh)
+async function refreshDiffSection() {
+  if (!selectedNode || selectedNode.type !== 'file') return;
+  if (!selectedProjectPath || !window.electronAPI || !window.electronAPI.getGitDiff) return;
+
+  const diffContent = document.getElementById('diff-view-content');
+  if (!diffContent) return;
+
+  // Build relative path for git (relative to project root)
+  let relativePath;
+  if (selectedNode.sourceType === 'planning') {
+    relativePath = '.planning/' + selectedNode.path;
+  } else if (selectedNode.sourceType === 'src') {
+    relativePath = 'src/' + selectedNode.path;
+  } else {
+    relativePath = selectedNode.path;
+  }
+
+  try {
+    diffContent.innerHTML = '<div class="diff-status">Loading diff...</div>';
+    const diffResult = await window.electronAPI.getGitDiff(selectedProjectPath, relativePath);
+    diffContent.innerHTML = renderDiffView(diffResult);
+  } catch (err) {
+    console.error('Error refreshing diff:', err);
+    diffContent.innerHTML = '<div class="diff-status">Error loading diff</div>';
+  }
+}
+
 // Close panel button handler
 document.getElementById('close-panel').addEventListener('click', hideDetailsPanel);
 
@@ -2414,17 +2455,150 @@ initActivityInteractions();
 // STATISTICS PANEL FUNCTIONALITY
 // =====================================================
 
-// Placeholder - will be fully implemented in Task 2
+// Calculate statistics from activity entries
+function calculateStatistics() {
+  // Count changes per file
+  const fileCounts = {};
+  activityEntries.forEach(entry => {
+    const key = entry.relativePath;
+    if (!fileCounts[key]) {
+      fileCounts[key] = {
+        path: key,
+        count: 0,
+        lastChange: 0,
+        events: { created: 0, modified: 0, deleted: 0 },
+        nodeId: entry.nodeId
+      };
+    }
+    fileCounts[key].count++;
+    fileCounts[key].events[entry.event]++;
+    if (entry.timestamp > fileCounts[key].lastChange) {
+      fileCounts[key].lastChange = entry.timestamp;
+    }
+    // Update nodeId if we have a newer one
+    if (entry.nodeId) {
+      fileCounts[key].nodeId = entry.nodeId;
+    }
+  });
+
+  // Sort by count descending
+  const ranked = Object.values(fileCounts)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10); // Top 10
+
+  return { ranked, total: activityEntries.length };
+}
+
+// Determine dominant event type for a file
+function getDominantEventType(events) {
+  if (events.created > events.modified && events.created > events.deleted) {
+    return 'created';
+  }
+  if (events.deleted > events.modified && events.deleted > events.created) {
+    return 'deleted';
+  }
+  return 'modified';
+}
+
+// Truncate path for display (show end if too long)
+function truncatePath(path, maxLen = 35) {
+  if (path.length <= maxLen) return path;
+  return '...' + path.slice(-(maxLen - 3));
+}
+
+// Update statistics panel (calls both ranking and chart)
 function updateStatisticsPanel() {
   updateFileRanking();
   updateActivityChart();
 }
 
-// Placeholder function - implemented in Task 2
+// Update file ranking display
 function updateFileRanking() {
   const container = document.getElementById('stats-file-ranking');
   if (!container) return;
-  container.innerHTML = '<div class="stats-empty">No activity recorded yet</div>';
+
+  if (activityEntries.length === 0) {
+    container.innerHTML = '<div class="stats-empty">No activity recorded yet</div>';
+    return;
+  }
+
+  const { ranked } = calculateStatistics();
+
+  if (ranked.length === 0) {
+    container.innerHTML = '<div class="stats-empty">No activity recorded yet</div>';
+    return;
+  }
+
+  // Find max count for relative bar widths
+  const maxCount = ranked[0].count;
+
+  container.innerHTML = ranked.map(file => {
+    const dominantType = getDominantEventType(file.events);
+    const barWidth = Math.round((file.count / maxCount) * 100);
+    const truncatedPath = truncatePath(file.path);
+
+    return `<div class="ranking-entry" data-node-id="${file.nodeId || ''}" title="${file.path}\n${file.count} changes (${file.events.created} created, ${file.events.modified} modified, ${file.events.deleted} deleted)">
+      <span class="ranking-path">${truncatedPath}</span>
+      <div class="ranking-bar-container">
+        <div class="ranking-bar">
+          <div class="ranking-bar-fill ${dominantType}" style="width: ${barWidth}%"></div>
+        </div>
+        <span class="ranking-count">${file.count}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Add click handlers for ranking entries to navigate to node
+  container.querySelectorAll('.ranking-entry').forEach(entry => {
+    entry.addEventListener('click', () => {
+      const nodeId = entry.dataset.nodeId;
+      if (nodeId) {
+        handleRankingEntryClick(nodeId);
+      }
+    });
+  });
+}
+
+// Handle click on ranking entry - navigate to node
+function handleRankingEntryClick(nodeId) {
+  const graphNode = findNodeById(nodeId);
+  if (!graphNode) {
+    console.log('[Stats] Node not found:', nodeId);
+    return;
+  }
+
+  // Fly to node (reuse same pattern as activity entry click)
+  if (graphNode.x !== undefined) {
+    const distance = 50 + getNodeSize(graphNode, connectionCounts) * 4;
+
+    if (is3D) {
+      const distRatio = 1 + distance / Math.hypot(graphNode.x || 0, graphNode.y || 0, graphNode.z || 0);
+      Graph.cameraPosition(
+        {
+          x: (graphNode.x || 0) * distRatio,
+          y: (graphNode.y || 0) * distRatio,
+          z: (graphNode.z || 0) * distRatio
+        },
+        graphNode,
+        1000
+      );
+    } else {
+      Graph.cameraPosition(
+        { x: graphNode.x || 0, y: graphNode.y || 0, z: distance + 100 },
+        graphNode,
+        1000
+      );
+    }
+
+    // Flash the node
+    flashNode(nodeId);
+  }
+
+  // Open details panel
+  showDetailsPanel(graphNode);
+
+  // Highlight in tree panel
+  highlightTreeItem(nodeId);
 }
 
 // Placeholder function - implemented in Task 3
