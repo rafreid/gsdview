@@ -8,8 +8,24 @@ const nodeColors = {
   plan: '#45B7D1',       // Sky blue - work units
   task: '#98D8C8',       // Mint green - granular items
   requirement: '#F7DC6F', // Gold - specifications
-  file: '#DDA0DD',       // Plum - source references
+  file: '#DDA0DD',       // Plum - source references (default)
   directory: '#BB8FCE'   // Purple - directories
+};
+
+// File extension colors for better visual distinction
+const extensionColors = {
+  '.md': '#5DADE2',      // Blue - markdown
+  '.js': '#F7DC6F',      // Yellow - javascript
+  '.ts': '#3498DB',      // Dark blue - typescript
+  '.json': '#27AE60',    // Green - json
+  '.html': '#E74C3C',    // Red - html
+  '.css': '#9B59B6',     // Purple - css
+  '.py': '#2ECC71',      // Green - python
+  '.yaml': '#F39C12',    // Orange - yaml
+  '.yml': '#F39C12',     // Orange - yaml
+  '.txt': '#BDC3C7',     // Gray - text
+  '.sh': '#1ABC9C',      // Teal - shell
+  '.gitignore': '#7F8C8D' // Dark gray - git files
 };
 
 // Status-based colors (progress visualization)
@@ -77,6 +93,12 @@ function getNodeColor(node) {
     }
     return statusColors[node.status] || nodeColors[node.type] || DEFAULT_NODE_COLOR;
   }
+
+  // For files, use extension-based colors
+  if (node.type === 'file' && node.extension) {
+    return extensionColors[node.extension] || nodeColors.file;
+  }
+
   return nodeColors[node.type] || DEFAULT_NODE_COLOR;
 }
 
@@ -134,12 +156,68 @@ const Graph = ForceGraph3D()(container)
   .nodeColor(node => getNodeColor(node))
   .nodeVal(node => getNodeSize(node, connectionCounts))
   .nodeThreeObject(node => {
-    // Create custom geometry for current phase (glow effect)
+    const size = getNodeSize(node, connectionCounts);
+    const color = getNodeColor(node);
+
+    // Directories: Use box/cube geometry with folder-like appearance
+    if (node.type === 'directory') {
+      const group = new THREE.Group();
+
+      // Main folder body (slightly flattened box)
+      const bodyGeometry = new THREE.BoxGeometry(size * 1.5, size * 1.2, size * 0.8);
+      const bodyMaterial = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.85
+      });
+      const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+
+      // Folder tab (small box on top)
+      const tabGeometry = new THREE.BoxGeometry(size * 0.6, size * 0.3, size * 0.8);
+      const tabMaterial = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.95
+      });
+      const tab = new THREE.Mesh(tabGeometry, tabMaterial);
+      tab.position.set(-size * 0.4, size * 0.75, 0);
+
+      // Wireframe outline for clarity
+      const edges = new THREE.EdgesGeometry(bodyGeometry);
+      const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true });
+      const wireframe = new THREE.LineSegments(edges, lineMaterial);
+
+      group.add(body);
+      group.add(tab);
+      group.add(wireframe);
+
+      return group;
+    }
+
+    // Files: Use octahedron (diamond-like) for visual distinction
+    if (node.type === 'file') {
+      const geometry = new THREE.OctahedronGeometry(size * 0.8);
+      const material = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.85
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+
+      // Add wireframe for clarity
+      const edges = new THREE.EdgesGeometry(geometry);
+      const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.3, transparent: true });
+      const wireframe = new THREE.LineSegments(edges, lineMaterial);
+      mesh.add(wireframe);
+
+      return mesh;
+    }
+
+    // Current active phase: glow effect
     if (node.type === 'phase' && currentState && currentState.currentPhase) {
       const phaseNum = parseInt(node.id.replace('phase-', ''), 10);
       if (phaseNum === currentState.currentPhase && node.status !== 'complete') {
         // Create glowing sphere for current phase
-        const size = getNodeSize(node, connectionCounts);
         const geometry = new THREE.SphereGeometry(size);
         const material = new THREE.MeshBasicMaterial({
           color: statusColors['in-progress'],
@@ -162,14 +240,25 @@ const Graph = ForceGraph3D()(container)
         return sphere;
       }
     }
-    return false; // Use default sphere
+
+    // Root node: larger icosahedron
+    if (node.type === 'root') {
+      const geometry = new THREE.IcosahedronGeometry(size * 1.2);
+      const material = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.9
+      });
+      return new THREE.Mesh(geometry, material);
+    }
+
+    return false; // Use default sphere for other types
   })
   .linkColor(link => getLinkColor(link, currentGraphData))
   .linkWidth(link => getLinkWidth(link, currentGraphData))
   .linkOpacity(0.6)
   .linkDirectionalArrowLength(3.5)
   .linkDirectionalArrowRelPos(1)
-  .linkLineDash(link => link.type === 'blocked' ? [2, 2] : null)
   .backgroundColor('#1a1a2e')
   .showNavInfo(false)
   // Click-to-fly navigation
@@ -197,12 +286,28 @@ const Graph = ForceGraph3D()(container)
     const tooltip = document.getElementById('tooltip');
     if (node) {
       let content = `<strong>${node.name}</strong><br>`;
-      content += `<span style="color: ${getNodeColor(node)}; text-transform: capitalize;">Type: ${node.type}</span>`;
+      content += `<span style="color: ${getNodeColor(node)}; text-transform: capitalize;">`;
+
+      // Show type with icon
+      if (node.type === 'directory') {
+        content += '📁 Directory';
+      } else if (node.type === 'file') {
+        content += '📄 File';
+        if (node.extension) {
+          content += ` (${node.extension})`;
+        }
+      } else {
+        content += `Type: ${node.type}`;
+      }
+      content += '</span>';
+
       if (node.status) {
         const statusColor = statusColors[node.status] || '#888';
         content += `<br><span style="color: ${statusColor}">Status: ${node.status}</span>`;
       }
       if (node.category) content += `<br>Category: ${node.category}`;
+      if (node.path) content += `<br><span style="color: #888; font-size: 10px;">${node.path}</span>`;
+
       tooltip.innerHTML = content;
       tooltip.classList.add('visible');
       container.style.cursor = 'pointer';
@@ -423,10 +528,19 @@ async function loadProject(projectPath) {
 
 // Folder selection handler
 document.getElementById('select-folder-btn').addEventListener('click', async () => {
+  console.log('Select folder button clicked');
+  console.log('electronAPI:', window.electronAPI);
+
   if (window.electronAPI && window.electronAPI.selectFolder) {
-    const folderPath = await window.electronAPI.selectFolder();
-    if (folderPath) {
-      await loadProject(folderPath);
+    console.log('Calling selectFolder...');
+    try {
+      const folderPath = await window.electronAPI.selectFolder();
+      console.log('Selected folder:', folderPath);
+      if (folderPath) {
+        await loadProject(folderPath);
+      }
+    } catch (err) {
+      console.error('Error selecting folder:', err);
     }
   } else {
     console.warn('electronAPI.selectFolder not available');
@@ -493,6 +607,38 @@ function populateColorLegend() {
     item.appendChild(label);
     legend.appendChild(item);
   }
+
+  // File extensions section
+  const extTitle = document.createElement('div');
+  extTitle.className = 'legend-title';
+  extTitle.style.marginTop = '12px';
+  extTitle.textContent = 'File Types';
+  legend.appendChild(extTitle);
+
+  const extLabels = {
+    '.md': 'Markdown',
+    '.js': 'JavaScript',
+    '.json': 'JSON',
+    '.html': 'HTML',
+    '.css': 'CSS'
+  };
+
+  for (const [ext, label] of Object.entries(extLabels)) {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+
+    const colorCircle = document.createElement('div');
+    colorCircle.className = 'legend-color';
+    colorCircle.style.backgroundColor = extensionColors[ext];
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'legend-label';
+    labelSpan.textContent = label;
+
+    item.appendChild(colorCircle);
+    item.appendChild(labelSpan);
+    legend.appendChild(item);
+  }
 }
 
 populateColorLegend();
@@ -504,8 +650,48 @@ container.addEventListener('mousemove', (e) => {
   tooltip.style.top = e.clientY + 15 + 'px';
 });
 
+// Format file size for display
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// Format date for display
+function formatDate(date) {
+  return new Date(date).toLocaleString();
+}
+
+// Simple syntax highlighting for code
+function highlightCode(content, extension) {
+  // Escape HTML
+  let escaped = content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Basic highlighting based on extension
+  if (['.js', '.ts', '.json'].includes(extension)) {
+    // Highlight strings
+    escaped = escaped.replace(/(["'`])(?:(?!\1)[^\\]|\\.)*\1/g, '<span style="color: #98C379;">$&</span>');
+    // Highlight keywords
+    escaped = escaped.replace(/\b(const|let|var|function|return|if|else|for|while|import|export|from|async|await|class|new|this|true|false|null|undefined)\b/g, '<span style="color: #C678DD;">$1</span>');
+    // Highlight comments
+    escaped = escaped.replace(/(\/\/[^\n]*)/g, '<span style="color: #5C6370;">$1</span>');
+  } else if (extension === '.md') {
+    // Highlight headers
+    escaped = escaped.replace(/^(#{1,6}\s.*)$/gm, '<span style="color: #E06C75; font-weight: bold;">$1</span>');
+    // Highlight bold
+    escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #E5C07B;">$1</strong>');
+    // Highlight code blocks
+    escaped = escaped.replace(/`([^`]+)`/g, '<code style="background: #3E4451; padding: 2px 4px; border-radius: 3px;">$1</code>');
+  }
+
+  return escaped;
+}
+
 // Details panel functions
-function showDetailsPanel(node) {
+async function showDetailsPanel(node) {
   selectedNode = node;
   const panel = document.getElementById('details-panel');
   const title = document.getElementById('panel-title');
@@ -541,39 +727,81 @@ function showDetailsPanel(node) {
   }
 
   if (node.extension) {
-    html += `<p><strong>Extension:</strong> ${node.extension}</p>`;
+    html += `<p><strong>Extension:</strong> <span style="color: ${extensionColors[node.extension] || '#888'}">${node.extension}</span></p>`;
   }
 
   // Add open button for nodes with file paths
   const filePath = node.path || node.file;
+  let fullPath = null;
+
   if (filePath && selectedProjectPath) {
+    if (node.path) {
+      fullPath = `${selectedProjectPath}/.planning/${node.path}`;
+    } else if (node.file) {
+      fullPath = `${selectedProjectPath}/.planning/phases/${node.file}`;
+    }
     html += `<button id="open-file-btn" class="panel-btn">Open in Editor</button>`;
+  }
+
+  // For files, show content preview
+  if (node.type === 'file' && fullPath && window.electronAPI && window.electronAPI.readFileContent) {
+    html += `<div id="file-preview-container">
+      <p><strong>File Preview:</strong></p>
+      <div id="file-preview-loading">Loading...</div>
+      <pre id="file-preview"></pre>
+    </div>`;
+  }
+
+  // For directories, show children count info
+  if (node.type === 'directory') {
+    const childLinks = currentGraphData.links.filter(l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+      return sourceId === node.id;
+    });
+    html += `<p><strong>Contains:</strong> ${childLinks.length} items</p>`;
   }
 
   content.innerHTML = html;
 
-  // Add click handler for open button
-  const openBtn = document.getElementById('open-file-btn');
-  if (openBtn) {
-    openBtn.addEventListener('click', async () => {
-      let fullPath;
-      if (node.path) {
-        // Directory/file node - path is relative to .planning
-        fullPath = `${selectedProjectPath}/.planning/${node.path}`;
-      } else if (node.file) {
-        // Plan node - file is in phases directory
-        const phaseMatch = node.id.match(/plan-phase-(\d+)/);
-        if (phaseMatch) {
-          const phaseNum = phaseMatch[1].padStart(2, '0');
-          fullPath = `${selectedProjectPath}/.planning/phases/${phaseNum}-*/`;
-          // For now, just try to open the plan file directly
-          fullPath = `${selectedProjectPath}/.planning/phases/${node.file}`;
-        } else {
-          fullPath = `${selectedProjectPath}/.planning/${node.file}`;
+  // Load file content preview
+  if (node.type === 'file' && fullPath && window.electronAPI && window.electronAPI.readFileContent) {
+    try {
+      const result = await window.electronAPI.readFileContent(fullPath);
+      const previewEl = document.getElementById('file-preview');
+      const loadingEl = document.getElementById('file-preview-loading');
+
+      if (loadingEl) loadingEl.style.display = 'none';
+
+      if (result.error) {
+        if (previewEl) previewEl.innerHTML = `<span style="color: #E74C3C;">Error: ${result.error}</span>`;
+      } else {
+        // Show file stats
+        const statsHtml = `<p style="font-size: 11px; color: #888; margin-bottom: 8px;">
+          Size: ${formatFileSize(result.size)} | Modified: ${formatDate(result.modified)}
+          ${result.truncated ? ' | <span style="color: #F39C12;">Truncated</span>' : ''}
+        </p>`;
+
+        const container = document.getElementById('file-preview-container');
+        if (container) {
+          container.insertAdjacentHTML('afterbegin', statsHtml);
+        }
+
+        if (previewEl) {
+          previewEl.innerHTML = highlightCode(result.content, node.extension);
         }
       }
+    } catch (err) {
+      console.error('Error loading file preview:', err);
+      const previewEl = document.getElementById('file-preview');
+      if (previewEl) previewEl.innerHTML = `<span style="color: #E74C3C;">Error loading preview</span>`;
+    }
+  }
 
-      if (fullPath && window.electronAPI && window.electronAPI.openFile) {
+  // Add click handler for open button
+  const openBtn = document.getElementById('open-file-btn');
+  if (openBtn && fullPath) {
+    openBtn.addEventListener('click', async () => {
+      if (window.electronAPI && window.electronAPI.openFile) {
         const result = await window.electronAPI.openFile(fullPath);
         if (result.error) {
           console.error('Error opening file:', result.error);

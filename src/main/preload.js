@@ -7,6 +7,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   parseDirectory: (planningPath) => ipcRenderer.invoke('parse-directory', planningPath),
   parseProject: (projectPath) => ipcRenderer.invoke('parse-project', projectPath),
   openFile: (filePath) => ipcRenderer.invoke('open-file', filePath),
+  readFileContent: (filePath) => ipcRenderer.invoke('read-file-content', filePath),
+  getFileStats: (filePath) => ipcRenderer.invoke('get-file-stats', filePath),
   startWatching: (projectPath) => ipcRenderer.invoke('start-watching', projectPath),
   stopWatching: () => ipcRenderer.invoke('stop-watching'),
   onFilesChanged: (callback) => ipcRenderer.on('files-changed', (event, data) => callback(data)),

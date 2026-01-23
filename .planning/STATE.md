@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 Phase: 6 of 6 (Polish)
 Plan: 5 of 5 in current phase
 Status: Complete
-Last activity: 2026-01-22 -- All phases complete
+Last activity: 2026-01-23 -- Completed quick task 001: Enhance file visualization
 
 Progress: [##########] 100%
 
@@ -59,6 +59,12 @@ None - milestone complete.
 ### Blockers/Concerns
 
 None.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Directory |
+|---|-------------|------|-----------|
+| 001 | Enhance file visualization - distinguish dirs from files, show content on click | 2026-01-23 | [001-enhance-file-visualization](./quick/001-enhance-file-visualization-distinguish-d/) |
 
 ## Session Continuity
 

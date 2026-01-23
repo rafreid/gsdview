@@ -107,15 +107,42 @@
       position: fixed;
       right: 0;
       top: 0;
-      width: 320px;
+      width: 420px;
       height: 100%;
-      background: rgba(26, 26, 46, 0.95);
+      background: rgba(26, 26, 46, 0.98);
       border-left: 1px solid #4ECDC4;
       padding: 60px 20px 20px;
       transform: translateX(100%);
       transition: transform 0.3s ease;
       z-index: 200;
       overflow-y: auto;
+    }
+
+    /* File Preview */
+    #file-preview-container {
+      margin-top: 15px;
+      border-top: 1px solid #333;
+      padding-top: 15px;
+    }
+
+    #file-preview {
+      background: #1e1e2e;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 12px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      max-height: 400px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: #ABB2BF;
+    }
+
+    #file-preview-loading {
+      color: #888;
+      font-style: italic;
     }
 
     #details-panel.visible {
@@ -266,6 +293,6 @@
     <h2 id="panel-title"></h2>
     <div id="panel-content"></div>
   </div>
-  <script src="./renderer.js" type="module"></script>
+  <script src="./bundle.js"></script>
 </body>
 </html>
