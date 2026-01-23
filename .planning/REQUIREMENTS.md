@@ -54,7 +54,7 @@
 
 ---
 
-## v1.1 Requirements (Active)
+## v1.1 Requirements (Complete)
 
 Requirements for milestone v1.1: Real-time Activity Visualization.
 
@@ -104,9 +104,9 @@ Requirements for milestone v1.1: Real-time Activity Visualization.
 
 ### Timeline
 
-- [ ] **TML-01**: Timeline scrubber allows navigating through recent activity history
-- [ ] **TML-02**: Timeline can replay file changes over time
-- [ ] **TML-03**: Timeline has pause/play controls for activity replay
+- [x] **TML-01**: Timeline scrubber allows navigating through recent activity history
+- [x] **TML-02**: Timeline can replay file changes over time
+- [x] **TML-03**: Timeline has pause/play controls for activity replay
 
 ---
 
@@ -180,9 +180,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DIF-01 | Phase 11 | Complete |
 | DIF-02 | Phase 11 | Complete |
 | DIF-03 | Phase 11 | Complete |
-| TML-01 | Phase 12 | Pending |
-| TML-02 | Phase 12 | Pending |
-| TML-03 | Phase 12 | Pending |
+| TML-01 | Phase 12 | Complete |
+| TML-02 | Phase 12 | Complete |
+| TML-03 | Phase 12 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 26 total
@@ -199,4 +199,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-22 (v1.0), 2026-01-23 (v1.1)*
-*Last updated: 2026-01-23 (Phase 11 complete)*
+*Last updated: 2026-01-23 (v1.1 complete)*

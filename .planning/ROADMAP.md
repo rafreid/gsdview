@@ -21,14 +21,14 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Interactions** - Details panel, tooltips, fly-to navigation, external editor launch
 - [x] **Phase 6: Polish** - Live file watching, recent projects, window state persistence
 
-### v1.1 (Current)
+### v1.1 (Complete)
 
 - [x] **Phase 7: Expanded File Scope** - Include src/ directory in graph and file watcher
 - [x] **Phase 8: Activity Feed & Change Indicators** - Live activity feed with change type animations
 - [x] **Phase 9: Heat Map Visualization** - Recent changes glow hot, cool down over time
 - [x] **Phase 10: Git Integration** - Show uncommitted/staged changes and recent commits
 - [x] **Phase 11: Statistics & Diff Preview** - Activity analytics and file diffs
-- [ ] **Phase 12: Timeline Replay** - Scrub through activity history with playback controls
+- [x] **Phase 12: Timeline Replay** - Scrub through activity history with playback controls
 
 ## Phase Details
 
@@ -220,7 +220,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 12-01-PLAN.md — Timeline UI, playback controls, and graph state filtering
+- [x] 12-01-PLAN.md — Timeline UI, playback controls, and graph state filtering
 
 ## Progress
 
@@ -238,7 +238,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 5. Interactions | 4/4 | Complete | 2026-01-22 |
 | 6. Polish | 5/5 | Complete | 2026-01-22 |
 
-### v1.1 (Current)
+### v1.1 (Complete)
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -247,8 +247,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 9. Heat Map Visualization | 2/2 | Complete | 2026-01-23 |
 | 10. Git Integration | 3/3 | Complete | 2026-01-23 |
 | 11. Statistics & Diff Preview | 2/2 | Complete | 2026-01-23 |
-| 12. Timeline Replay | 0/1 | Pending | — |
+| 12. Timeline Replay | 1/1 | Complete | 2026-01-23 |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-23 (Phase 12 planned)*
+*Last updated: 2026-01-23 (v1.1 complete)*
