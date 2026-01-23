@@ -23,8 +23,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 ### v1.1 (Current)
 
-- [ ] **Phase 7: Expanded File Scope** - Include src/ directory in graph and file watcher
-- [ ] **Phase 8: Activity Feed & Change Indicators** - Live activity feed with change type animations
+- [x] **Phase 7: Expanded File Scope** - Include src/ directory in graph and file watcher
+- [x] **Phase 8: Activity Feed & Change Indicators** - Live activity feed with change type animations
 - [ ] **Phase 9: Heat Map Visualization** - Recent changes glow hot, cool down over time
 - [ ] **Phase 10: Git Integration** - Show uncommitted/staged changes and recent commits
 - [ ] **Phase 11: Statistics & Diff Preview** - Activity analytics and file diffs
@@ -170,9 +170,13 @@ Plans:
 **Requirements**: HET-01, HET-02, HET-03
 **Success Criteria** (what must be TRUE):
   1. Recently changed files glow with hot colors (red/orange)
-  2. File heat color transitions smoothly from hot to cool over time (red → orange → yellow → normal)
+  2. File heat color transitions smoothly from hot to cool over time (red -> orange -> yellow -> normal)
   3. User can adjust heat decay rate to control how fast files cool down
-**Plans**: Not yet planned
+**Plans**: 2 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — Heat state tracking, color gradient, and decay animation loop
+- [ ] 09-02-PLAN.md — Heat decay slider UI and persistence
 
 ### Phase 10: Git Integration
 **Goal**: User can see git status directly in the graph (uncommitted, staged, commits, branch)
@@ -228,11 +232,11 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 |-------|----------------|--------|-----------|
 | 7. Expanded File Scope | 3/3 | Complete | 2026-01-23 |
 | 8. Activity Feed & Change Indicators | 3/3 | Complete | 2026-01-23 |
-| 9. Heat Map Visualization | 0/— | Pending | — |
+| 9. Heat Map Visualization | 0/2 | Planned | — |
 | 10. Git Integration | 0/— | Pending | — |
 | 11. Statistics & Diff Preview | 0/— | Pending | — |
 | 12. Timeline Replay | 0/— | Pending | — |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-23 (Phase 8 complete)*
+*Last updated: 2026-01-23 (Phase 9 planned)*
