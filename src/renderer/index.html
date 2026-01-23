@@ -439,6 +439,226 @@
       left: 280px;
       width: calc(100% - 280px);
     }
+
+    /* Adjust graph container when activity panel is open */
+    #graph-container.activity-open {
+      bottom: 180px;
+      height: calc(100% - 50px - 180px);
+    }
+
+    /* Activity Feed Toggle Button */
+    #activity-toggle {
+      position: fixed;
+      left: 10px;
+      bottom: 10px;
+      background: rgba(78, 205, 196, 0.9);
+      color: #1a1a2e;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      z-index: 95;
+      transition: bottom 0.3s ease, background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #activity-toggle:hover {
+      background: #45B7D1;
+    }
+
+    #activity-toggle.panel-open {
+      bottom: 190px;
+    }
+
+    /* Activity Badge */
+    #activity-badge {
+      display: none;
+      background: #E74C3C;
+      color: #fff;
+      font-size: 10px;
+      font-weight: bold;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 8px;
+      padding: 0 4px;
+      text-align: center;
+      line-height: 16px;
+    }
+
+    #activity-badge.visible {
+      display: inline-block;
+    }
+
+    @keyframes badge-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    #activity-badge.pulse {
+      animation: badge-pulse 1s ease-in-out infinite;
+    }
+
+    /* Activity Feed Panel */
+    #activity-panel {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 180px;
+      background: rgba(26, 26, 46, 0.98);
+      border-top: 1px solid #333;
+      z-index: 90;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #activity-panel.visible {
+      transform: translateY(0);
+    }
+
+    #activity-header {
+      padding: 8px 16px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    #activity-header h3 {
+      margin: 0;
+      font-size: 13px;
+      color: #4ECDC4;
+      font-weight: 500;
+    }
+
+    #activity-clear {
+      background: transparent;
+      border: 1px solid #555;
+      color: #888;
+      padding: 4px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: all 0.2s;
+    }
+
+    #activity-clear:hover {
+      border-color: #E74C3C;
+      color: #E74C3C;
+    }
+
+    #activity-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 4px 0;
+    }
+
+    /* Custom scrollbar for activity content */
+    #activity-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #activity-content::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    #activity-content::-webkit-scrollbar-thumb {
+      background: #4ECDC4;
+      border-radius: 3px;
+    }
+
+    #activity-content::-webkit-scrollbar-thumb:hover {
+      background: #45B7D1;
+    }
+
+    /* Activity Entry */
+    .activity-entry {
+      display: flex;
+      align-items: center;
+      padding: 6px 16px;
+      font-size: 12px;
+      color: #ccc;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-left: 3px solid transparent;
+    }
+
+    .activity-entry:hover {
+      background: rgba(78, 205, 196, 0.1);
+    }
+
+    .activity-entry .entry-icon {
+      margin-right: 8px;
+      font-size: 14px;
+    }
+
+    .activity-entry .entry-path {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .activity-entry .entry-type {
+      margin-left: 8px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    .activity-entry .entry-time {
+      margin-left: 12px;
+      color: #666;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    /* Activity Entry Types - Color Coding */
+    .activity-entry.created {
+      border-left-color: #2ECC71;
+    }
+
+    .activity-entry.created .entry-type {
+      background: rgba(46, 204, 113, 0.2);
+      color: #2ECC71;
+    }
+
+    .activity-entry.modified {
+      border-left-color: #F39C12;
+    }
+
+    .activity-entry.modified .entry-type {
+      background: rgba(243, 156, 18, 0.2);
+      color: #F39C12;
+    }
+
+    .activity-entry.deleted {
+      border-left-color: #E74C3C;
+    }
+
+    .activity-entry.deleted .entry-type {
+      background: rgba(231, 76, 60, 0.2);
+      color: #E74C3C;
+    }
+
+    /* Empty state */
+    .activity-empty {
+      padding: 20px;
+      text-align: center;
+      color: #666;
+      font-size: 12px;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -453,6 +673,19 @@
   </div>
   <div id="refresh-indicator">Refreshing...</div>
   <button id="tree-toggle" title="Toggle file tree">📁</button>
+  <button id="activity-toggle" title="Toggle activity feed">
+    <span>Activity</span>
+    <span id="activity-badge"></span>
+  </button>
+  <div id="activity-panel">
+    <div id="activity-header">
+      <h3>Activity Feed</h3>
+      <button id="activity-clear">Clear</button>
+    </div>
+    <div id="activity-content">
+      <div class="activity-empty">No recent activity</div>
+    </div>
+  </div>
   <div id="tree-panel">
     <div id="tree-header">
       <h3>📂 File Tree</h3>
