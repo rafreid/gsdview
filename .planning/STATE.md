@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Phase: 8 of 12 (Activity Feed & Change Indicators)
-Plan: 1 of 3 complete (Wave 1: 08-01 done, Wave 2: 08-02 next, Wave 3: 08-03)
+Plan: 2 of 3 complete (Wave 1: 08-01 done, Wave 2: 08-02 done, Wave 3: 08-03 next)
 Status: In progress - Phase 8
-Last activity: 2026-01-23 - Completed 08-01-PLAN.md (activity feed panel structure)
+Last activity: 2026-01-23 - Completed 08-02-PLAN.md (activity state management and animations)
 
-Progress: [████████░░] 68% (v1.0: 6/12 phases + v1.1: 3/3 plans in Phase 7 + 1/3 in Phase 8)
+Progress: [████████░░] 71% (v1.0: 6/12 phases + v1.1: 3/3 plans in Phase 7 + 2/3 in Phase 8)
 
 ## Performance Metrics
 
@@ -41,7 +41,7 @@ Progress: [████████░░] 68% (v1.0: 6/12 phases + v1.1: 3/3 pl
 | Phase | Plans | Status | Target |
 |-------|-------|--------|--------|
 | 7. Expanded File Scope | 3 | 3/3 complete | EXP-01-03 |
-| 8. Activity Feed & Change Indicators | 3 | 1/3 complete | FED-01-04, CHG-01-03 |
+| 8. Activity Feed & Change Indicators | 3 | 2/3 complete | FED-01-04, CHG-01-03 |
 | 9. Heat Map Visualization | - | Pending | HET-01-03 |
 | 10. Git Integration | - | Pending | GIT-01-04 |
 | 11. Statistics & Diff Preview | - | Pending | STS-01-03, DIF-01-03 |
@@ -71,6 +71,10 @@ Recent decisions affecting current work:
 - applySourceTint shifts colors toward blue for visual differentiation (07-03)
 - Activity panel height 180px, badge caps at "99+" (08-01)
 - Entry type classes: .created (green), .modified (orange), .deleted (red) (08-01)
+- addActivityEntry maps chokidar events to user-friendly types (08-02)
+- Change type colors: created=#2ECC71, modified=#F39C12, deleted=#E74C3C (08-02)
+- flashNodeWithType for type-specific 3D animations (08-02)
+- MAX_ACTIVITY_ENTRIES=100 to prevent memory issues (08-02)
 
 ### Pending Todos
 
@@ -95,6 +99,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 08-01-PLAN.md (activity feed panel structure)
+Stopped at: Completed 08-02-PLAN.md (activity state management and animations)
 Resume file: None
-Next action: Execute 08-02-PLAN.md (wire up file change events to activity feed)
+Next action: Execute 08-03-PLAN.md (activity entry click-to-navigate)
