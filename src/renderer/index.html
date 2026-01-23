@@ -809,6 +809,52 @@
       font-size: 12px;
       font-style: italic;
     }
+
+    /* Heat Decay Slider */
+    #heat-decay-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 15px;
+      padding-left: 15px;
+      border-left: 1px solid rgba(255,255,255,0.2);
+    }
+
+    #heat-decay-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.8);
+      white-space: nowrap;
+    }
+
+    #heat-decay-slider {
+      width: 100px;
+      height: 4px;
+      -webkit-appearance: none;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    #heat-decay-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #FF6B6B;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #heat-decay-slider::-webkit-slider-thumb:hover {
+      background: #FF8C00;
+    }
+
+    #heat-decay-value {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      min-width: 35px;
+    }
   </style>
 </head>
 <body>
@@ -819,6 +865,11 @@
     </select>
     <button id="refresh-btn" title="Refresh graph">↻ Refresh</button>
     <button id="dimension-toggle" title="Toggle between 2D and 3D view">3D</button>
+    <div id="heat-decay-container">
+      <span id="heat-decay-label">Heat:</span>
+      <input type="range" id="heat-decay-slider" min="30" max="600" value="300" title="Heat decay duration (seconds)">
+      <span id="heat-decay-value">5m</span>
+    </div>
     <span id="selected-path">No project selected</span>
   </div>
   <div id="refresh-indicator">Refreshing...</div>
