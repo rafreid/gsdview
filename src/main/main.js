@@ -58,23 +58,55 @@ function startWatching(projectPath) {
   stopWatching();
 
   const planningPath = path.join(projectPath, '.planning');
-  watcher = chokidar.watch(planningPath, {
+  const srcPath = path.join(projectPath, 'src');
+
+  // Build array of paths to watch (only existing directories)
+  const watchPaths = [];
+  if (fs.existsSync(planningPath)) watchPaths.push(planningPath);
+  if (fs.existsSync(srcPath)) watchPaths.push(srcPath);
+
+  // Handle case where neither directory exists
+  if (watchPaths.length === 0) {
+    console.log('[Watcher] No directories to watch (.planning/ and src/ not found)');
+    return;
+  }
+
+  console.log('[Watcher] Watching directories:', watchPaths);
+
+  watcher = chokidar.watch(watchPaths, {
     ignoreInitial: true,
     persistent: true,
-    depth: 10 // Ensure deep watching
-    // Remove ignored pattern - we explicitly want to watch .planning contents
+    depth: 10,
+    ignored: [
+      '**/node_modules/**',
+      '**/.git/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/coverage/**',
+      '**/.next/**',
+      '**/.cache/**',
+      '**/__pycache__/**'
+    ]
   });
 
   let debounceTimer = null;
 
   watcher.on('all', (event, filePath) => {
-    console.log('[Watcher] Event:', event, filePath);
+    // Determine sourceType from path
+    let sourceType = 'unknown';
+    if (filePath.includes('/.planning/') || filePath.includes('\\.planning\\') || filePath.includes(path.sep + '.planning' + path.sep)) {
+      sourceType = 'planning';
+    } else if (filePath.includes('/src/') || filePath.includes('\\src\\') || filePath.includes(path.sep + 'src' + path.sep)) {
+      sourceType = 'src';
+    }
+
+    console.log('[Watcher] Event:', event, filePath, 'sourceType:', sourceType);
 
     // Debounce to avoid rapid updates
     if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('files-changed', { event, path: filePath });
+        mainWindow.webContents.send('files-changed', { event, path: filePath, sourceType });
       }
     }, 500);
   });
