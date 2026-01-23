@@ -8,8 +8,14 @@ const nodeColors = {
   plan: '#45B7D1',       // Sky blue - work units
   task: '#98D8C8',       // Mint green - granular items
   requirement: '#F7DC6F', // Gold - specifications
-  file: '#DDA0DD',       // Plum - source references (default)
-  directory: '#BB8FCE'   // Purple - directories
+  file: '#DDA0DD',       // Plum - source references (default for .planning/)
+  directory: '#BB8FCE'   // Purple - directories (default for .planning/)
+};
+
+// src/ specific node colors (cooler tones for visual differentiation)
+const srcNodeColors = {
+  file: '#7EC8E3',       // Cool blue (vs #DDA0DD plum for planning)
+  directory: '#5B9BD5'   // Steel blue (vs #BB8FCE purple for planning)
 };
 
 // File extension colors for better visual distinction
@@ -242,6 +248,24 @@ function getNodeSize(node, connectionCounts) {
   return minSize + (maxSize - minSize) * scale;
 }
 
+// Helper to apply cooler tint to a color for src/ files
+function applySourceTint(hexColor, sourceType) {
+  if (sourceType !== 'src') return hexColor;
+
+  // Parse hex to RGB
+  const hex = hexColor.replace('#', '');
+  let r = parseInt(hex.substr(0, 2), 16);
+  let g = parseInt(hex.substr(2, 2), 16);
+  let b = parseInt(hex.substr(4, 2), 16);
+
+  // Shift toward cooler tones (increase blue, decrease red slightly)
+  r = Math.max(0, Math.round(r * 0.85));
+  b = Math.min(255, Math.round(b * 1.15 + 20));
+
+  // Convert back to hex
+  return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+
 // Get node color based on type and status
 function getNodeColor(node) {
   // For phases, plans, tasks, requirements - use status colors if available
@@ -257,9 +281,25 @@ function getNodeColor(node) {
     return statusColors[node.status] || nodeColors[node.type] || DEFAULT_NODE_COLOR;
   }
 
-  // For files, use extension-based colors
-  if (node.type === 'file' && node.extension) {
-    return extensionColors[node.extension] || nodeColors.file;
+  // For files, use extension colors with sourceType tint
+  if (node.type === 'file') {
+    // Get base color from extension or default
+    let baseColor = extensionColors[node.extension] || nodeColors.file;
+
+    // Apply cooler tint for src/ files
+    if (node.sourceType === 'src') {
+      baseColor = applySourceTint(baseColor, 'src');
+    }
+
+    return baseColor;
+  }
+
+  // For directories, use sourceType-specific colors
+  if (node.type === 'directory') {
+    if (node.sourceType === 'src') {
+      return srcNodeColors.directory;
+    }
+    return nodeColors.directory;
   }
 
   return nodeColors[node.type] || DEFAULT_NODE_COLOR;
