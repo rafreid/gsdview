@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-01-23)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** Phase 10 - Git Integration (v1.1)
+**Current focus:** Phase 10 - Git Integration (v1.1) - COMPLETE
 
 ## Current Position
 
 Phase: 10 of 12 (Git Integration)
-Plan: 2 of 3 complete
-Status: In progress
-Last activity: 2026-01-23 - Completed 10-02-PLAN.md (Git Status Visual Indicators)
+Plan: 3 of 3 complete
+Status: Phase complete
+Last activity: 2026-01-23 - Completed 10-03-PLAN.md (Commits & Branch Display)
 
-Progress: [████████░░] 83% (v1.0: 6/12 phases + v1.1: Phases 7-9 + 10-01 + 10-02)
+Progress: [█████████░] 86% (v1.0: 6/12 phases + v1.1: Phases 7-10)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 26 (22 from v1.0 + 09-01 + 09-02 + 10-01 + 10-02)
+- Total plans completed: 27 (22 from v1.0 + 09-01 + 09-02 + 10-01 + 10-02 + 10-03)
 - Average duration: Session duration
 - Total execution time: 1 day (v1.0)
 
@@ -43,7 +43,7 @@ Progress: [████████░░] 83% (v1.0: 6/12 phases + v1.1: Phases
 | 7. Expanded File Scope | 3 | 3/3 complete | EXP-01-03 |
 | 8. Activity Feed & Change Indicators | 3 | 3/3 complete | FED-01-04, CHG-01-03 |
 | 9. Heat Map Visualization | 2 | 2/2 complete | HET-01-03 |
-| 10. Git Integration | 3 | 2/3 complete | GIT-01-04 |
+| 10. Git Integration | 3 | 3/3 complete | GIT-01-04 |
 | 11. Statistics & Diff Preview | - | Pending | STS-01-03, DIF-01-03 |
 | 12. Timeline Replay | - | Pending | TML-01-03 |
 
@@ -91,6 +91,10 @@ Recent decisions affecting current work:
 - Staged=green, modified=orange, untracked=purple color scheme (10-02)
 - Staged takes priority over modified when both apply (10-02)
 - Git status checks use path matching with sourceType prefixes (10-02)
+- Fetch git data before buildGraphFromProject for commit node integration (10-03)
+- Use directory type for "Recent Commits" parent node (10-03)
+- Hexagonal cylinder geometry for commit nodes (10-03)
+- Purple (#9B59B6) for commit nodes (10-03)
 
 ### Pending Todos
 
@@ -115,6 +119,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 10-02-PLAN.md (Git Status Visual Indicators)
+Stopped at: Completed 10-03-PLAN.md (Commits & Branch Display)
 Resume file: None
-Next action: `/gsd:execute-plan 10-03` to continue Phase 10: Git Integration
+Next action: Phase 10 complete. Proceed to Phase 11 (Statistics & Diff Preview) when ready.
