@@ -1870,6 +1870,13 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
         flashTreeItem(entry.nodeId, entry.event);
       }
 
+      // Check if the changed file is currently shown in details panel
+      // and auto-refresh the diff section if so
+      if (selectedNode && selectedNode.type === 'file' && entry.nodeId === selectedNode.id) {
+        // Refresh diff section for the currently displayed file
+        refreshDiffSection();
+      }
+
       showRefreshIndicator();
       await loadProject(selectedProjectPath);
 
