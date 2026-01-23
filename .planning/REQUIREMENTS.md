@@ -66,10 +66,10 @@ Requirements for milestone v1.1: Real-time Activity Visualization.
 
 ### Activity Feed
 
-- [ ] **FED-01**: Live activity feed panel displays file changes as they happen
-- [ ] **FED-02**: Each activity entry shows timestamp, file path, and change type
-- [ ] **FED-03**: Activity feed scrolls automatically to show newest entries
-- [ ] **FED-04**: Clicking an activity entry navigates to that node in the graph
+- [x] **FED-01**: Live activity feed panel displays file changes as they happen
+- [x] **FED-02**: Each activity entry shows timestamp, file path, and change type
+- [x] **FED-03**: Activity feed scrolls automatically to show newest entries
+- [x] **FED-04**: Clicking an activity entry navigates to that node in the graph
 
 ### Heat Map Visualization
 
@@ -86,9 +86,9 @@ Requirements for milestone v1.1: Real-time Activity Visualization.
 
 ### Change Type Indicators
 
-- [ ] **CHG-01**: File creation triggers green pulse animation
-- [ ] **CHG-02**: File modification triggers yellow/orange pulse animation
-- [ ] **CHG-03**: File deletion triggers red pulse animation and node fade-out
+- [x] **CHG-01**: File creation triggers green pulse animation
+- [x] **CHG-02**: File modification triggers yellow/orange pulse animation
+- [x] **CHG-03**: File deletion triggers red pulse animation and node fade-out
 
 ### Activity Statistics
 
@@ -160,13 +160,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXP-01 | Phase 7 | Complete |
 | EXP-02 | Phase 7 | Complete |
 | EXP-03 | Phase 7 | Complete |
-| FED-01 | Phase 8 | Pending |
-| FED-02 | Phase 8 | Pending |
-| FED-03 | Phase 8 | Pending |
-| FED-04 | Phase 8 | Pending |
-| CHG-01 | Phase 8 | Pending |
-| CHG-02 | Phase 8 | Pending |
-| CHG-03 | Phase 8 | Pending |
+| FED-01 | Phase 8 | Complete |
+| FED-02 | Phase 8 | Complete |
+| FED-03 | Phase 8 | Complete |
+| FED-04 | Phase 8 | Complete |
+| CHG-01 | Phase 8 | Complete |
+| CHG-02 | Phase 8 | Complete |
+| CHG-03 | Phase 8 | Complete |
 | HET-01 | Phase 9 | Pending |
 | HET-02 | Phase 9 | Pending |
 | HET-03 | Phase 9 | Pending |

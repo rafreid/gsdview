@@ -160,9 +160,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Activity feed panel UI with collapsible toggle and badge
-- [ ] 08-02-PLAN.md — Activity state management and change-type animations
-- [ ] 08-03-PLAN.md — Entry interactions, auto-scroll, and hover-to-highlight
+- [x] 08-01-PLAN.md — Activity feed panel UI with collapsible toggle and badge
+- [x] 08-02-PLAN.md — Activity state management and change-type animations
+- [x] 08-03-PLAN.md — Entry interactions, auto-scroll, and hover-to-highlight
 
 ### Phase 9: Heat Map Visualization
 **Goal**: User can visually identify recently active files by heat color that decays over time
@@ -227,7 +227,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 7. Expanded File Scope | 3/3 | Complete | 2026-01-23 |
-| 8. Activity Feed & Change Indicators | 0/3 | Planned | — |
+| 8. Activity Feed & Change Indicators | 3/3 | Complete | 2026-01-23 |
 | 9. Heat Map Visualization | 0/— | Pending | — |
 | 10. Git Integration | 0/— | Pending | — |
 | 11. Statistics & Diff Preview | 0/— | Pending | — |
@@ -235,4 +235,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-23 (Phase 8 planned)*
+*Last updated: 2026-01-23 (Phase 8 complete)*

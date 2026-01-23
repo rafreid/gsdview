@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-23)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** Phase 8 - Activity Feed & Change Indicators (v1.1)
+**Current focus:** Phase 9 - Heat Map Visualization (v1.1)
 
 ## Current Position
 
-Phase: 8 of 12 (Activity Feed & Change Indicators)
-Plan: 2 of 3 complete (Wave 1: 08-01 done, Wave 2: 08-02 done, Wave 3: 08-03 next)
-Status: In progress - Phase 8
-Last activity: 2026-01-23 - Completed 08-02-PLAN.md (activity state management and animations)
+Phase: 9 of 12 (Heat Map Visualization)
+Plan: Not yet planned
+Status: Ready for Phase 9
+Last activity: 2026-01-23 - Completed Phase 8 (Activity Feed & Change Indicators)
 
-Progress: [████████░░] 71% (v1.0: 6/12 phases + v1.1: 3/3 plans in Phase 7 + 2/3 in Phase 8)
+Progress: [████████░░] 75% (v1.0: 6/12 phases + v1.1: Phase 7 + Phase 8 complete)
 
 ## Performance Metrics
 
@@ -41,7 +41,7 @@ Progress: [████████░░] 71% (v1.0: 6/12 phases + v1.1: 3/3 pl
 | Phase | Plans | Status | Target |
 |-------|-------|--------|--------|
 | 7. Expanded File Scope | 3 | 3/3 complete | EXP-01-03 |
-| 8. Activity Feed & Change Indicators | 3 | 2/3 complete | FED-01-04, CHG-01-03 |
+| 8. Activity Feed & Change Indicators | 3 | 3/3 complete | FED-01-04, CHG-01-03 |
 | 9. Heat Map Visualization | - | Pending | HET-01-03 |
 | 10. Git Integration | - | Pending | GIT-01-04 |
 | 11. Statistics & Diff Preview | - | Pending | STS-01-03, DIF-01-03 |
@@ -75,6 +75,9 @@ Recent decisions affecting current work:
 - Change type colors: created=#2ECC71, modified=#F39C12, deleted=#E74C3C (08-02)
 - flashNodeWithType for type-specific 3D animations (08-02)
 - MAX_ACTIVITY_ENTRIES=100 to prevent memory issues (08-02)
+- Event delegation on activity-content for entry interactions (08-03)
+- Node highlight 1.3x scale on hover (08-03)
+- Entry click navigates AND opens details panel (08-03)
 
 ### Pending Todos
 
@@ -99,6 +102,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 08-02-PLAN.md (activity state management and animations)
+Stopped at: Completed Phase 8 (Activity Feed & Change Indicators)
 Resume file: None
-Next action: Execute 08-03-PLAN.md (activity entry click-to-navigate)
+Next action: `/gsd:plan-phase 9` to plan Phase 9: Heat Map Visualization
