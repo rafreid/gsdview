@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 Phase: 6 of 6 (Polish)
 Plan: 5 of 5 in current phase
 Status: Complete
-Last activity: 2026-01-23 -- Completed quick task 003: Flash animate file nodes on change
+Last activity: 2026-01-23 -- Completed quick task 004: Bidirectional flash sync between graph and tree
 
 Progress: [##########] 100%
 
@@ -67,9 +67,10 @@ None.
 | 001 | Enhance file visualization - distinguish dirs from files, show content on click | 2026-01-23 | [001-enhance-file-visualization](./quick/001-enhance-file-visualization-distinguish-d/) |
 | 002 | Add tree structure view with bidirectional graph synchronization | 2026-01-23 | [002-add-tree-structure-view](./quick/002-add-tree-structure-view-of-files-synchro/) |
 | 003 | Flash animate file nodes on change with 2-second yellow pulse | 2026-01-23 | [003-flash-animate-file-nodes](./quick/003-flash-animate-file-nodes-on-change-to-re/) |
+| 004 | Bidirectional flash sync: graph click flashes tree, tree click flashes graph | 2026-01-23 | [004-bidirectional-flash-sync](./quick/004-bidirectional-flash-sync-between-graph-n/) |
 
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed quick task 003
+Stopped at: Completed quick task 004
 Resume file: None
