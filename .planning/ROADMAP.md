@@ -217,7 +217,10 @@ Plans:
   1. Timeline scrubber allows navigating backward/forward through activity history
   2. Graph state updates to reflect file state at selected point in time
   3. Timeline has play/pause controls for automatic activity replay
-**Plans**: Not yet planned
+**Plans**: 1 plan
+
+Plans:
+- [ ] 12-01-PLAN.md — Timeline UI, playback controls, and graph state filtering
 
 ## Progress
 
@@ -244,8 +247,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 9. Heat Map Visualization | 2/2 | Complete | 2026-01-23 |
 | 10. Git Integration | 3/3 | Complete | 2026-01-23 |
 | 11. Statistics & Diff Preview | 2/2 | Complete | 2026-01-23 |
-| 12. Timeline Replay | 0/— | Pending | — |
+| 12. Timeline Replay | 0/1 | Pending | — |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-23 (Phase 11 complete)*
+*Last updated: 2026-01-23 (Phase 12 planned)*
