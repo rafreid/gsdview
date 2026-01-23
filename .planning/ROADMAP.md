@@ -27,7 +27,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 8: Activity Feed & Change Indicators** - Live activity feed with change type animations
 - [x] **Phase 9: Heat Map Visualization** - Recent changes glow hot, cool down over time
 - [x] **Phase 10: Git Integration** - Show uncommitted/staged changes and recent commits
-- [ ] **Phase 11: Statistics & Diff Preview** - Activity analytics and file diffs
+- [x] **Phase 11: Statistics & Diff Preview** - Activity analytics and file diffs
 - [ ] **Phase 12: Timeline Replay** - Scrub through activity history with playback controls
 
 ## Phase Details
@@ -206,8 +206,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 11-01-PLAN.md — Statistics panel with file ranking and activity chart
-- [ ] 11-02-PLAN.md — Git diff preview in details panel
+- [x] 11-01-PLAN.md — Statistics panel with file ranking and activity chart
+- [x] 11-02-PLAN.md — Git diff preview in details panel
 
 ### Phase 12: Timeline Replay
 **Goal**: User can scrub through activity history and replay file changes over time
@@ -243,9 +243,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 8. Activity Feed & Change Indicators | 3/3 | Complete | 2026-01-23 |
 | 9. Heat Map Visualization | 2/2 | Complete | 2026-01-23 |
 | 10. Git Integration | 3/3 | Complete | 2026-01-23 |
-| 11. Statistics & Diff Preview | 0/2 | Pending | — |
+| 11. Statistics & Diff Preview | 2/2 | Complete | 2026-01-23 |
 | 12. Timeline Replay | 0/— | Pending | — |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-23 (Phase 11 planned)*
+*Last updated: 2026-01-23 (Phase 11 complete)*

@@ -92,15 +92,15 @@ Requirements for milestone v1.1: Real-time Activity Visualization.
 
 ### Activity Statistics
 
-- [ ] **STS-01**: Statistics panel shows most frequently edited files
-- [ ] **STS-02**: Statistics panel shows change count per file
-- [ ] **STS-03**: Activity over time chart visualizes editing patterns
+- [x] **STS-01**: Statistics panel shows most frequently edited files
+- [x] **STS-02**: Statistics panel shows change count per file
+- [x] **STS-03**: Activity over time chart visualizes editing patterns
 
 ### Diff Preview
 
-- [ ] **DIF-01**: Details panel shows file diff for recently changed files
-- [ ] **DIF-02**: Diff display highlights added lines (green) and removed lines (red)
-- [ ] **DIF-03**: Diff compares current state with last known/committed state
+- [x] **DIF-01**: Details panel shows file diff for recently changed files
+- [x] **DIF-02**: Diff display highlights added lines (green) and removed lines (red)
+- [x] **DIF-03**: Diff compares current state with last known/committed state
 
 ### Timeline
 
@@ -174,12 +174,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GIT-02 | Phase 10 | Complete |
 | GIT-03 | Phase 10 | Complete |
 | GIT-04 | Phase 10 | Complete |
-| STS-01 | Phase 11 | Pending |
-| STS-02 | Phase 11 | Pending |
-| STS-03 | Phase 11 | Pending |
-| DIF-01 | Phase 11 | Pending |
-| DIF-02 | Phase 11 | Pending |
-| DIF-03 | Phase 11 | Pending |
+| STS-01 | Phase 11 | Complete |
+| STS-02 | Phase 11 | Complete |
+| STS-03 | Phase 11 | Complete |
+| DIF-01 | Phase 11 | Complete |
+| DIF-02 | Phase 11 | Complete |
+| DIF-03 | Phase 11 | Complete |
 | TML-01 | Phase 12 | Pending |
 | TML-02 | Phase 12 | Pending |
 | TML-03 | Phase 12 | Pending |
@@ -199,4 +199,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-22 (v1.0), 2026-01-23 (v1.1)*
-*Last updated: 2026-01-23 after v1.1 roadmap creation*
+*Last updated: 2026-01-23 (Phase 11 complete)*
