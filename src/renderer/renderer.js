@@ -1511,6 +1511,62 @@ function highlightCode(content, extension) {
   return escaped;
 }
 
+// Escape HTML for safe display in diff view
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// Render diff view with syntax highlighting for diff lines
+function renderDiffView(diffResult) {
+  if (!diffResult) return '<div class="diff-status">Unable to load diff</div>';
+
+  if (diffResult.error) {
+    return `<div class="diff-status">Error: ${diffResult.error}</div>`;
+  }
+
+  if (!diffResult.diff) {
+    return `<div class="diff-status">${diffResult.message || 'No diff available'}</div>`;
+  }
+
+  // Check for binary file indicator in diff output
+  if (diffResult.diff.includes('Binary files') || diffResult.diff.includes('GIT binary patch')) {
+    return '<div class="diff-status">Binary file - diff not available</div>';
+  }
+
+  // Parse and highlight diff lines
+  const lines = diffResult.diff.split('\n');
+
+  // Truncate very long diffs (100 lines)
+  const MAX_DIFF_LINES = 100;
+  const truncated = lines.length > MAX_DIFF_LINES;
+  const displayLines = truncated ? lines.slice(0, MAX_DIFF_LINES) : lines;
+
+  const htmlLines = displayLines.map(line => {
+    let className = 'diff-line context';
+    if (line.startsWith('+') && !line.startsWith('+++')) {
+      className = 'diff-line added';
+    } else if (line.startsWith('-') && !line.startsWith('---')) {
+      className = 'diff-line removed';
+    } else if (line.startsWith('@@')) {
+      className = 'diff-line header';
+    } else if (line.startsWith('diff ') || line.startsWith('index ') ||
+               line.startsWith('---') || line.startsWith('+++')) {
+      className = 'diff-line header';
+    }
+    return `<div class="${className}">${escapeHtml(line)}</div>`;
+  }).join('');
+
+  let truncateMsg = '';
+  if (truncated) {
+    truncateMsg = `<div class="diff-status">... (diff truncated, showing first ${MAX_DIFF_LINES} of ${lines.length} lines)</div>`;
+  }
+
+  return `<div class="diff-content">${htmlLines}${truncateMsg}</div>`;
+}
+
 // Details panel functions
 async function showDetailsPanel(node) {
   selectedNode = node;
@@ -1569,7 +1625,12 @@ async function showDetailsPanel(node) {
   let fullPath = null;
 
   if (filePath && selectedProjectPath) {
-    if (node.path) {
+    // Build full path based on sourceType
+    if (node.sourceType === 'src') {
+      fullPath = `${selectedProjectPath}/src/${node.path}`;
+    } else if (node.sourceType === 'planning') {
+      fullPath = `${selectedProjectPath}/.planning/${node.path}`;
+    } else if (node.path) {
       fullPath = `${selectedProjectPath}/.planning/${node.path}`;
     } else if (node.file) {
       fullPath = `${selectedProjectPath}/.planning/phases/${node.file}`;
@@ -1583,6 +1644,14 @@ async function showDetailsPanel(node) {
       <p><strong>File Preview:</strong></p>
       <div id="file-preview-loading">Loading...</div>
       <pre id="file-preview"></pre>
+    </div>`;
+  }
+
+  // For file nodes in git projects, show diff section
+  if (node.type === 'file' && selectedProjectPath && window.electronAPI && window.electronAPI.getGitDiff) {
+    html += `<div class="diff-container">
+      <div class="diff-header">Recent Changes</div>
+      <div id="diff-view-content"><div class="diff-status">Loading diff...</div></div>
     </div>`;
   }
 
@@ -1642,6 +1711,33 @@ async function showDetailsPanel(node) {
         }
       }
     });
+  }
+
+  // Load and render diff for file nodes
+  if (node.type === 'file' && selectedProjectPath && window.electronAPI && window.electronAPI.getGitDiff) {
+    // Build relative path for git (relative to project root)
+    let relativePath;
+    if (node.sourceType === 'planning') {
+      relativePath = '.planning/' + node.path;
+    } else if (node.sourceType === 'src') {
+      relativePath = 'src/' + node.path;
+    } else {
+      relativePath = node.path;
+    }
+
+    try {
+      const diffResult = await window.electronAPI.getGitDiff(selectedProjectPath, relativePath);
+      const diffContent = document.getElementById('diff-view-content');
+      if (diffContent) {
+        diffContent.innerHTML = renderDiffView(diffResult);
+      }
+    } catch (err) {
+      console.error('Error loading diff:', err);
+      const diffContent = document.getElementById('diff-view-content');
+      if (diffContent) {
+        diffContent.innerHTML = '<div class="diff-status">Error loading diff</div>';
+      }
+    }
   }
 
   panel.classList.remove('hidden');
