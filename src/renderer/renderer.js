@@ -69,15 +69,25 @@ function lerpColor(color1, color2, t) {
 
 // Find node ID from file path
 function findNodeIdFromPath(changedPath) {
-  // Normalize the path - remove leading .planning/ or ./
-  let normalizedPath = changedPath.replace(/^\.\//, '').replace(/^\.planning\//, '');
+  // changedPath is absolute: /path/to/project/.planning/some/file.md
+  // node.path is relative: some/file.md (relative to .planning/)
 
-  // Search currentGraphData.nodes for matching path property
-  const node = currentGraphData.nodes.find(n => {
-    if (!n.path) return false;
-    const nodePath = n.path.replace(/^\.\//, '').replace(/^\.planning\//, '');
-    return nodePath === normalizedPath;
-  });
+  // Extract portion after .planning/
+  const planningIndex = changedPath.indexOf('.planning/');
+  if (planningIndex === -1) {
+    console.log('[Flash] Path not in .planning:', changedPath);
+    return null;
+  }
+
+  const relativePath = changedPath.substring(planningIndex + '.planning/'.length);
+  console.log('[Flash] Looking for node with path:', relativePath);
+
+  const node = currentGraphData.nodes.find(n => n.path === relativePath);
+  if (node) {
+    console.log('[Flash] Found node:', node.id);
+  } else {
+    console.log('[Flash] No node found for path:', relativePath);
+  }
 
   return node ? node.id : null;
 }
@@ -1023,9 +1033,11 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
     if (selectedProjectPath) {
       // Flash the changed file node if it exists in the graph
       if (data.path) {
+        console.log('[FileChange] Received:', data.event, data.path);
         const nodeId = findNodeIdFromPath(data.path);
         if (nodeId) {
           flashNode(nodeId);
+          flashTreeItem(nodeId);
         }
       }
 
