@@ -396,6 +396,49 @@
       color: #1a1a2e !important; /* Dark text during flash for contrast */
     }
 
+    /* Change-type-specific tree flash animations */
+    @keyframes tree-flash-created {
+      0% { background-color: rgba(46, 204, 113, 0.9); box-shadow: 0 0 15px rgba(46, 204, 113, 0.8); }
+      15% { background-color: rgba(46, 204, 113, 0.3); box-shadow: 0 0 5px rgba(46, 204, 113, 0.3); }
+      30% { background-color: rgba(46, 204, 113, 0.8); box-shadow: 0 0 12px rgba(46, 204, 113, 0.7); }
+      45% { background-color: rgba(46, 204, 113, 0.2); box-shadow: 0 0 3px rgba(46, 204, 113, 0.2); }
+      60% { background-color: rgba(46, 204, 113, 0.6); box-shadow: 0 0 10px rgba(46, 204, 113, 0.5); }
+      100% { background-color: transparent; box-shadow: none; }
+    }
+
+    @keyframes tree-flash-modified {
+      0% { background-color: rgba(243, 156, 18, 0.9); box-shadow: 0 0 15px rgba(243, 156, 18, 0.8); }
+      15% { background-color: rgba(243, 156, 18, 0.3); box-shadow: 0 0 5px rgba(243, 156, 18, 0.3); }
+      30% { background-color: rgba(243, 156, 18, 0.8); box-shadow: 0 0 12px rgba(243, 156, 18, 0.7); }
+      45% { background-color: rgba(243, 156, 18, 0.2); box-shadow: 0 0 3px rgba(243, 156, 18, 0.2); }
+      60% { background-color: rgba(243, 156, 18, 0.6); box-shadow: 0 0 10px rgba(243, 156, 18, 0.5); }
+      100% { background-color: transparent; box-shadow: none; }
+    }
+
+    @keyframes tree-flash-deleted {
+      0% { background-color: rgba(231, 76, 60, 0.9); box-shadow: 0 0 15px rgba(231, 76, 60, 0.8); }
+      15% { background-color: rgba(231, 76, 60, 0.3); box-shadow: 0 0 5px rgba(231, 76, 60, 0.3); }
+      30% { background-color: rgba(231, 76, 60, 0.8); box-shadow: 0 0 12px rgba(231, 76, 60, 0.7); }
+      45% { background-color: rgba(231, 76, 60, 0.2); box-shadow: 0 0 3px rgba(231, 76, 60, 0.2); }
+      60% { background-color: rgba(231, 76, 60, 0.6); box-shadow: 0 0 10px rgba(231, 76, 60, 0.5); }
+      100% { background-color: transparent; box-shadow: none; opacity: 0.5; }
+    }
+
+    .tree-flash-created {
+      animation: tree-flash-created 2s ease-out;
+      color: #1a1a2e !important;
+    }
+
+    .tree-flash-modified {
+      animation: tree-flash-modified 2s ease-out;
+      color: #1a1a2e !important;
+    }
+
+    .tree-flash-deleted {
+      animation: tree-flash-deleted 2s ease-out;
+      color: #1a1a2e !important;
+    }
+
     .tree-toggle-icon {
       width: 16px;
       height: 16px;
@@ -472,6 +515,16 @@
 
     #activity-toggle.panel-open {
       bottom: 190px;
+    }
+
+    #activity-toggle.pulse {
+      animation: toggle-pulse 0.6s ease-out;
+    }
+
+    @keyframes toggle-pulse {
+      0% { transform: scale(1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); }
+      50% { transform: scale(1.1); box-shadow: 0 0 15px rgba(78, 205, 196, 0.8); }
+      100% { transform: scale(1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); }
     }
 
     /* Activity Badge */
@@ -595,28 +648,35 @@
       background: rgba(78, 205, 196, 0.1);
     }
 
-    .activity-entry .entry-icon {
+    .activity-entry .entry-icon,
+    .activity-entry .activity-icon {
       margin-right: 8px;
       font-size: 14px;
+      font-weight: bold;
+      width: 16px;
+      text-align: center;
     }
 
-    .activity-entry .entry-path {
+    .activity-entry .entry-path,
+    .activity-entry .activity-path {
       flex: 1;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .activity-entry .entry-type {
+    .activity-entry .entry-type,
+    .activity-entry .activity-type {
       margin-left: 8px;
       padding: 2px 6px;
       border-radius: 3px;
       font-size: 10px;
       font-weight: 500;
-      text-transform: uppercase;
+      text-transform: capitalize;
     }
 
-    .activity-entry .entry-time {
+    .activity-entry .entry-time,
+    .activity-entry .activity-time {
       margin-left: 12px;
       color: #666;
       font-size: 11px;
@@ -628,8 +688,13 @@
       border-left-color: #2ECC71;
     }
 
-    .activity-entry.created .entry-type {
+    .activity-entry.created .entry-type,
+    .activity-entry.created .activity-type {
       background: rgba(46, 204, 113, 0.2);
+      color: #2ECC71;
+    }
+
+    .activity-entry.created .activity-icon {
       color: #2ECC71;
     }
 
@@ -637,8 +702,13 @@
       border-left-color: #F39C12;
     }
 
-    .activity-entry.modified .entry-type {
+    .activity-entry.modified .entry-type,
+    .activity-entry.modified .activity-type {
       background: rgba(243, 156, 18, 0.2);
+      color: #F39C12;
+    }
+
+    .activity-entry.modified .activity-icon {
       color: #F39C12;
     }
 
@@ -646,8 +716,13 @@
       border-left-color: #E74C3C;
     }
 
-    .activity-entry.deleted .entry-type {
+    .activity-entry.deleted .entry-type,
+    .activity-entry.deleted .activity-type {
       background: rgba(231, 76, 60, 0.2);
+      color: #E74C3C;
+    }
+
+    .activity-entry.deleted .activity-icon {
       color: #E74C3C;
     }
 

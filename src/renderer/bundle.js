@@ -81830,7 +81830,16 @@ var<${access}> ${name} : ${structName};`;
   var is3D = true;
   var activityEntries = [];
   var activityUnreadCount = 0;
+  var MAX_ACTIVITY_ENTRIES = 100;
   var flashingNodes = /* @__PURE__ */ new Map();
+  var changeTypeColors = {
+    created: 3066993,
+    // Green
+    modified: 15965202,
+    // Orange
+    deleted: 15158332
+    // Red
+  };
   function lerpColor(color1, color2, t2) {
     const r1 = color1 >> 16 & 255, g12 = color1 >> 8 & 255, b1 = color1 & 255;
     const r2 = color2 >> 16 & 255, g2 = color2 >> 8 & 255, b2 = color2 & 255;
@@ -81838,6 +81847,57 @@ var<${access}> ${name} : ${structName};`;
     const g3 = Math.round(g12 + (g2 - g12) * t2);
     const b = Math.round(b1 + (b2 - b1) * t2);
     return r3 << 16 | g3 << 8 | b;
+  }
+  function getRelativePath(absolutePath) {
+    if (!absolutePath) return "";
+    const normalized = absolutePath.replace(/\\/g, "/");
+    const planningIndex = normalized.indexOf(".planning/");
+    if (planningIndex !== -1) {
+      return ".planning/" + normalized.substring(planningIndex + ".planning/".length);
+    }
+    const srcIndex = normalized.indexOf("/src/");
+    if (srcIndex !== -1) {
+      return "src/" + normalized.substring(srcIndex + "/src/".length);
+    }
+    const parts = normalized.split("/");
+    return parts.slice(-2).join("/");
+  }
+  function addActivityEntry(event, filePath, sourceType) {
+    const nodeId = findNodeIdFromPath(filePath);
+    const eventMap = {
+      "add": "created",
+      "change": "modified",
+      "unlink": "deleted",
+      "addDir": "created",
+      "unlinkDir": "deleted"
+    };
+    const entry = {
+      id: Date.now() + "-" + Math.random().toString(36).substr(2, 9),
+      path: filePath,
+      relativePath: getRelativePath(filePath),
+      event: eventMap[event] || event,
+      timestamp: Date.now(),
+      sourceType,
+      nodeId
+    };
+    activityEntries.unshift(entry);
+    if (activityEntries.length > MAX_ACTIVITY_ENTRIES) {
+      activityEntries = activityEntries.slice(0, MAX_ACTIVITY_ENTRIES);
+    }
+    const panel = document.getElementById("activity-panel");
+    if (!panel || !panel.classList.contains("visible")) {
+      activityUnreadCount++;
+      updateActivityBadge();
+      pulseActivityToggle();
+    }
+    updateActivityPanel();
+    return entry;
+  }
+  function pulseActivityToggle() {
+    const toggle = document.getElementById("activity-toggle");
+    if (!toggle) return;
+    toggle.classList.add("pulse");
+    setTimeout(() => toggle.classList.remove("pulse"), 600);
   }
   function findNodeIdFromPath(changedPath) {
     const normalizedPath = changedPath.replace(/\\/g, "/");
@@ -81868,10 +81928,10 @@ var<${access}> ${name} : ${structName};`;
     console.log("[Flash] No node found for path:", changedPath);
     return null;
   }
-  function flashNode(nodeId) {
+  function flashNodeWithType(nodeId, changeType) {
     const node = currentGraphData.nodes.find((n2) => n2.id === nodeId);
     if (!node) {
-      console.log("[Flash] Node not found in graph:", nodeId);
+      console.log("[Flash] Node not found:", nodeId);
       return;
     }
     const threeObj = node.__threeObj;
@@ -81888,19 +81948,18 @@ var<${access}> ${name} : ${structName};`;
         if (child.material) materials.push(child.material);
       });
     }
-    if (materials.length === 0) {
-      console.log("[Flash] No materials found for node:", nodeId);
-      return;
-    }
+    if (materials.length === 0) return;
     if (flashingNodes.has(nodeId)) {
       const existing = flashingNodes.get(nodeId);
       if (existing.rafId) cancelAnimationFrame(existing.rafId);
     }
     const originalColors = materials.map((m3) => m3.color.getHex());
-    const flashColor = 16777215;
+    const flashColor = changeTypeColors[changeType] || 16777215;
     const duration = 2e3;
     const pulseCount = 3;
     const startTime = Date.now();
+    const isDelete = changeType === "deleted";
+    const originalOpacities = materials.map((m3) => m3.opacity || 1);
     function animate() {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
@@ -81910,29 +81969,40 @@ var<${access}> ${name} : ${structName};`;
       const intensity = pulse * decay;
       materials.forEach((material, i2) => {
         material.color.setHex(lerpColor(originalColors[i2], flashColor, intensity));
+        if (isDelete && progress > 0.5) {
+          const fadeProgress = (progress - 0.5) * 2;
+          material.opacity = originalOpacities[i2] * (1 - fadeProgress * 0.7);
+        }
       });
       if (progress < 1) {
         const rafId2 = requestAnimationFrame(animate);
-        flashingNodes.set(nodeId, { rafId: rafId2, startTime });
+        flashingNodes.set(nodeId, { rafId: rafId2, startTime, changeType });
       } else {
         materials.forEach((material, i2) => {
           material.color.setHex(originalColors[i2]);
+          if (!isDelete) {
+            material.opacity = originalOpacities[i2];
+          }
         });
         flashingNodes.delete(nodeId);
       }
     }
     const rafId = requestAnimationFrame(animate);
-    flashingNodes.set(nodeId, { rafId, startTime });
-    console.log("[Flash] Started graph flash for:", nodeId);
+    flashingNodes.set(nodeId, { rafId, startTime, changeType });
+    console.log("[Flash] Started", changeType, "flash for:", nodeId);
   }
-  function flashTreeItem(nodeId) {
+  function flashNode(nodeId) {
+    flashNodeWithType(nodeId, "modified");
+  }
+  function flashTreeItem(nodeId, changeType = "modified") {
     const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);
     if (!treeItem) return;
-    treeItem.classList.remove("tree-flash");
+    treeItem.classList.remove("tree-flash", "tree-flash-created", "tree-flash-modified", "tree-flash-deleted");
     void treeItem.offsetWidth;
-    treeItem.classList.add("tree-flash");
+    const className = `tree-flash-${changeType}`;
+    treeItem.classList.add(className);
     setTimeout(() => {
-      treeItem.classList.remove("tree-flash");
+      treeItem.classList.remove(className);
     }, 2e3);
   }
   function calculateConnectionCounts(graphData) {
@@ -82621,13 +82691,10 @@ ${node.goal}`;
     window.electronAPI.onFilesChanged((data) => {
       console.log("Files changed:", data.event, data.path, "sourceType:", data.sourceType);
       if (selectedProjectPath) {
-        if (data.path) {
-          console.log("[FileChange] Received:", data.event, data.path, "sourceType:", data.sourceType);
-          const nodeId = findNodeIdFromPath(data.path);
-          if (nodeId) {
-            flashNode(nodeId);
-            flashTreeItem(nodeId);
-          }
+        const entry = addActivityEntry(data.event, data.path, data.sourceType);
+        if (entry.nodeId) {
+          flashNodeWithType(entry.nodeId, entry.event);
+          flashTreeItem(entry.nodeId, entry.event);
         }
         showRefreshIndicator();
         loadProject(selectedProjectPath);
@@ -82846,6 +82913,18 @@ ${node.goal}`;
       badge.classList.remove("visible", "pulse");
     }
   }
+  function getActivityIcon(event) {
+    switch (event) {
+      case "created":
+        return "+";
+      case "modified":
+        return "~";
+      case "deleted":
+        return "-";
+      default:
+        return "?";
+    }
+  }
   function updateActivityPanel() {
     const content = document.getElementById("activity-content");
     if (!content) return;
@@ -82854,15 +82933,17 @@ ${node.goal}`;
       return;
     }
     content.innerHTML = activityEntries.map((entry) => {
-      const icon = entry.event === "add" ? "\u2728" : entry.event === "change" ? "\u{1F4DD}" : "\u{1F5D1}\uFE0F";
-      const typeLabel = entry.event === "add" ? "created" : entry.event === "change" ? "modified" : "deleted";
-      const typeClass = entry.event === "add" ? "created" : entry.event === "change" ? "modified" : "deleted";
+      const icon = getActivityIcon(entry.event);
       const timeAgo = formatTimeAgo(entry.timestamp);
-      return `<div class="activity-entry ${typeClass}" data-entry-id="${entry.id}" title="${new Date(entry.timestamp).toLocaleString()}">
-      <span class="entry-icon">${icon}</span>
-      <span class="entry-path">${entry.path}</span>
-      <span class="entry-type">${typeLabel}</span>
-      <span class="entry-time">${timeAgo}</span>
+      return `<div class="activity-entry ${entry.event}"
+         data-entry-id="${entry.id}"
+         data-node-id="${entry.nodeId || ""}"
+         data-timestamp="${entry.timestamp}"
+         title="${new Date(entry.timestamp).toLocaleString()}">
+      <span class="activity-icon">${icon}</span>
+      <span class="activity-path">${entry.relativePath}</span>
+      <span class="activity-type">${entry.event}</span>
+      <span class="activity-time">${timeAgo}</span>
     </div>`;
     }).join("");
   }
@@ -82894,6 +82975,11 @@ ${node.goal}`;
     updateActivityBadge();
     updateActivityPanel();
   });
+  setInterval(() => {
+    if (activityEntries.length > 0) {
+      updateActivityPanel();
+    }
+  }, 3e4);
   var storedDirectoryData = null;
   document.getElementById("dimension-toggle").addEventListener("click", () => {
     const toggle = document.getElementById("dimension-toggle");
