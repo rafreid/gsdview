@@ -420,9 +420,20 @@ const Graph = ForceGraph3D()(container)
       return group;
     }
 
-    // Files: Use octahedron (diamond-like) for visual distinction
+    // Files: Different shapes based on sourceType for visual distinction
+    // .planning/ files: Octahedron (diamond, 8 faces) - angular, document-like
+    // src/ files: Icosahedron (20 faces) - rounder, code-like
     if (node.type === 'file') {
-      const geometry = new THREE.OctahedronGeometry(size * 0.8);
+      let geometry;
+
+      if (node.sourceType === 'src') {
+        // src/ files: Icosahedron (20-sided, more spherical)
+        geometry = new THREE.IcosahedronGeometry(size * 0.7);
+      } else {
+        // .planning/ files: Octahedron (diamond shape) - existing
+        geometry = new THREE.OctahedronGeometry(size * 0.8);
+      }
+
       const material = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
@@ -433,7 +444,11 @@ const Graph = ForceGraph3D()(container)
 
       // Add wireframe for clarity
       const edges = new THREE.EdgesGeometry(geometry);
-      const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.3, transparent: true });
+      const lineMaterial = new THREE.LineBasicMaterial({
+        color: 0xffffff,
+        opacity: 0.3,
+        transparent: true
+      });
       const wireframe = new THREE.LineSegments(edges, lineMaterial);
       mesh.add(wireframe);
 
