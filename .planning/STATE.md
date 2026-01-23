@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 Phase: 6 of 6 (Polish)
 Plan: 5 of 5 in current phase
 Status: Complete
-Last activity: 2026-01-23 -- Completed quick task 004: Bidirectional flash sync between graph and tree
+Last activity: 2026-01-23 -- Completed quick task 005: Fix flash animation visibility
 
 Progress: [##########] 100%
 
@@ -68,9 +68,10 @@ None.
 | 002 | Add tree structure view with bidirectional graph synchronization | 2026-01-23 | [002-add-tree-structure-view](./quick/002-add-tree-structure-view-of-files-synchro/) |
 | 003 | Flash animate file nodes on change with 2-second yellow pulse | 2026-01-23 | [003-flash-animate-file-nodes](./quick/003-flash-animate-file-nodes-on-change-to-re/) |
 | 004 | Bidirectional flash sync: graph click flashes tree, tree click flashes graph | 2026-01-23 | [004-bidirectional-flash-sync](./quick/004-bidirectional-flash-sync-between-graph-n/) |
+| 005 | Fix flash animation visibility - brighter pulsing effect | 2026-01-23 | [005-fix-flash-animation](./quick/005-fix-flash-animation-visibility-make-more/) |
 
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed quick task 004
+Stopped at: Completed quick task 005
 Resume file: None
