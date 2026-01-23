@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Phase: 7 of 12 (Expanded File Scope)
-Plan: 1 of 3 complete (07-01 done, remaining: 07-02, 07-03)
+Plan: 2 of 3 complete (07-01, 07-02 done, remaining: 07-03)
 Status: In progress - Phase 7
-Last activity: 2026-01-23 — Completed 07-01-PLAN.md
+Last activity: 2026-01-23 — Completed 07-02-PLAN.md
 
-Progress: [██████░░░░] 52% (v1.0: 6/12 phases + v1.1: 1/3 plans in Phase 7)
+Progress: [███████░░░] 59% (v1.0: 6/12 phases + v1.1: 2/3 plans in Phase 7)
 
 ## Performance Metrics
 
@@ -40,7 +40,7 @@ Progress: [██████░░░░] 52% (v1.0: 6/12 phases + v1.1: 1/3 pl
 
 | Phase | Plans | Status | Target |
 |-------|-------|--------|--------|
-| 7. Expanded File Scope | 3 | 1/3 complete | EXP-01-03 |
+| 7. Expanded File Scope | 3 | 2/3 complete | EXP-01-03 |
 | 8. Activity Feed & Change Indicators | — | Pending | FED-01-04, CHG-01-03 |
 | 9. Heat Map Visualization | — | Pending | HET-01-03 |
 | 10. Git Integration | — | Pending | GIT-01-04 |
@@ -64,6 +64,8 @@ Recent decisions affecting current work:
 - Limit file scope to .planning/ + src/ for performance (v1.1: expanding to src/)
 - parseDirectories uses sourceType property for node categorization (07-01)
 - Node IDs prefixed with sourceType to avoid collisions (07-01)
+- File watcher monitors both .planning/ and src/ simultaneously (07-02)
+- sourceType property included in file change events (07-02)
 
 ### Pending Todos
 
@@ -88,6 +90,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 07-01-PLAN.md (multi-directory parsing)
+Stopped at: Completed 07-02-PLAN.md (dual-directory file watcher)
 Resume file: None
-Next action: Execute 07-02-PLAN.md (file watcher updates) or 07-03-PLAN.md (visual differentiation)
+Next action: Execute 07-03-PLAN.md (visual differentiation of directory trees)
