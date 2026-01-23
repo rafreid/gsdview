@@ -404,6 +404,17 @@ async function loadProject(projectPath) {
     document.getElementById('selected-path').textContent = projectPath;
     selectedProjectPath = projectPath;
 
+    // Start file watching
+    if (window.electronAPI && window.electronAPI.startWatching) {
+      await window.electronAPI.startWatching(projectPath);
+    }
+
+    // Add to recent projects
+    if (window.electronAPI && window.electronAPI.addRecentProject) {
+      await window.electronAPI.addRecentProject(projectPath);
+      updateRecentProjects();
+    }
+
   } catch (error) {
     console.error('Error loading project:', error);
     document.getElementById('selected-path').textContent = `Error: ${error.message}`;
@@ -591,5 +602,73 @@ document.addEventListener('keydown', (e) => {
     hideDetailsPanel();
   }
 });
+
+// Refresh button handler
+document.getElementById('refresh-btn').addEventListener('click', async () => {
+  if (selectedProjectPath) {
+    const btn = document.getElementById('refresh-btn');
+    btn.disabled = true;
+    btn.textContent = 'Refreshing...';
+    showRefreshIndicator();
+    await loadProject(selectedProjectPath);
+    btn.disabled = false;
+    btn.textContent = '↻ Refresh';
+  }
+});
+
+// Show refresh indicator
+function showRefreshIndicator() {
+  const indicator = document.getElementById('refresh-indicator');
+  if (indicator) {
+    indicator.classList.add('visible');
+    setTimeout(() => indicator.classList.remove('visible'), 1500);
+  }
+}
+
+// Recent projects functions
+async function updateRecentProjects() {
+  if (!window.electronAPI || !window.electronAPI.getRecentProjects) return;
+
+  try {
+    const recent = await window.electronAPI.getRecentProjects();
+    const dropdown = document.getElementById('recent-projects');
+    dropdown.innerHTML = '<option value="">Recent Projects...</option>';
+
+    for (const projectPath of recent) {
+      const opt = document.createElement('option');
+      opt.value = projectPath;
+      // Show just the folder name, with full path as title
+      const folderName = projectPath.split('/').pop() || projectPath;
+      opt.textContent = folderName;
+      opt.title = projectPath;
+      dropdown.appendChild(opt);
+    }
+  } catch (error) {
+    console.error('Error loading recent projects:', error);
+  }
+}
+
+// Recent projects dropdown handler
+document.getElementById('recent-projects').addEventListener('change', async (e) => {
+  const projectPath = e.target.value;
+  if (projectPath) {
+    await loadProject(projectPath);
+    e.target.value = ''; // Reset dropdown
+  }
+});
+
+// Listen for file changes (auto-refresh)
+if (window.electronAPI && window.electronAPI.onFilesChanged) {
+  window.electronAPI.onFilesChanged((data) => {
+    console.log('Files changed:', data);
+    if (selectedProjectPath) {
+      showRefreshIndicator();
+      loadProject(selectedProjectPath);
+    }
+  });
+}
+
+// Load recent projects on startup
+updateRecentProjects();
 
 console.log('GSD Viewer initialized - select a project folder to visualize');

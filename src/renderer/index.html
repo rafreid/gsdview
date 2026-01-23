@@ -199,13 +199,65 @@
     #tooltip.visible {
       display: block;
     }
+
+    /* Toolbar additions */
+    #toolbar button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #recent-projects {
+      background: #2a2a4e;
+      color: #eee;
+      border: 1px solid #4ECDC4;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      max-width: 200px;
+    }
+
+    #recent-projects:focus {
+      outline: none;
+      border-color: #45B7D1;
+    }
+
+    #recent-projects option {
+      background: #2a2a4e;
+      color: #eee;
+    }
+
+    /* Refresh indicator */
+    #refresh-indicator {
+      position: fixed;
+      top: 60px;
+      right: 20px;
+      background: rgba(78, 205, 196, 0.9);
+      color: #1a1a2e;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 150;
+    }
+
+    #refresh-indicator.visible {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
   <div id="toolbar">
     <button id="select-folder-btn">Select Project</button>
+    <select id="recent-projects">
+      <option value="">Recent Projects...</option>
+    </select>
+    <button id="refresh-btn" title="Refresh graph">↻ Refresh</button>
     <span id="selected-path">No project selected</span>
   </div>
+  <div id="refresh-indicator">Refreshing...</div>
   <div id="graph-container"></div>
   <div id="color-legend"></div>
   <div id="tooltip"></div>

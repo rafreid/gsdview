@@ -12,6 +12,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "3d-force-graph": "^1.79.0"
+    "3d-force-graph": "^1.79.0",
+    "chokidar": "^5.0.0",
+    "electron-store": "^11.0.2"
   }
 }

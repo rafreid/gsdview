@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: GSD Parsing** - Parse .planning/ structure into hierarchical nodes
 - [x] **Phase 4: State Visualization** - Progress colors, current phase highlight, blocker indicators
 - [x] **Phase 5: Interactions** - Details panel, tooltips, fly-to navigation, external editor launch
-- [ ] **Phase 6: Polish** - Live file watching, recent projects, window state persistence
+- [x] **Phase 6: Polish** - Live file watching, recent projects, window state persistence
 
 ## Phase Details
 
@@ -111,14 +111,14 @@ Plans:
   2. Manual refresh button reloads graph data on demand
   3. Recent projects appear in menu/list for quick access
   4. Closing and reopening app restores previous window size and position
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 06-01: File system watcher for .planning/
-- [ ] 06-02: Auto-refresh on file changes
-- [ ] 06-03: Manual refresh button
-- [ ] 06-04: Recent projects storage and UI
-- [ ] 06-05: Window state persistence
+- [x] 06-01-PLAN.md — File system watcher for .planning/
+- [x] 06-02-PLAN.md — Auto-refresh on file changes
+- [x] 06-03-PLAN.md — Manual refresh button
+- [x] 06-04-PLAN.md — Recent projects storage and UI
+- [x] 06-05-PLAN.md — Window state persistence
 
 ## Progress
 
@@ -132,7 +132,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. GSD Parsing | 4/4 | Complete | 2026-01-22 |
 | 4. State Visualization | 4/4 | Complete | 2026-01-22 |
 | 5. Interactions | 4/4 | Complete | 2026-01-22 |
-| 6. Polish | 0/5 | Not started | - |
+| 6. Polish | 5/5 | Complete | 2026-01-22 |
 
 ---
 *Roadmap created: 2026-01-22*
