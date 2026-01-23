@@ -72055,9 +72055,9 @@ ${snippets.join("\n")}
           } else if (uniform2.node.isStorageTextureNode === true) {
             const format2 = getFormat2(texture2);
             const access = this.getStorageAccess(uniform2.node, shaderStage);
-            const is3D = uniform2.node.value.is3DTexture;
+            const is3D2 = uniform2.node.value.is3DTexture;
             const isArrayTexture = uniform2.node.value.isArrayTexture;
-            const dimension = is3D ? "3d" : `2d${isArrayTexture ? "_array" : ""}`;
+            const dimension = is3D2 ? "3d" : `2d${isArrayTexture ? "_array" : ""}`;
             textureType = `texture_storage_${dimension}<${format2}, ${access}>`;
           } else if (texture2.isArrayTexture === true || texture2.isDataArrayTexture === true || texture2.isCompressedArrayTexture === true) {
             textureType = "texture_2d_array<f32>";
@@ -81769,6 +81769,101 @@ var<${access}> ${name} : ${structName};`;
   var selectedProjectPath = null;
   var currentState = null;
   var selectedNode = null;
+  var treeData = null;
+  var treeExpanded = /* @__PURE__ */ new Set();
+  var is3D = true;
+  var flashingNodes = /* @__PURE__ */ new Map();
+  function lerpColor(color1, color2, t2) {
+    const r1 = color1 >> 16 & 255, g12 = color1 >> 8 & 255, b1 = color1 & 255;
+    const r2 = color2 >> 16 & 255, g2 = color2 >> 8 & 255, b2 = color2 & 255;
+    const r3 = Math.round(r1 + (r2 - r1) * t2);
+    const g3 = Math.round(g12 + (g2 - g12) * t2);
+    const b = Math.round(b1 + (b2 - b1) * t2);
+    return r3 << 16 | g3 << 8 | b;
+  }
+  function findNodeIdFromPath(changedPath) {
+    const planningIndex = changedPath.indexOf(".planning/");
+    if (planningIndex === -1) {
+      console.log("[Flash] Path not in .planning:", changedPath);
+      return null;
+    }
+    const relativePath = changedPath.substring(planningIndex + ".planning/".length);
+    console.log("[Flash] Looking for node with path:", relativePath);
+    const node = currentGraphData.nodes.find((n2) => n2.path === relativePath);
+    if (node) {
+      console.log("[Flash] Found node:", node.id);
+    } else {
+      console.log("[Flash] No node found for path:", relativePath);
+    }
+    return node ? node.id : null;
+  }
+  function flashNode(nodeId) {
+    const node = currentGraphData.nodes.find((n2) => n2.id === nodeId);
+    if (!node) {
+      console.log("[Flash] Node not found in graph:", nodeId);
+      return;
+    }
+    const threeObj = node.__threeObj;
+    if (!threeObj) {
+      console.log("[Flash] No THREE object for node:", nodeId);
+      return;
+    }
+    const materials = [];
+    if (threeObj.material) {
+      materials.push(threeObj.material);
+    }
+    if (threeObj.children) {
+      threeObj.children.forEach((child) => {
+        if (child.material) materials.push(child.material);
+      });
+    }
+    if (materials.length === 0) {
+      console.log("[Flash] No materials found for node:", nodeId);
+      return;
+    }
+    if (flashingNodes.has(nodeId)) {
+      const existing = flashingNodes.get(nodeId);
+      if (existing.rafId) cancelAnimationFrame(existing.rafId);
+    }
+    const originalColors = materials.map((m3) => m3.color.getHex());
+    const flashColor = 16777215;
+    const duration = 2e3;
+    const pulseCount = 3;
+    const startTime = Date.now();
+    function animate() {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const pulsePhase = progress * pulseCount * Math.PI * 2;
+      const pulse = Math.max(0, Math.sin(pulsePhase));
+      const decay = 1 - progress;
+      const intensity = pulse * decay;
+      materials.forEach((material, i2) => {
+        material.color.setHex(lerpColor(originalColors[i2], flashColor, intensity));
+      });
+      if (progress < 1) {
+        const rafId2 = requestAnimationFrame(animate);
+        flashingNodes.set(nodeId, { rafId: rafId2, startTime });
+      } else {
+        materials.forEach((material, i2) => {
+          material.color.setHex(originalColors[i2]);
+        });
+        flashingNodes.delete(nodeId);
+      }
+    }
+    const rafId = requestAnimationFrame(animate);
+    flashingNodes.set(nodeId, { rafId, startTime });
+    console.log("[Flash] Started graph flash for:", nodeId);
+  }
+  function flashTreeItem(nodeId) {
+    const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);
+    if (!treeItem) return;
+    treeItem.classList.remove("tree-flash");
+    void treeItem.offsetWidth;
+    treeItem.classList.add("tree-flash");
+    setTimeout(() => {
+      treeItem.classList.remove("tree-flash");
+    }, 2e3);
+  }
   function calculateConnectionCounts(graphData) {
     const counts = {};
     graphData.nodes.forEach((node) => {
@@ -81849,6 +81944,7 @@ ${node.goal}`;
     const color2 = getNodeColor(node);
     if (node.type === "directory") {
       const group = new Group();
+      group.name = node.id;
       const bodyGeometry = new BoxGeometry(size * 1.5, size * 1.2, size * 0.8);
       const bodyMaterial = new MeshBasicMaterial({
         color: color2,
@@ -81856,6 +81952,7 @@ ${node.goal}`;
         opacity: 0.85
       });
       const body = new Mesh(bodyGeometry, bodyMaterial);
+      body.name = node.id + "-body";
       const tabGeometry = new BoxGeometry(size * 0.6, size * 0.3, size * 0.8);
       const tabMaterial = new MeshBasicMaterial({
         color: color2,
@@ -81880,6 +81977,7 @@ ${node.goal}`;
         opacity: 0.85
       });
       const mesh = new Mesh(geometry, material);
+      mesh.name = node.id;
       const edges = new EdgesGeometry(geometry);
       const lineMaterial = new LineBasicMaterial({ color: 16777215, opacity: 0.3, transparent: true });
       const wireframe = new LineSegments(edges, lineMaterial);
@@ -81966,7 +82064,9 @@ ${node.goal}`;
   function handleResize() {
     const toolbar = document.getElementById("toolbar");
     const toolbarHeight = toolbar ? toolbar.offsetHeight : 50;
-    Graph.width(window.innerWidth);
+    const treePanel = document.getElementById("tree-panel");
+    const treeWidth = treePanel && treePanel.classList.contains("visible") ? 280 : 0;
+    Graph.width(window.innerWidth - treeWidth);
     Graph.height(window.innerHeight - toolbarHeight);
   }
   window.addEventListener("resize", handleResize);
@@ -82041,6 +82141,7 @@ ${node.goal}`;
     }
     const { directory } = projectData;
     if (directory && directory.nodes) {
+      storedDirectoryData = directory;
       for (const dirNode of directory.nodes) {
         addNode({
           id: dirNode.id,
@@ -82085,6 +82186,13 @@ ${node.goal}`;
     setTimeout(() => {
       Graph.zoomToFit(400);
     }, 500);
+    if (storedDirectoryData) {
+      treeData = buildTreeStructure(storedDirectoryData);
+      if (treeData && treeData.length > 0) {
+        treeExpanded.add(treeData[0].id);
+      }
+      updateTreePanel();
+    }
   }
   async function loadProject(projectPath) {
     if (!window.electronAPI || !window.electronAPI.parseProject) {
@@ -82239,6 +82347,9 @@ ${node.goal}`;
     const panel = document.getElementById("details-panel");
     const title = document.getElementById("panel-title");
     const content = document.getElementById("panel-content");
+    if (node.type === "directory" || node.type === "file") {
+      highlightTreeItem(node.id);
+    }
     title.textContent = node.name;
     let html = `<p><strong>Type:</strong> <span style="color: ${getNodeColor(node)}; text-transform: capitalize;">${node.type}</span></p>`;
     if (node.status) {
@@ -82388,12 +82499,226 @@ ${node.goal}`;
     window.electronAPI.onFilesChanged((data) => {
       console.log("Files changed:", data);
       if (selectedProjectPath) {
+        if (data.path) {
+          console.log("[FileChange] Received:", data.event, data.path);
+          const nodeId = findNodeIdFromPath(data.path);
+          if (nodeId) {
+            flashNode(nodeId);
+            flashTreeItem(nodeId);
+          }
+        }
         showRefreshIndicator();
         loadProject(selectedProjectPath);
       }
     });
   }
   updateRecentProjects();
+  function buildTreeStructure(directoryData) {
+    if (!directoryData || !directoryData.nodes) return null;
+    const nodeMap = /* @__PURE__ */ new Map();
+    const roots = [];
+    for (const node of directoryData.nodes) {
+      nodeMap.set(node.id, {
+        ...node,
+        children: []
+      });
+    }
+    for (const link of directoryData.links) {
+      const parent = nodeMap.get(link.source);
+      const child = nodeMap.get(link.target);
+      if (parent && child) {
+        parent.children.push(child);
+      }
+    }
+    const childIds = new Set(directoryData.links.map((l2) => l2.target));
+    for (const node of directoryData.nodes) {
+      if (!childIds.has(node.id)) {
+        roots.push(nodeMap.get(node.id));
+      }
+    }
+    function sortChildren(node) {
+      node.children.sort((a3, b) => {
+        if (a3.type === "directory" && b.type !== "directory") return -1;
+        if (a3.type !== "directory" && b.type === "directory") return 1;
+        return a3.name.localeCompare(b.name);
+      });
+      node.children.forEach(sortChildren);
+      return node;
+    }
+    roots.forEach(sortChildren);
+    return roots;
+  }
+  function getTreeIcon(node) {
+    if (node.type === "directory") {
+      return treeExpanded.has(node.id) ? "\u{1F4C2}" : "\u{1F4C1}";
+    }
+    const extIcons = {
+      ".md": "\u{1F4DD}",
+      ".js": "\u{1F4DC}",
+      ".ts": "\u{1F4D8}",
+      ".json": "\u{1F4CB}",
+      ".html": "\u{1F310}",
+      ".css": "\u{1F3A8}",
+      ".yaml": "\u2699\uFE0F",
+      ".yml": "\u2699\uFE0F",
+      ".txt": "\u{1F4C4}"
+    };
+    return extIcons[node.extension] || "\u{1F4C4}";
+  }
+  function getTreeColor(node) {
+    if (node.type === "directory") return "#BB8FCE";
+    return extensionColors[node.extension] || "#DDA0DD";
+  }
+  function renderTree(nodes, depth2 = 0) {
+    let html = "";
+    const indent = depth2 * 16;
+    for (const node of nodes) {
+      const hasChildren = node.children && node.children.length > 0;
+      const isExpanded = treeExpanded.has(node.id);
+      const isSelected = selectedNode && selectedNode.id === node.id;
+      html += `<div class="tree-item ${isSelected ? "selected" : ""}"
+                  data-node-id="${node.id}"
+                  style="padding-left: ${indent + 8}px">
+      <span class="tree-toggle-icon ${isExpanded ? "expanded" : ""} ${!hasChildren ? "no-children" : ""}"
+            data-node-id="${node.id}">\u25B6</span>
+      <span class="tree-icon" style="color: ${getTreeColor(node)}">${getTreeIcon(node)}</span>
+      <span class="tree-name">${node.name}</span>
+    </div>`;
+      if (hasChildren) {
+        html += `<div class="tree-children ${isExpanded ? "expanded" : ""}" data-parent-id="${node.id}">
+        ${renderTree(node.children, depth2 + 1)}
+      </div>`;
+      }
+    }
+    return html;
+  }
+  function updateTreePanel() {
+    const content = document.getElementById("tree-content");
+    if (!content || !treeData) return;
+    content.innerHTML = renderTree(treeData);
+    content.querySelectorAll(".tree-item").forEach((item) => {
+      item.addEventListener("click", (e2) => {
+        e2.stopPropagation();
+        const nodeId = item.dataset.nodeId;
+        if (e2.target.classList.contains("tree-toggle-icon")) {
+          toggleTreeExpand(nodeId);
+          return;
+        }
+        selectTreeItem(nodeId);
+      });
+    });
+    content.querySelectorAll(".tree-item").forEach((item) => {
+      item.addEventListener("dblclick", (e2) => {
+        const nodeId = item.dataset.nodeId;
+        const node = findNodeById(nodeId);
+        if (node && node.type === "directory") {
+          toggleTreeExpand(nodeId);
+        }
+      });
+    });
+  }
+  function findNodeById(nodeId) {
+    return currentGraphData.nodes.find((n2) => n2.id === nodeId);
+  }
+  function toggleTreeExpand(nodeId) {
+    if (treeExpanded.has(nodeId)) {
+      treeExpanded.delete(nodeId);
+    } else {
+      treeExpanded.add(nodeId);
+    }
+    updateTreePanel();
+  }
+  function expandParentsOf(nodeId) {
+    function findPath(nodes, targetId, path2 = []) {
+      for (const node of nodes) {
+        if (node.id === targetId) {
+          return [...path2, node.id];
+        }
+        if (node.children && node.children.length > 0) {
+          const found = findPath(node.children, targetId, [...path2, node.id]);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+    if (!treeData) return;
+    const path = findPath(treeData, nodeId);
+    if (path) {
+      path.slice(0, -1).forEach((id) => treeExpanded.add(id));
+    }
+  }
+  function selectTreeItem(nodeId) {
+    const graphNode = findNodeById(nodeId);
+    if (!graphNode) return;
+    document.querySelectorAll(".tree-item").forEach((item) => {
+      item.classList.remove("selected");
+      if (item.dataset.nodeId === nodeId) {
+        item.classList.add("selected");
+      }
+    });
+    if (graphNode.x !== void 0) {
+      const distance3 = 50 + getNodeSize(graphNode, connectionCounts) * 4;
+      const distRatio = 1 + distance3 / Math.hypot(graphNode.x || 0, graphNode.y || 0, graphNode.z || 0);
+      Graph.cameraPosition(
+        {
+          x: (graphNode.x || 0) * distRatio,
+          y: (graphNode.y || 0) * distRatio,
+          z: (graphNode.z || 0) * distRatio
+        },
+        graphNode,
+        1e3
+      );
+      flashNode(nodeId);
+    }
+    showDetailsPanel(graphNode);
+  }
+  function highlightTreeItem(nodeId) {
+    expandParentsOf(nodeId);
+    updateTreePanel();
+    setTimeout(() => {
+      const treeContent = document.getElementById("tree-content");
+      const treeItems = document.querySelectorAll(".tree-item");
+      treeItems.forEach((item) => {
+        item.classList.remove("selected", "highlighted");
+        if (item.dataset.nodeId === nodeId) {
+          item.classList.add("selected");
+          item.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      });
+      flashTreeItem(nodeId);
+    }, 50);
+  }
+  document.getElementById("tree-toggle").addEventListener("click", () => {
+    const panel = document.getElementById("tree-panel");
+    const toggle = document.getElementById("tree-toggle");
+    const graphContainer = document.getElementById("graph-container");
+    panel.classList.toggle("visible");
+    toggle.classList.toggle("panel-open");
+    graphContainer.classList.toggle("tree-open");
+    toggle.textContent = panel.classList.contains("visible") ? "\u25C0" : "\u{1F4C1}";
+    setTimeout(() => handleResize(), 300);
+  });
+  var storedDirectoryData = null;
+  document.getElementById("dimension-toggle").addEventListener("click", () => {
+    const toggle = document.getElementById("dimension-toggle");
+    is3D = !is3D;
+    Graph.numDimensions(is3D ? 3 : 2);
+    toggle.textContent = is3D ? "3D" : "2D";
+    if (!is3D) {
+      Graph.cameraPosition(
+        { x: 0, y: 0, z: 300 },
+        // Camera position (looking down from Z-axis)
+        { x: 0, y: 0, z: 0 },
+        // Look at origin
+        1e3
+        // Transition duration
+      );
+    } else {
+      setTimeout(() => {
+        Graph.zoomToFit(1e3);
+      }, 100);
+    }
+  });
   console.log("GSD Viewer initialized - select a project folder to visualize");
 })();
 /*! Bundled license information:

@@ -53,6 +53,7 @@ let currentState = null;
 let selectedNode = null;
 let treeData = null; // Hierarchical tree structure
 let treeExpanded = new Set(); // Track expanded directories
+let is3D = true; // Track current dimension mode
 
 // Track nodes currently flashing (nodeId -> animation state)
 const flashingNodes = new Map();
@@ -1329,5 +1330,34 @@ document.getElementById('tree-toggle').addEventListener('click', () => {
 
 // Store directory data for tree building
 let storedDirectoryData = null;
+
+// Dimension toggle button handler
+document.getElementById('dimension-toggle').addEventListener('click', () => {
+  const toggle = document.getElementById('dimension-toggle');
+
+  // Toggle dimension state
+  is3D = !is3D;
+
+  // Update graph dimensions
+  Graph.numDimensions(is3D ? 3 : 2);
+
+  // Update button text to reflect current mode
+  toggle.textContent = is3D ? '3D' : '2D';
+
+  // For 2D mode, adjust camera to top-down view for better visualization
+  if (!is3D) {
+    // Position camera directly above looking down
+    Graph.cameraPosition(
+      { x: 0, y: 0, z: 300 },  // Camera position (looking down from Z-axis)
+      { x: 0, y: 0, z: 0 },     // Look at origin
+      1000                       // Transition duration
+    );
+  } else {
+    // For 3D mode, zoom to fit to see the spatial layout
+    setTimeout(() => {
+      Graph.zoomToFit(1000);
+    }, 100);
+  }
+});
 
 console.log('GSD Viewer initialized - select a project folder to visualize');
