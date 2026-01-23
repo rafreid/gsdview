@@ -82478,12 +82478,12 @@ ${node.goal}`;
     }
   });
   function populateColorLegend() {
-    const legend = document.getElementById("color-legend");
-    if (!legend) return;
+    const legendContent = document.getElementById("legend-content");
+    if (!legendContent) return;
     const typeTitle = document.createElement("div");
     typeTitle.className = "legend-title";
     typeTitle.textContent = "Node Types";
-    legend.appendChild(typeTitle);
+    legendContent.appendChild(typeTitle);
     const formatTypeName = (type) => type.charAt(0).toUpperCase() + type.slice(1);
     for (const [type, color2] of Object.entries(nodeColors)) {
       const item = document.createElement("div");
@@ -82496,13 +82496,13 @@ ${node.goal}`;
       label2.textContent = formatTypeName(type);
       item.appendChild(colorCircle);
       item.appendChild(label2);
-      legend.appendChild(item);
+      legendContent.appendChild(item);
     }
     const statusTitle = document.createElement("div");
     statusTitle.className = "legend-title";
     statusTitle.style.marginTop = "12px";
     statusTitle.textContent = "Status";
-    legend.appendChild(statusTitle);
+    legendContent.appendChild(statusTitle);
     const statusLabels = {
       complete: "Complete",
       "in-progress": "In Progress",
@@ -82520,13 +82520,13 @@ ${node.goal}`;
       label2.textContent = statusLabels[status];
       item.appendChild(colorCircle);
       item.appendChild(label2);
-      legend.appendChild(item);
+      legendContent.appendChild(item);
     }
     const extTitle = document.createElement("div");
     extTitle.className = "legend-title";
     extTitle.style.marginTop = "12px";
     extTitle.textContent = "File Types";
-    legend.appendChild(extTitle);
+    legendContent.appendChild(extTitle);
     const extLabels = {
       ".md": "Markdown",
       ".js": "JavaScript",
@@ -82552,10 +82552,14 @@ ${node.goal}`;
       labelSpan.textContent = label2;
       item.appendChild(colorCircle);
       item.appendChild(labelSpan);
-      legend.appendChild(item);
+      legendContent.appendChild(item);
     }
   }
   populateColorLegend();
+  document.getElementById("legend-header").addEventListener("click", () => {
+    const legend = document.getElementById("color-legend");
+    legend.classList.toggle("collapsed");
+  });
   container.addEventListener("mousemove", (e2) => {
     const tooltip = document.getElementById("tooltip");
     tooltip.style.left = e2.clientX + 15 + "px";

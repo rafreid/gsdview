@@ -74,9 +74,57 @@
       left: 20px;
       background: rgba(0, 0, 0, 0.7);
       border-radius: 8px;
-      padding: 12px;
       font-size: 12px;
       z-index: 100;
+      max-height: calc(100vh - 250px);
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    #color-legend.collapsed {
+      max-height: 36px;
+    }
+
+    #legend-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      user-select: none;
+    }
+
+    #legend-header:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    #legend-header .legend-header-title {
+      font-weight: 600;
+      color: #4ECDC4;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    #legend-header .legend-toggle-icon {
+      color: #888;
+      font-size: 10px;
+      transition: transform 0.3s ease;
+    }
+
+    #color-legend.collapsed #legend-header .legend-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    #legend-content {
+      padding: 8px 12px 12px;
+      overflow-y: auto;
+      max-height: calc(100vh - 290px);
+    }
+
+    #color-legend.collapsed #legend-content {
+      display: none;
     }
 
     #color-legend .legend-title {
@@ -100,6 +148,20 @@
 
     #color-legend .legend-label {
       color: #aaa;
+    }
+
+    /* Scrollbar for legend content */
+    #legend-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #legend-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #legend-content::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
     }
 
     /* Details Panel */
@@ -781,7 +843,13 @@
     <div id="tree-content"></div>
   </div>
   <div id="graph-container"></div>
-  <div id="color-legend"></div>
+  <div id="color-legend">
+    <div id="legend-header">
+      <span class="legend-header-title">Legend</span>
+      <span class="legend-toggle-icon">▼</span>
+    </div>
+    <div id="legend-content"></div>
+  </div>
   <div id="tooltip"></div>
   <div id="details-panel" class="hidden">
     <button id="close-panel">&times;</button>

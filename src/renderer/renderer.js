@@ -1003,14 +1003,14 @@ document.getElementById('select-folder-btn').addEventListener('click', async () 
 
 // Populate color legend with both type and status colors
 function populateColorLegend() {
-  const legend = document.getElementById('color-legend');
-  if (!legend) return;
+  const legendContent = document.getElementById('legend-content');
+  if (!legendContent) return;
 
   // Node types section
   const typeTitle = document.createElement('div');
   typeTitle.className = 'legend-title';
   typeTitle.textContent = 'Node Types';
-  legend.appendChild(typeTitle);
+  legendContent.appendChild(typeTitle);
 
   const formatTypeName = (type) => type.charAt(0).toUpperCase() + type.slice(1);
 
@@ -1028,7 +1028,7 @@ function populateColorLegend() {
 
     item.appendChild(colorCircle);
     item.appendChild(label);
-    legend.appendChild(item);
+    legendContent.appendChild(item);
   }
 
   // Status section
@@ -1036,7 +1036,7 @@ function populateColorLegend() {
   statusTitle.className = 'legend-title';
   statusTitle.style.marginTop = '12px';
   statusTitle.textContent = 'Status';
-  legend.appendChild(statusTitle);
+  legendContent.appendChild(statusTitle);
 
   const statusLabels = {
     complete: 'Complete',
@@ -1059,7 +1059,7 @@ function populateColorLegend() {
 
     item.appendChild(colorCircle);
     item.appendChild(label);
-    legend.appendChild(item);
+    legendContent.appendChild(item);
   }
 
   // File extensions section
@@ -1067,7 +1067,7 @@ function populateColorLegend() {
   extTitle.className = 'legend-title';
   extTitle.style.marginTop = '12px';
   extTitle.textContent = 'File Types';
-  legend.appendChild(extTitle);
+  legendContent.appendChild(extTitle);
 
   const extLabels = {
     '.md': 'Markdown',
@@ -1098,11 +1098,17 @@ function populateColorLegend() {
 
     item.appendChild(colorCircle);
     item.appendChild(labelSpan);
-    legend.appendChild(item);
+    legendContent.appendChild(item);
   }
 }
 
 populateColorLegend();
+
+// Legend toggle handler
+document.getElementById('legend-header').addEventListener('click', () => {
+  const legend = document.getElementById('color-legend');
+  legend.classList.toggle('collapsed');
+});
 
 // Track mouse for tooltip positioning
 container.addEventListener('mousemove', (e) => {
