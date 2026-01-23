@@ -273,6 +273,153 @@
     #refresh-indicator.visible {
       opacity: 1;
     }
+
+    /* Tree Panel */
+    #tree-panel {
+      position: fixed;
+      left: 0;
+      top: 50px;
+      width: 280px;
+      height: calc(100% - 50px);
+      background: rgba(26, 26, 46, 0.98);
+      border-right: 1px solid #333;
+      z-index: 90;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #tree-panel.visible {
+      transform: translateX(0);
+    }
+
+    #tree-toggle {
+      position: fixed;
+      left: 10px;
+      top: 60px;
+      background: rgba(78, 205, 196, 0.9);
+      color: #1a1a2e;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      z-index: 95;
+      transition: left 0.3s ease, background 0.2s;
+    }
+
+    #tree-toggle:hover {
+      background: #45B7D1;
+    }
+
+    #tree-toggle.panel-open {
+      left: 290px;
+    }
+
+    #tree-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    #tree-header h3 {
+      margin: 0;
+      font-size: 14px;
+      color: #4ECDC4;
+    }
+
+    #tree-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 8px 0;
+    }
+
+    .tree-item {
+      display: flex;
+      align-items: center;
+      padding: 4px 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+      font-size: 13px;
+      color: #ccc;
+    }
+
+    .tree-item:hover {
+      background: rgba(78, 205, 196, 0.15);
+    }
+
+    .tree-item.selected {
+      background: rgba(78, 205, 196, 0.3);
+      color: #fff;
+    }
+
+    .tree-item.highlighted {
+      background: rgba(78, 205, 196, 0.25);
+      border-left: 3px solid #4ECDC4;
+    }
+
+    @keyframes tree-flash {
+      from {
+        background-color: rgba(255, 255, 0, 0.6);
+      }
+      to {
+        background-color: transparent;
+      }
+    }
+
+    .tree-flash {
+      animation: tree-flash 2s ease-out;
+    }
+
+    .tree-toggle-icon {
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 4px;
+      color: #888;
+      font-size: 10px;
+      transition: transform 0.2s;
+    }
+
+    .tree-toggle-icon.expanded {
+      transform: rotate(90deg);
+    }
+
+    .tree-toggle-icon.no-children {
+      visibility: hidden;
+    }
+
+    .tree-icon {
+      margin-right: 6px;
+      font-size: 14px;
+    }
+
+    .tree-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tree-children {
+      display: none;
+    }
+
+    .tree-children.expanded {
+      display: block;
+    }
+
+    /* Adjust graph container when tree is open */
+    #graph-container.tree-open {
+      left: 280px;
+      width: calc(100% - 280px);
+    }
   </style>
 </head>
 <body>
@@ -285,6 +432,13 @@
     <span id="selected-path">No project selected</span>
   </div>
   <div id="refresh-indicator">Refreshing...</div>
+  <button id="tree-toggle" title="Toggle file tree">📁</button>
+  <div id="tree-panel">
+    <div id="tree-header">
+      <h3>📂 File Tree</h3>
+    </div>
+    <div id="tree-content"></div>
+  </div>
   <div id="graph-container"></div>
   <div id="color-legend"></div>
   <div id="tooltip"></div>
