@@ -51,6 +51,94 @@ let currentGraphData = {
 let selectedProjectPath = null;
 let currentState = null;
 let selectedNode = null;
+let treeData = null; // Hierarchical tree structure
+let treeExpanded = new Set(); // Track expanded directories
+
+// Track nodes currently flashing (nodeId -> animation state)
+const flashingNodes = new Map();
+
+// Color interpolation helper for flash animation
+function lerpColor(color1, color2, t) {
+  const r1 = (color1 >> 16) & 0xFF, g1 = (color1 >> 8) & 0xFF, b1 = color1 & 0xFF;
+  const r2 = (color2 >> 16) & 0xFF, g2 = (color2 >> 8) & 0xFF, b2 = color2 & 0xFF;
+  const r = Math.round(r1 + (r2 - r1) * t);
+  const g = Math.round(g1 + (g2 - g1) * t);
+  const b = Math.round(b1 + (b2 - b1) * t);
+  return (r << 16) | (g << 8) | b;
+}
+
+// Find node ID from file path
+function findNodeIdFromPath(changedPath) {
+  // Normalize the path - remove leading .planning/ or ./
+  let normalizedPath = changedPath.replace(/^\.\//, '').replace(/^\.planning\//, '');
+
+  // Search currentGraphData.nodes for matching path property
+  const node = currentGraphData.nodes.find(n => {
+    if (!n.path) return false;
+    const nodePath = n.path.replace(/^\.\//, '').replace(/^\.planning\//, '');
+    return nodePath === normalizedPath;
+  });
+
+  return node ? node.id : null;
+}
+
+// Flash a node when its file changes
+function flashNode(nodeId) {
+  const node = currentGraphData.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+
+  // Get the THREE object - 3d-force-graph stores them on node.__threeObj
+  const threeObj = node.__threeObj;
+  if (!threeObj) return;
+
+  // Find the material to animate
+  let material;
+  if (threeObj.material) {
+    material = threeObj.material;
+  } else if (threeObj.children) {
+    // For groups, find first mesh with material
+    const mesh = threeObj.children.find(c => c.material);
+    if (mesh) material = mesh.material;
+  }
+  if (!material) return;
+
+  // Cancel any existing animation for this node
+  if (flashingNodes.has(nodeId)) {
+    const existingAnimation = flashingNodes.get(nodeId);
+    if (existingAnimation.rafId) {
+      cancelAnimationFrame(existingAnimation.rafId);
+    }
+  }
+
+  // Store original color
+  const originalColor = material.color.getHex();
+  const flashColor = 0xFFFF00; // Bright yellow
+
+  // Animate
+  const duration = 2000;
+  const startTime = Date.now();
+
+  function animate() {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // Ease out: start bright, fade to original
+    const t = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    material.color.setHex(lerpColor(flashColor, originalColor, t));
+
+    if (progress < 1) {
+      const rafId = requestAnimationFrame(animate);
+      flashingNodes.set(nodeId, { rafId, startTime });
+    } else {
+      flashingNodes.delete(nodeId);
+    }
+  }
+
+  // Start with bright flash
+  material.color.setHex(flashColor);
+  const rafId = requestAnimationFrame(animate);
+  flashingNodes.set(nodeId, { rafId, startTime });
+}
 
 // Calculate connection count for each node
 function calculateConnectionCounts(graphData) {
@@ -162,6 +250,7 @@ const Graph = ForceGraph3D()(container)
     // Directories: Use box/cube geometry with folder-like appearance
     if (node.type === 'directory') {
       const group = new THREE.Group();
+      group.name = node.id;
 
       // Main folder body (slightly flattened box)
       const bodyGeometry = new THREE.BoxGeometry(size * 1.5, size * 1.2, size * 0.8);
@@ -171,6 +260,7 @@ const Graph = ForceGraph3D()(container)
         opacity: 0.85
       });
       const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+      body.name = node.id + '-body';
 
       // Folder tab (small box on top)
       const tabGeometry = new THREE.BoxGeometry(size * 0.6, size * 0.3, size * 0.8);
@@ -203,6 +293,7 @@ const Graph = ForceGraph3D()(container)
         opacity: 0.85
       });
       const mesh = new THREE.Mesh(geometry, material);
+      mesh.name = node.id;
 
       // Add wireframe for clarity
       const edges = new THREE.EdgesGeometry(geometry);
@@ -321,7 +412,9 @@ const Graph = ForceGraph3D()(container)
 function handleResize() {
   const toolbar = document.getElementById('toolbar');
   const toolbarHeight = toolbar ? toolbar.offsetHeight : 50;
-  Graph.width(window.innerWidth);
+  const treePanel = document.getElementById('tree-panel');
+  const treeWidth = treePanel && treePanel.classList.contains('visible') ? 280 : 0;
+  Graph.width(window.innerWidth - treeWidth);
   Graph.height(window.innerHeight - toolbarHeight);
 }
 
@@ -416,6 +509,9 @@ function buildGraphFromProject(projectData) {
   // Process directory structure
   const { directory } = projectData;
   if (directory && directory.nodes) {
+    // Store directory data for tree building
+    storedDirectoryData = directory;
+
     for (const dirNode of directory.nodes) {
       addNode({
         id: dirNode.id,
@@ -478,6 +574,16 @@ function updateGraph(graphData) {
   setTimeout(() => {
     Graph.zoomToFit(400);
   }, 500);
+
+  // Build and update tree panel
+  if (storedDirectoryData) {
+    treeData = buildTreeStructure(storedDirectoryData);
+    // Auto-expand root directory
+    if (treeData && treeData.length > 0) {
+      treeExpanded.add(treeData[0].id);
+    }
+    updateTreePanel();
+  }
 }
 
 // Load project and update graph
@@ -697,6 +803,11 @@ async function showDetailsPanel(node) {
   const title = document.getElementById('panel-title');
   const content = document.getElementById('panel-content');
 
+  // Sync with tree panel - highlight the node in tree
+  if (node.type === 'directory' || node.type === 'file') {
+    highlightTreeItem(node.id);
+  }
+
   title.textContent = node.name;
 
   let html = `<p><strong>Type:</strong> <span style="color: ${getNodeColor(node)}; text-transform: capitalize;">${node.type}</span></p>`;
@@ -890,6 +1001,14 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
   window.electronAPI.onFilesChanged((data) => {
     console.log('Files changed:', data);
     if (selectedProjectPath) {
+      // Flash the changed file node if it exists in the graph
+      if (data.path) {
+        const nodeId = findNodeIdFromPath(data.path);
+        if (nodeId) {
+          flashNode(nodeId);
+        }
+      }
+
       showRefreshIndicator();
       loadProject(selectedProjectPath);
     }
@@ -898,5 +1017,260 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
 
 // Load recent projects on startup
 updateRecentProjects();
+
+// =====================================================
+// TREE PANEL FUNCTIONALITY
+// =====================================================
+
+// Build hierarchical tree structure from flat directory data
+function buildTreeStructure(directoryData) {
+  if (!directoryData || !directoryData.nodes) return null;
+
+  const nodeMap = new Map();
+  const roots = [];
+
+  // Create map of all nodes
+  for (const node of directoryData.nodes) {
+    nodeMap.set(node.id, {
+      ...node,
+      children: []
+    });
+  }
+
+  // Build parent-child relationships
+  for (const link of directoryData.links) {
+    const parent = nodeMap.get(link.source);
+    const child = nodeMap.get(link.target);
+    if (parent && child) {
+      parent.children.push(child);
+    }
+  }
+
+  // Find root nodes (nodes with no parent)
+  const childIds = new Set(directoryData.links.map(l => l.target));
+  for (const node of directoryData.nodes) {
+    if (!childIds.has(node.id)) {
+      roots.push(nodeMap.get(node.id));
+    }
+  }
+
+  // Sort children: directories first, then alphabetically
+  function sortChildren(node) {
+    node.children.sort((a, b) => {
+      if (a.type === 'directory' && b.type !== 'directory') return -1;
+      if (a.type !== 'directory' && b.type === 'directory') return 1;
+      return a.name.localeCompare(b.name);
+    });
+    node.children.forEach(sortChildren);
+    return node;
+  }
+
+  roots.forEach(sortChildren);
+  return roots;
+}
+
+// Get icon for tree item
+function getTreeIcon(node) {
+  if (node.type === 'directory') {
+    return treeExpanded.has(node.id) ? '📂' : '📁';
+  }
+  // File icons by extension
+  const extIcons = {
+    '.md': '📝',
+    '.js': '📜',
+    '.ts': '📘',
+    '.json': '📋',
+    '.html': '🌐',
+    '.css': '🎨',
+    '.yaml': '⚙️',
+    '.yml': '⚙️',
+    '.txt': '📄'
+  };
+  return extIcons[node.extension] || '📄';
+}
+
+// Get color for tree item
+function getTreeColor(node) {
+  if (node.type === 'directory') return '#BB8FCE';
+  return extensionColors[node.extension] || '#DDA0DD';
+}
+
+// Render tree recursively
+function renderTree(nodes, depth = 0) {
+  let html = '';
+  const indent = depth * 16;
+
+  for (const node of nodes) {
+    const hasChildren = node.children && node.children.length > 0;
+    const isExpanded = treeExpanded.has(node.id);
+    const isSelected = selectedNode && selectedNode.id === node.id;
+
+    html += `<div class="tree-item ${isSelected ? 'selected' : ''}"
+                  data-node-id="${node.id}"
+                  style="padding-left: ${indent + 8}px">
+      <span class="tree-toggle-icon ${isExpanded ? 'expanded' : ''} ${!hasChildren ? 'no-children' : ''}"
+            data-node-id="${node.id}">▶</span>
+      <span class="tree-icon" style="color: ${getTreeColor(node)}">${getTreeIcon(node)}</span>
+      <span class="tree-name">${node.name}</span>
+    </div>`;
+
+    if (hasChildren) {
+      html += `<div class="tree-children ${isExpanded ? 'expanded' : ''}" data-parent-id="${node.id}">
+        ${renderTree(node.children, depth + 1)}
+      </div>`;
+    }
+  }
+
+  return html;
+}
+
+// Update tree display
+function updateTreePanel() {
+  const content = document.getElementById('tree-content');
+  if (!content || !treeData) return;
+
+  content.innerHTML = renderTree(treeData);
+
+  // Add click handlers for tree items
+  content.querySelectorAll('.tree-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const nodeId = item.dataset.nodeId;
+
+      // If clicking on toggle icon, just toggle expand/collapse
+      if (e.target.classList.contains('tree-toggle-icon')) {
+        toggleTreeExpand(nodeId);
+        return;
+      }
+
+      // Otherwise, select the node and fly to it in graph
+      selectTreeItem(nodeId);
+    });
+  });
+
+  // Add double-click to expand/collapse directories
+  content.querySelectorAll('.tree-item').forEach(item => {
+    item.addEventListener('dblclick', (e) => {
+      const nodeId = item.dataset.nodeId;
+      const node = findNodeById(nodeId);
+      if (node && node.type === 'directory') {
+        toggleTreeExpand(nodeId);
+      }
+    });
+  });
+}
+
+// Find node in graph data by ID
+function findNodeById(nodeId) {
+  return currentGraphData.nodes.find(n => n.id === nodeId);
+}
+
+// Toggle expand/collapse for a directory
+function toggleTreeExpand(nodeId) {
+  if (treeExpanded.has(nodeId)) {
+    treeExpanded.delete(nodeId);
+  } else {
+    treeExpanded.add(nodeId);
+  }
+  updateTreePanel();
+}
+
+// Expand all parents of a node
+function expandParentsOf(nodeId) {
+  // Find the path to this node from root
+  function findPath(nodes, targetId, path = []) {
+    for (const node of nodes) {
+      if (node.id === targetId) {
+        return [...path, node.id];
+      }
+      if (node.children && node.children.length > 0) {
+        const found = findPath(node.children, targetId, [...path, node.id]);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
+  if (!treeData) return;
+  const path = findPath(treeData, nodeId);
+  if (path) {
+    // Expand all nodes in path except the target itself
+    path.slice(0, -1).forEach(id => treeExpanded.add(id));
+  }
+}
+
+// Select a tree item and fly to it in graph
+function selectTreeItem(nodeId) {
+  const graphNode = findNodeById(nodeId);
+  if (!graphNode) return;
+
+  // Update visual selection in tree
+  document.querySelectorAll('.tree-item').forEach(item => {
+    item.classList.remove('selected');
+    if (item.dataset.nodeId === nodeId) {
+      item.classList.add('selected');
+    }
+  });
+
+  // Fly to node in graph
+  if (graphNode.x !== undefined) {
+    const distance = 50 + getNodeSize(graphNode, connectionCounts) * 4;
+    const distRatio = 1 + distance / Math.hypot(graphNode.x || 0, graphNode.y || 0, graphNode.z || 0);
+    Graph.cameraPosition(
+      {
+        x: (graphNode.x || 0) * distRatio,
+        y: (graphNode.y || 0) * distRatio,
+        z: (graphNode.z || 0) * distRatio
+      },
+      graphNode,
+      1000
+    );
+  }
+
+  // Show details panel
+  showDetailsPanel(graphNode);
+}
+
+// Highlight a node in the tree (called when graph node is clicked)
+function highlightTreeItem(nodeId) {
+  // Expand parents first
+  expandParentsOf(nodeId);
+  updateTreePanel();
+
+  // Scroll to and highlight the item
+  setTimeout(() => {
+    const treeContent = document.getElementById('tree-content');
+    const treeItems = document.querySelectorAll('.tree-item');
+
+    treeItems.forEach(item => {
+      item.classList.remove('selected', 'highlighted');
+      if (item.dataset.nodeId === nodeId) {
+        item.classList.add('selected');
+        // Scroll into view
+        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  }, 50);
+}
+
+// Tree toggle button handler
+document.getElementById('tree-toggle').addEventListener('click', () => {
+  const panel = document.getElementById('tree-panel');
+  const toggle = document.getElementById('tree-toggle');
+  const graphContainer = document.getElementById('graph-container');
+
+  panel.classList.toggle('visible');
+  toggle.classList.toggle('panel-open');
+  graphContainer.classList.toggle('tree-open');
+
+  // Update toggle icon
+  toggle.textContent = panel.classList.contains('visible') ? '◀' : '📁';
+
+  // Resize graph
+  setTimeout(() => handleResize(), 300);
+});
+
+// Store directory data for tree building
+let storedDirectoryData = null;
 
 console.log('GSD Viewer initialized - select a project folder to visualize');
