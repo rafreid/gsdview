@@ -3,6 +3,7 @@ const path = require('path');
 const { parseRoadmap } = require('./parsers/roadmap-parser');
 const { parseRequirements } = require('./parsers/requirements-parser');
 const { parseDirectory, flattenTree } = require('./parsers/directory-parser');
+const { parseState } = require('./parsers/state-parser');
 
 let mainWindow;
 
@@ -82,11 +83,13 @@ app.whenReady().then(() => {
       const requirements = parseRequirements(planningPath);
       const directory = parseDirectory(planningPath);
       const dirFlattened = flattenTree(directory.tree);
+      const state = parseState(planningPath);
 
       return {
         roadmap,
         requirements,
         directory: { ...directory, ...dirFlattened },
+        state,
         projectPath
       };
     } catch (error) {

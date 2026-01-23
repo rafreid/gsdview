@@ -1,4 +1,5 @@
 import ForceGraph3D from '3d-force-graph';
+import * as THREE from 'three';
 
 // Color palette by node type (WCAG AA compliant against #1a1a2e background)
 const nodeColors = {
@@ -9,6 +10,14 @@ const nodeColors = {
   requirement: '#F7DC6F', // Gold - specifications
   file: '#DDA0DD',       // Plum - source references
   directory: '#BB8FCE'   // Purple - directories
+};
+
+// Status-based colors (progress visualization)
+const statusColors = {
+  complete: '#2ECC71',      // Green - done
+  'in-progress': '#F39C12', // Yellow/Orange - active
+  pending: '#95A5A6',       // Gray - not started
+  blocked: '#E74C3C'        // Red - blocked
 };
 
 // Default color for unknown types
@@ -22,8 +31,9 @@ let currentGraphData = {
   links: []
 };
 
-// Store selected project path
+// Store selected project path and state
 let selectedProjectPath = null;
+let currentState = null;
 
 // Calculate connection count for each node
 function calculateConnectionCounts(graphData) {
@@ -52,19 +62,49 @@ function getNodeSize(node, connectionCounts) {
   return minSize + (maxSize - minSize) * scale;
 }
 
-// Get link color based on source node type
+// Get node color based on type and status
+function getNodeColor(node) {
+  // For phases, plans, tasks, requirements - use status colors if available
+  const statusTypes = ['phase', 'plan', 'task', 'requirement'];
+  if (statusTypes.includes(node.type) && node.status) {
+    // Check if this is the current active phase
+    if (node.type === 'phase' && currentState && currentState.currentPhase) {
+      const phaseNum = parseInt(node.id.replace('phase-', ''), 10);
+      if (phaseNum === currentState.currentPhase && node.status !== 'complete') {
+        return statusColors['in-progress'];
+      }
+    }
+    return statusColors[node.status] || nodeColors[node.type] || DEFAULT_NODE_COLOR;
+  }
+  return nodeColors[node.type] || DEFAULT_NODE_COLOR;
+}
+
+// Get link color based on source node and link type
 function getLinkColor(link, graphData) {
   const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+  const targetId = typeof link.target === 'object' ? link.target.id : link.target;
   const sourceNode = graphData.nodes.find(n => n.id === sourceId);
+  const targetNode = graphData.nodes.find(n => n.id === targetId);
+
+  // Red for blocked connections
+  if (link.type === 'blocked' || (targetNode && targetNode.status === 'blocked')) {
+    return '#E74C3C'; // Red
+  }
+
   if (sourceNode) {
-    const baseColor = nodeColors[sourceNode.type] || DEFAULT_NODE_COLOR;
+    const baseColor = getNodeColor(sourceNode);
     return baseColor + '66'; // 40% opacity
   }
   return 'rgba(255,255,255,0.2)';
 }
 
-// Get link width based on hierarchy level
+// Get link width based on hierarchy level and type
 function getLinkWidth(link, graphData) {
+  // Blocked links are thicker for visibility
+  if (link.type === 'blocked') {
+    return 3;
+  }
+
   const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
   const sourceNode = graphData.nodes.find(n => n.id === sourceId);
   if (sourceNode) {
@@ -85,17 +125,50 @@ const Graph = ForceGraph3D()(container)
   .graphData(currentGraphData)
   .nodeLabel(node => {
     let label = node.name;
+    if (node.status) label += ` [${node.status}]`;
     if (node.description) label += `\n${node.description}`;
     if (node.goal) label += `\n${node.goal}`;
     return label;
   })
-  .nodeColor(node => nodeColors[node.type] || DEFAULT_NODE_COLOR)
+  .nodeColor(node => getNodeColor(node))
   .nodeVal(node => getNodeSize(node, connectionCounts))
+  .nodeThreeObject(node => {
+    // Create custom geometry for current phase (glow effect)
+    if (node.type === 'phase' && currentState && currentState.currentPhase) {
+      const phaseNum = parseInt(node.id.replace('phase-', ''), 10);
+      if (phaseNum === currentState.currentPhase && node.status !== 'complete') {
+        // Create glowing sphere for current phase
+        const size = getNodeSize(node, connectionCounts);
+        const geometry = new THREE.SphereGeometry(size);
+        const material = new THREE.MeshBasicMaterial({
+          color: statusColors['in-progress'],
+          transparent: true,
+          opacity: 0.8
+        });
+        const sphere = new THREE.Mesh(geometry, material);
+
+        // Add outer glow ring
+        const ringGeometry = new THREE.RingGeometry(size * 1.2, size * 1.8, 32);
+        const ringMaterial = new THREE.MeshBasicMaterial({
+          color: statusColors['in-progress'],
+          transparent: true,
+          opacity: 0.4,
+          side: THREE.DoubleSide
+        });
+        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+        sphere.add(ring);
+
+        return sphere;
+      }
+    }
+    return false; // Use default sphere
+  })
   .linkColor(link => getLinkColor(link, currentGraphData))
   .linkWidth(link => getLinkWidth(link, currentGraphData))
   .linkOpacity(0.6)
   .linkDirectionalArrowLength(3.5)
   .linkDirectionalArrowRelPos(1)
+  .linkLineDash(link => link.type === 'blocked' ? [2, 2] : null)
   .backgroundColor('#1a1a2e')
   .showNavInfo(false);
 
@@ -115,6 +188,11 @@ function buildGraphFromProject(projectData) {
   const nodes = [];
   const links = [];
   const nodeMap = new Map();
+
+  // Store state for coloring
+  if (projectData.state) {
+    currentState = projectData.state;
+  }
 
   function addNode(node) {
     if (!nodeMap.has(node.id)) {
@@ -213,6 +291,29 @@ function buildGraphFromProject(projectData) {
     }
   }
 
+  // Add blocker links if any
+  const { state } = projectData;
+  if (state && state.blockers && state.blockers.length > 0) {
+    for (const blocker of state.blockers) {
+      // Add blocker as a node
+      const blockerNode = addNode({
+        id: blocker.id,
+        name: `Blocker: ${blocker.description.substring(0, 30)}...`,
+        type: 'blocker',
+        status: 'blocked',
+        description: blocker.description
+      });
+
+      // Link blocker to current phase
+      if (state.currentPhase) {
+        const currentPhaseId = `phase-${state.currentPhase}`;
+        if (nodeMap.has(currentPhaseId)) {
+          addLink(blockerNode.id, currentPhaseId, 'blocked');
+        }
+      }
+    }
+  }
+
   return { nodes, links };
 }
 
@@ -223,6 +324,7 @@ function updateGraph(graphData) {
 
   Graph
     .graphData(graphData)
+    .nodeColor(node => getNodeColor(node))
     .nodeVal(node => getNodeSize(node, connectionCounts))
     .linkColor(link => getLinkColor(link, graphData))
     .linkWidth(link => getLinkWidth(link, graphData));
@@ -280,15 +382,16 @@ document.getElementById('select-folder-btn').addEventListener('click', async () 
   }
 });
 
-// Populate color legend
+// Populate color legend with both type and status colors
 function populateColorLegend() {
   const legend = document.getElementById('color-legend');
   if (!legend) return;
 
-  const title = document.createElement('div');
-  title.className = 'legend-title';
-  title.textContent = 'Node Types';
-  legend.appendChild(title);
+  // Node types section
+  const typeTitle = document.createElement('div');
+  typeTitle.className = 'legend-title';
+  typeTitle.textContent = 'Node Types';
+  legend.appendChild(typeTitle);
 
   const formatTypeName = (type) => type.charAt(0).toUpperCase() + type.slice(1);
 
@@ -303,6 +406,37 @@ function populateColorLegend() {
     const label = document.createElement('span');
     label.className = 'legend-label';
     label.textContent = formatTypeName(type);
+
+    item.appendChild(colorCircle);
+    item.appendChild(label);
+    legend.appendChild(item);
+  }
+
+  // Status section
+  const statusTitle = document.createElement('div');
+  statusTitle.className = 'legend-title';
+  statusTitle.style.marginTop = '12px';
+  statusTitle.textContent = 'Status';
+  legend.appendChild(statusTitle);
+
+  const statusLabels = {
+    complete: 'Complete',
+    'in-progress': 'In Progress',
+    pending: 'Pending',
+    blocked: 'Blocked'
+  };
+
+  for (const [status, color] of Object.entries(statusColors)) {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+
+    const colorCircle = document.createElement('div');
+    colorCircle.className = 'legend-color';
+    colorCircle.style.backgroundColor = color;
+
+    const label = document.createElement('span');
+    label.className = 'legend-label';
+    label.textContent = statusLabels[status];
 
     item.appendChild(colorCircle);
     item.appendChild(label);
