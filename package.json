@@ -1,0 +1,14 @@
+{
+  "name": "gsd-viewer",
+  "version": "0.1.0",
+  "description": "3D visualization of GSD project structure",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^28.0.0"
+  },
+  "author": "",
+  "license": "MIT"
+}
