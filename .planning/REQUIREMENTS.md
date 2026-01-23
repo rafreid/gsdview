@@ -16,8 +16,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### GSD Structure
 
-- [ ] **STR-01**: Phase → Plan → Task hierarchy is visualized as connected nodes
-- [ ] **STR-02**: Requirements → Phases mapping is visualized
+- [ ] **STR-01**: Phase -> Plan -> Task hierarchy is visualized as connected nodes
+- [ ] **STR-02**: Requirements -> Phases mapping is visualized
 - [ ] **STR-03**: File dependency relationships are detected and shown
 - [ ] **STR-04**: Directory tree of .planning/ folder is represented as nodes
 
@@ -92,35 +92,35 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | GRF-01 | Phase 1 | Pending |
-| GRF-02 | Phase 1 | Pending |
-| GRF-03 | Phase 1 | Pending |
-| GRF-04 | Phase 1 | Pending |
-| STR-01 | Phase 2 | Pending |
-| STR-02 | Phase 2 | Pending |
-| STR-03 | Phase 2 | Pending |
-| STR-04 | Phase 2 | Pending |
-| STA-01 | Phase 3 | Pending |
-| STA-02 | Phase 3 | Pending |
-| STA-03 | Phase 3 | Pending |
-| NAV-01 | Phase 4 | Pending |
-| NAV-02 | Phase 4 | Pending |
-| NAV-03 | Phase 4 | Pending |
-| NAV-04 | Phase 4 | Pending |
+| GRF-02 | Phase 2 | Pending |
+| GRF-03 | Phase 2 | Pending |
+| GRF-04 | Phase 2 | Pending |
+| STR-01 | Phase 3 | Pending |
+| STR-02 | Phase 3 | Pending |
+| STR-03 | Phase 3 | Pending |
+| STR-04 | Phase 3 | Pending |
+| STA-01 | Phase 4 | Pending |
+| STA-02 | Phase 4 | Pending |
+| STA-03 | Phase 4 | Pending |
+| NAV-01 | Phase 1 | Pending |
+| NAV-02 | Phase 1 | Pending |
+| NAV-03 | Phase 1 | Pending |
+| NAV-04 | Phase 5 | Pending |
 | INT-01 | Phase 5 | Pending |
 | INT-02 | Phase 5 | Pending |
 | INT-03 | Phase 5 | Pending |
 | LIV-01 | Phase 6 | Pending |
 | LIV-02 | Phase 6 | Pending |
 | LIV-03 | Phase 6 | Pending |
-| APP-01 | Phase 7 | Pending |
-| APP-02 | Phase 7 | Pending |
-| APP-03 | Phase 7 | Pending |
+| APP-01 | Phase 1 | Pending |
+| APP-02 | Phase 6 | Pending |
+| APP-03 | Phase 6 | Pending |
 
 **Coverage:**
 - v1 requirements: 24 total
 - Mapped to phases: 24
-- Unmapped: 0 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-01-22*
-*Last updated: 2026-01-22 after initial definition*
+*Last updated: 2026-01-22 after roadmap creation*
