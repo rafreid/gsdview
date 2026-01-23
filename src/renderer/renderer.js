@@ -739,9 +739,15 @@ function updateGraph(graphData) {
   // Build and update tree panel
   if (storedDirectoryData) {
     treeData = buildTreeStructure(storedDirectoryData);
-    // Auto-expand root directory
+    // Auto-expand root and both top-level directories (.planning and src)
     if (treeData && treeData.length > 0) {
-      treeExpanded.add(treeData[0].id);
+      treeExpanded.add(treeData[0].id);  // Project root
+      // Expand children (should be .planning and src)
+      if (treeData[0].children) {
+        treeData[0].children.forEach(child => {
+          treeExpanded.add(child.id);
+        });
+      }
     }
     updateTreePanel();
   }
@@ -1259,10 +1265,20 @@ function getTreeIcon(node) {
   return extIcons[node.extension] || '📄';
 }
 
-// Get color for tree item
+// Get color for tree item based on sourceType
 function getTreeColor(node) {
-  if (node.type === 'directory') return '#BB8FCE';
-  return extensionColors[node.extension] || '#DDA0DD';
+  if (node.type === 'directory') {
+    if (node.sourceType === 'src') return '#5B9BD5';  // Cool steel blue for src/
+    if (node.sourceType === 'root') return '#FFFFFF'; // White for project root
+    return '#BB8FCE';  // Purple for .planning/ (existing)
+  }
+
+  // Files: apply sourceType tint to extension colors
+  let baseColor = extensionColors[node.extension] || '#DDA0DD';
+  if (node.sourceType === 'src') {
+    baseColor = applySourceTint(baseColor, 'src');
+  }
+  return baseColor;
 }
 
 // Render tree recursively
