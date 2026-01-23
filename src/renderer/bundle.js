@@ -83028,6 +83028,28 @@ ${node.goal}`;
     panel.classList.add("hidden");
     selectedNode = null;
   }
+  async function refreshDiffSection() {
+    if (!selectedNode || selectedNode.type !== "file") return;
+    if (!selectedProjectPath || !window.electronAPI || !window.electronAPI.getGitDiff) return;
+    const diffContent = document.getElementById("diff-view-content");
+    if (!diffContent) return;
+    let relativePath;
+    if (selectedNode.sourceType === "planning") {
+      relativePath = ".planning/" + selectedNode.path;
+    } else if (selectedNode.sourceType === "src") {
+      relativePath = "src/" + selectedNode.path;
+    } else {
+      relativePath = selectedNode.path;
+    }
+    try {
+      diffContent.innerHTML = '<div class="diff-status">Loading diff...</div>';
+      const diffResult = await window.electronAPI.getGitDiff(selectedProjectPath, relativePath);
+      diffContent.innerHTML = renderDiffView(diffResult);
+    } catch (err) {
+      console.error("Error refreshing diff:", err);
+      diffContent.innerHTML = '<div class="diff-status">Error loading diff</div>';
+    }
+  }
   document.getElementById("close-panel").addEventListener("click", hideDetailsPanel);
   document.addEventListener("keydown", (e2) => {
     if (e2.key === "Escape") {
@@ -83085,6 +83107,9 @@ ${node.goal}`;
         if (entry.nodeId) {
           flashNodeWithType(entry.nodeId, entry.event);
           flashTreeItem(entry.nodeId, entry.event);
+        }
+        if (selectedNode && selectedNode.type === "file" && entry.nodeId === selectedNode.id) {
+          refreshDiffSection();
         }
         showRefreshIndicator();
         await loadProject(selectedProjectPath);
@@ -83384,6 +83409,9 @@ ${node.goal}`;
     }
     setTimeout(() => handleResize(), 300);
   });
+  document.getElementById("stats-refresh")?.addEventListener("click", () => {
+    updateStatisticsPanel();
+  });
   setInterval(() => {
     if (activityEntries.length > 0) {
       updateActivityPanel();
@@ -83607,10 +83635,105 @@ ${file.count} changes (${file.events.created} created, ${file.events.modified} m
     showDetailsPanel(graphNode);
     highlightTreeItem(nodeId);
   }
+  function formatChartTime(timestamp) {
+    const date = new Date(timestamp);
+    const hours = date.getHours().toString().padStart(2, "0");
+    const mins = date.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${mins}`;
+  }
+  function formatChartTooltip(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+  function calculateTimeBuckets() {
+    if (activityEntries.length === 0) {
+      return { buckets: [], oldest: 0, newest: 0 };
+    }
+    const timestamps = activityEntries.map((e2) => e2.timestamp);
+    const oldest = Math.min(...timestamps);
+    const newest = Math.max(...timestamps);
+    const span = newest - oldest;
+    let bucketSize;
+    let maxBuckets;
+    if (span < 60 * 60 * 1e3) {
+      bucketSize = 5 * 60 * 1e3;
+      maxBuckets = 12;
+    } else if (span < 24 * 60 * 60 * 1e3) {
+      bucketSize = 30 * 60 * 1e3;
+      maxBuckets = 48;
+    } else {
+      bucketSize = 60 * 60 * 1e3;
+      maxBuckets = 24;
+    }
+    const effectiveOldest = Math.max(oldest, newest - 24 * 60 * 60 * 1e3);
+    const buckets = [];
+    const numBuckets = Math.min(Math.ceil((newest - effectiveOldest) / bucketSize) + 1, maxBuckets);
+    for (let i2 = 0; i2 < numBuckets; i2++) {
+      const bucketStart = effectiveOldest + i2 * bucketSize;
+      const bucketEnd = bucketStart + bucketSize;
+      buckets.push({
+        start: bucketStart,
+        end: bucketEnd,
+        count: 0
+      });
+    }
+    activityEntries.forEach((entry) => {
+      if (entry.timestamp < effectiveOldest) return;
+      for (const bucket of buckets) {
+        if (entry.timestamp >= bucket.start && entry.timestamp < bucket.end) {
+          bucket.count++;
+          break;
+        }
+      }
+    });
+    return { buckets, oldest: effectiveOldest, newest };
+  }
   function updateActivityChart() {
     const container2 = document.getElementById("stats-chart");
     if (!container2) return;
-    container2.innerHTML = '<div class="stats-empty">No activity data</div>';
+    if (activityEntries.length === 0) {
+      container2.innerHTML = '<div class="stats-empty">No activity data</div>';
+      return;
+    }
+    const { buckets, oldest, newest } = calculateTimeBuckets();
+    if (buckets.length === 0) {
+      container2.innerHTML = '<div class="stats-empty">No activity data</div>';
+      return;
+    }
+    if (activityEntries.length === 1) {
+      container2.innerHTML = `<div class="activity-chart">
+      <div class="chart-bars">
+        <div class="chart-bar" style="height: 100%" title="1 change at ${formatChartTooltip(activityEntries[0].timestamp)}">
+          <span class="bar-value">1</span>
+        </div>
+      </div>
+      <div class="chart-axis">
+        <span class="axis-start">${formatChartTime(activityEntries[0].timestamp)}</span>
+        <span class="axis-end">Now</span>
+      </div>
+    </div>`;
+      return;
+    }
+    const maxCount = Math.max(...buckets.map((b) => b.count), 1);
+    const barsHtml = buckets.map((bucket) => {
+      const heightPercent = Math.round(bucket.count / maxCount * 100);
+      const tooltipTime = formatChartTooltip(bucket.start);
+      const tooltipText = `${bucket.count} change${bucket.count !== 1 ? "s" : ""} at ${tooltipTime}`;
+      const effectiveHeight = bucket.count === 0 ? 2 : heightPercent;
+      const opacity = bucket.count === 0 ? 0.2 : 1;
+      return `<div class="chart-bar" style="height: ${effectiveHeight}%; opacity: ${opacity}" title="${tooltipText}">
+      ${bucket.count > 0 ? `<span class="bar-value">${bucket.count}</span>` : ""}
+    </div>`;
+    }).join("");
+    container2.innerHTML = `<div class="activity-chart">
+    <div class="chart-bars">
+      ${barsHtml}
+    </div>
+    <div class="chart-axis">
+      <span class="axis-start">${formatChartTime(oldest)}</span>
+      <span class="axis-end">Now</span>
+    </div>
+  </div>`;
   }
   var gitStatusData = { modified: [], staged: [], untracked: [] };
   var currentBranch = null;

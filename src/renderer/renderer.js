@@ -2289,6 +2289,11 @@ document.getElementById('statistics-toggle').addEventListener('click', () => {
   setTimeout(() => handleResize(), 300);
 });
 
+// Statistics refresh button handler
+document.getElementById('stats-refresh')?.addEventListener('click', () => {
+  updateStatisticsPanel();
+});
+
 // Update relative timestamps every 30 seconds
 setInterval(() => {
   if (activityEntries.length > 0) {
@@ -2608,11 +2613,142 @@ function handleRankingEntryClick(nodeId) {
   highlightTreeItem(nodeId);
 }
 
-// Placeholder function - implemented in Task 3
+// Format time for chart axis labels
+function formatChartTime(timestamp) {
+  const date = new Date(timestamp);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const mins = date.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${mins}`;
+}
+
+// Format tooltip time (more detailed)
+function formatChartTooltip(timestamp) {
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+// Calculate time buckets for activity chart
+function calculateTimeBuckets() {
+  if (activityEntries.length === 0) {
+    return { buckets: [], oldest: 0, newest: 0 };
+  }
+
+  // Find time range
+  const timestamps = activityEntries.map(e => e.timestamp);
+  const oldest = Math.min(...timestamps);
+  const newest = Math.max(...timestamps);
+  const span = newest - oldest;
+
+  // Determine bucket size based on activity span
+  let bucketSize;
+  let maxBuckets;
+
+  if (span < 60 * 60 * 1000) {
+    // < 1 hour: use 5-minute buckets (12 max)
+    bucketSize = 5 * 60 * 1000;
+    maxBuckets = 12;
+  } else if (span < 24 * 60 * 60 * 1000) {
+    // 1-24 hours: use 30-minute buckets
+    bucketSize = 30 * 60 * 1000;
+    maxBuckets = 48;
+  } else {
+    // > 24 hours: use 1-hour buckets, cap at 24 hours
+    bucketSize = 60 * 60 * 1000;
+    maxBuckets = 24;
+  }
+
+  // Cap to last 24 hours of data
+  const effectiveOldest = Math.max(oldest, newest - (24 * 60 * 60 * 1000));
+
+  // Create buckets
+  const buckets = [];
+  const numBuckets = Math.min(Math.ceil((newest - effectiveOldest) / bucketSize) + 1, maxBuckets);
+
+  for (let i = 0; i < numBuckets; i++) {
+    const bucketStart = effectiveOldest + (i * bucketSize);
+    const bucketEnd = bucketStart + bucketSize;
+    buckets.push({
+      start: bucketStart,
+      end: bucketEnd,
+      count: 0
+    });
+  }
+
+  // Populate buckets with activity counts
+  activityEntries.forEach(entry => {
+    if (entry.timestamp < effectiveOldest) return; // Skip old entries
+
+    for (const bucket of buckets) {
+      if (entry.timestamp >= bucket.start && entry.timestamp < bucket.end) {
+        bucket.count++;
+        break;
+      }
+    }
+  });
+
+  return { buckets, oldest: effectiveOldest, newest };
+}
+
+// Update activity over time chart
 function updateActivityChart() {
   const container = document.getElementById('stats-chart');
   if (!container) return;
-  container.innerHTML = '<div class="stats-empty">No activity data</div>';
+
+  if (activityEntries.length === 0) {
+    container.innerHTML = '<div class="stats-empty">No activity data</div>';
+    return;
+  }
+
+  const { buckets, oldest, newest } = calculateTimeBuckets();
+
+  if (buckets.length === 0) {
+    container.innerHTML = '<div class="stats-empty">No activity data</div>';
+    return;
+  }
+
+  // Handle single activity
+  if (activityEntries.length === 1) {
+    container.innerHTML = `<div class="activity-chart">
+      <div class="chart-bars">
+        <div class="chart-bar" style="height: 100%" title="1 change at ${formatChartTooltip(activityEntries[0].timestamp)}">
+          <span class="bar-value">1</span>
+        </div>
+      </div>
+      <div class="chart-axis">
+        <span class="axis-start">${formatChartTime(activityEntries[0].timestamp)}</span>
+        <span class="axis-end">Now</span>
+      </div>
+    </div>`;
+    return;
+  }
+
+  // Find max count for height calculation
+  const maxCount = Math.max(...buckets.map(b => b.count), 1);
+
+  // Generate bar HTML
+  const barsHtml = buckets.map(bucket => {
+    const heightPercent = Math.round((bucket.count / maxCount) * 100);
+    const tooltipTime = formatChartTooltip(bucket.start);
+    const tooltipText = `${bucket.count} change${bucket.count !== 1 ? 's' : ''} at ${tooltipTime}`;
+
+    // Don't show bars with 0 height, just show a minimal bar
+    const effectiveHeight = bucket.count === 0 ? 2 : heightPercent;
+    const opacity = bucket.count === 0 ? 0.2 : 1;
+
+    return `<div class="chart-bar" style="height: ${effectiveHeight}%; opacity: ${opacity}" title="${tooltipText}">
+      ${bucket.count > 0 ? `<span class="bar-value">${bucket.count}</span>` : ''}
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `<div class="activity-chart">
+    <div class="chart-bars">
+      ${barsHtml}
+    </div>
+    <div class="chart-axis">
+      <span class="axis-start">${formatChartTime(oldest)}</span>
+      <span class="axis-end">Now</span>
+    </div>
+  </div>`;
 }
 
 // Git status state
