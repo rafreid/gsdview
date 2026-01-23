@@ -358,6 +358,29 @@ function setTimelineToLive() {
   updateActivityPanelForTimeline();
 }
 
+// Placeholder for updateActivityPanelForTimeline (defined later with event handlers)
+function updateActivityPanelForTimeline() {
+  if (!activityEntries.length) return;
+
+  const entries = document.querySelectorAll('.activity-entry');
+  entries.forEach(entryEl => {
+    const timestamp = parseInt(entryEl.dataset.timestamp, 10);
+    if (timelinePosition !== null && timestamp > timelinePosition) {
+      entryEl.classList.add('future');
+    } else {
+      entryEl.classList.remove('future');
+    }
+  });
+}
+
+// Update graph to show file state at current timeline position
+// (Full implementation in Task 3)
+function updateGraphForTimeline() {
+  // Will be fully implemented in Task 3
+  // For now, just log the state
+  console.log('[Timeline] Position:', timelinePosition === null ? 'LIVE' : new Date(timelinePosition).toLocaleTimeString());
+}
+
 // Get relative path for display in activity feed
 function getRelativePath(absolutePath) {
   if (!absolutePath) return '';
@@ -1958,6 +1981,13 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
         refreshDiffSection();
       }
 
+      // Update timeline UI (range may have expanded with new entry)
+      // If in live mode, timeline stays at live; if historical, don't auto-advance
+      if (timelinePosition === null) {
+        // In live mode - just update UI to reflect new range
+        updateTimelineUI();
+      }
+
       showRefreshIndicator();
       await loadProject(selectedProjectPath);
 
@@ -2543,6 +2573,99 @@ function initActivityInteractions() {
 
 // Initialize activity interactions
 initActivityInteractions();
+
+// =====================================================
+// TIMELINE REPLAY FUNCTIONALITY
+// =====================================================
+
+// Timeline scrubber input handler
+document.getElementById('timeline-scrubber')?.addEventListener('input', (e) => {
+  const sliderValue = parseInt(e.target.value, 10);
+  const { min, max } = getTimelineRange();
+
+  if (sliderValue >= 100) {
+    // At max = live mode
+    setTimelineToLive();
+  } else {
+    // Historical mode
+    const range = max - min;
+    if (range > 0) {
+      timelinePosition = min + (sliderValue / 100) * range;
+    } else {
+      timelinePosition = min;
+    }
+
+    // Stop playback if manually scrubbing
+    if (isTimelinePlaying) {
+      clearInterval(playbackInterval);
+      playbackInterval = null;
+      isTimelinePlaying = false;
+    }
+
+    updateTimelineUI();
+    updateGraphForTimeline();
+    updateActivityPanelForTimeline();
+  }
+});
+
+// Play/pause button click handler
+document.getElementById('timeline-play')?.addEventListener('click', () => {
+  if (isTimelinePlaying) {
+    // Pause playback
+    clearInterval(playbackInterval);
+    playbackInterval = null;
+    isTimelinePlaying = false;
+  } else {
+    // Start playback
+    isTimelinePlaying = true;
+
+    // If at live position, jump to oldest entry first
+    if (timelinePosition === null && activityEntries.length > 0) {
+      const { min } = getTimelineRange();
+      timelinePosition = min;
+    }
+
+    // Start playback interval
+    playbackInterval = setInterval(playbackStep, PLAYBACK_SPEED);
+  }
+
+  updateTimelineUI();
+});
+
+// Playback step function - advances to next activity entry
+function playbackStep() {
+  if (!isTimelinePlaying || activityEntries.length === 0) {
+    // Stop if not playing or no entries
+    clearInterval(playbackInterval);
+    playbackInterval = null;
+    isTimelinePlaying = false;
+    updateTimelineUI();
+    return;
+  }
+
+  // Find next activity entry after current timelinePosition
+  // activityEntries is sorted newest first, so we search from end to find next
+  const sortedByTime = [...activityEntries].sort((a, b) => a.timestamp - b.timestamp);
+
+  let nextEntry = null;
+  for (const entry of sortedByTime) {
+    if (entry.timestamp > timelinePosition) {
+      nextEntry = entry;
+      break;
+    }
+  }
+
+  if (nextEntry) {
+    // Advance to next entry's timestamp
+    timelinePosition = nextEntry.timestamp;
+    updateTimelineUI();
+    updateGraphForTimeline();
+    updateActivityPanelForTimeline();
+  } else {
+    // No more entries - stop playback and switch to live mode
+    setTimelineToLive();
+  }
+}
 
 // =====================================================
 // STATISTICS PANEL FUNCTIONALITY
