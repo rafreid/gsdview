@@ -141,7 +141,12 @@ Plans:
   1. Graph displays nodes from both .planning/ and src/ directories
   2. File tree panel shows combined .planning/ + src/ structure
   3. File watcher detects and updates graph when files change in either directory
-**Plans**: Not yet planned
+**Plans**: 3 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Multi-directory parsing with source markers
+- [ ] 07-02-PLAN.md — Extended file watcher for both directories
+- [ ] 07-03-PLAN.md — Visual differentiation and unified tree panel
 
 ### Phase 8: Activity Feed & Change Indicators
 **Goal**: User sees real-time feed of file changes with distinct visual cues for create/modify/delete
@@ -216,7 +221,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 7. Expanded File Scope | 0/— | Pending | — |
+| 7. Expanded File Scope | 0/3 | Planned | — |
 | 8. Activity Feed & Change Indicators | 0/— | Pending | — |
 | 9. Heat Map Visualization | 0/— | Pending | — |
 | 10. Git Integration | 0/— | Pending | — |
@@ -225,4 +230,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-23 (v1.1 phases added)*
+*Last updated: 2026-01-23 (Phase 7 planned)*
