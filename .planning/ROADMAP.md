@@ -12,12 +12,23 @@ Transform a GSD project's .planning/ folder into an explorable 3D force-directed
 
 Decimal phases appear between their surrounding integers in numeric order.
 
+### v1.0 (Completed)
+
 - [x] **Phase 1: Foundation** - Electron app with basic 3d-force-graph rendering and navigation
 - [x] **Phase 2: Graph Rendering** - Color-coded nodes, connection-based sizing, styled edges
 - [x] **Phase 3: GSD Parsing** - Parse .planning/ structure into hierarchical nodes
 - [x] **Phase 4: State Visualization** - Progress colors, current phase highlight, blocker indicators
 - [x] **Phase 5: Interactions** - Details panel, tooltips, fly-to navigation, external editor launch
 - [x] **Phase 6: Polish** - Live file watching, recent projects, window state persistence
+
+### v1.1 (Current)
+
+- [ ] **Phase 7: Expanded File Scope** - Include src/ directory in graph and file watcher
+- [ ] **Phase 8: Activity Feed & Change Indicators** - Live activity feed with change type animations
+- [ ] **Phase 9: Heat Map Visualization** - Recent changes glow hot, cool down over time
+- [ ] **Phase 10: Git Integration** - Show uncommitted/staged changes and recent commits
+- [ ] **Phase 11: Statistics & Diff Preview** - Activity analytics and file diffs
+- [ ] **Phase 12: Timeline Replay** - Scrub through activity history with playback controls
 
 ## Phase Details
 
@@ -120,10 +131,77 @@ Plans:
 - [x] 06-04-PLAN.md — Recent projects storage and UI
 - [x] 06-05-PLAN.md — Window state persistence
 
+---
+
+### Phase 7: Expanded File Scope
+**Goal**: User can visualize both .planning/ and src/ directories in the graph with live file tracking
+**Depends on**: Phase 6 (v1.0 foundation)
+**Requirements**: EXP-01, EXP-02, EXP-03
+**Success Criteria** (what must be TRUE):
+  1. Graph displays nodes from both .planning/ and src/ directories
+  2. File tree panel shows combined .planning/ + src/ structure
+  3. File watcher detects and updates graph when files change in either directory
+**Plans**: Not yet planned
+
+### Phase 8: Activity Feed & Change Indicators
+**Goal**: User sees real-time feed of file changes with distinct visual cues for create/modify/delete
+**Depends on**: Phase 7
+**Requirements**: FED-01, FED-02, FED-03, FED-04, CHG-01, CHG-02, CHG-03
+**Success Criteria** (what must be TRUE):
+  1. Live activity feed panel shows each file change with timestamp and change type
+  2. Feed auto-scrolls to show newest changes at the top
+  3. Clicking an activity entry navigates camera to that node in the graph
+  4. Created files pulse green, modified files pulse yellow/orange, deleted files pulse red and fade out
+**Plans**: Not yet planned
+
+### Phase 9: Heat Map Visualization
+**Goal**: User can visually identify recently active files by heat color that decays over time
+**Depends on**: Phase 8
+**Requirements**: HET-01, HET-02, HET-03
+**Success Criteria** (what must be TRUE):
+  1. Recently changed files glow with hot colors (red/orange)
+  2. File heat color transitions smoothly from hot to cool over time (red → orange → yellow → normal)
+  3. User can adjust heat decay rate to control how fast files cool down
+**Plans**: Not yet planned
+
+### Phase 10: Git Integration
+**Goal**: User can see git status directly in the graph (uncommitted, staged, commits, branch)
+**Depends on**: Phase 7 (independent of activity features)
+**Requirements**: GIT-01, GIT-02, GIT-03, GIT-04
+**Success Criteria** (what must be TRUE):
+  1. File nodes show indicator for uncommitted changes (modified files)
+  2. Staged files are visually distinct from unstaged files
+  3. Recent commits appear as nodes in the graph showing bundled changes
+  4. Current git branch name is visible in the UI header
+**Plans**: Not yet planned
+
+### Phase 11: Statistics & Diff Preview
+**Goal**: User can analyze activity patterns and see what changed in files
+**Depends on**: Phase 8 (needs activity data)
+**Requirements**: STS-01, STS-02, STS-03, DIF-01, DIF-02, DIF-03
+**Success Criteria** (what must be TRUE):
+  1. Statistics panel displays most frequently edited files with change counts
+  2. Activity over time chart shows editing patterns
+  3. Details panel shows file diff for recently changed files
+  4. Diff display highlights added lines in green and removed lines in red
+**Plans**: Not yet planned
+
+### Phase 12: Timeline Replay
+**Goal**: User can scrub through activity history and replay file changes over time
+**Depends on**: Phase 11 (needs full activity tracking)
+**Requirements**: TML-01, TML-02, TML-03
+**Success Criteria** (what must be TRUE):
+  1. Timeline scrubber allows navigating backward/forward through activity history
+  2. Graph state updates to reflect file state at selected point in time
+  3. Timeline has play/pause controls for automatic activity replay
+**Plans**: Not yet planned
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
+
+### v1.0 (Complete)
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -134,6 +212,17 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 5. Interactions | 4/4 | Complete | 2026-01-22 |
 | 6. Polish | 5/5 | Complete | 2026-01-22 |
 
+### v1.1 (Current)
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 7. Expanded File Scope | 0/— | Pending | — |
+| 8. Activity Feed & Change Indicators | 0/— | Pending | — |
+| 9. Heat Map Visualization | 0/— | Pending | — |
+| 10. Git Integration | 0/— | Pending | — |
+| 11. Statistics & Diff Preview | 0/— | Pending | — |
+| 12. Timeline Replay | 0/— | Pending | — |
+
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-22*
+*Last updated: 2026-01-23 (v1.1 phases added)*

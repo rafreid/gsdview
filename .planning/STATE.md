@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-23)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.1 Real-time Activity Visualization
+**Current focus:** Phase 7 - Expanded File Scope (v1.1)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-01-23 — Milestone v1.1 started
+Phase: 7 of 12 (Expanded File Scope)
+Plan: Ready to plan
+Status: Ready to plan Phase 7
+Last activity: 2026-01-23 — Roadmap created for v1.1
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████░░░░] 50% (v1.0 complete: 6/12 phases)
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 22 (from v1.0)
-- Average duration: --
-- Total execution time: Session duration
+- Average duration: Session duration
+- Total execution time: 1 day (v1.0)
 
 **By Phase:**
 
@@ -38,9 +38,14 @@ Progress: [░░░░░░░░░░] 0%
 
 *v1.1 (Current):*
 
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| TBD | — | — | — |
+| Phase | Plans | Status | Target |
+|-------|-------|--------|--------|
+| 7. Expanded File Scope | — | Pending | EXP-01-03 |
+| 8. Activity Feed & Change Indicators | — | Pending | FED-01-04, CHG-01-03 |
+| 9. Heat Map Visualization | — | Pending | HET-01-03 |
+| 10. Git Integration | — | Pending | GIT-01-04 |
+| 11. Statistics & Diff Preview | — | Pending | STS-01-03, DIF-01-03 |
+| 12. Timeline Replay | — | Pending | TML-01-03 |
 
 *Updated after each plan completion*
 
@@ -56,7 +61,7 @@ Recent decisions affecting current work:
 - chokidar for file watching, electron-store for persistence
 - Single unified 3D graph view (not multiple views)
 - esbuild for bundling ES modules
-- Limit file scope to .planning/ + src/ for performance
+- Limit file scope to .planning/ + src/ for performance (v1.1: expanding to src/)
 
 ### Pending Todos
 
@@ -81,5 +86,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Starting milestone v1.1
+Stopped at: Roadmap created for v1.1 milestone
 Resume file: None
+Next action: `/gsd:plan-phase 7` to begin Phase 7: Expanded File Scope

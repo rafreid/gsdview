@@ -153,40 +153,50 @@ Explicitly excluded. Documented to prevent scope creep.
 
 Which phases cover which requirements. Updated during roadmap creation.
 
+### v1.1 Requirement Mapping
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EXP-01 | TBD | Pending |
-| EXP-02 | TBD | Pending |
-| EXP-03 | TBD | Pending |
-| FED-01 | TBD | Pending |
-| FED-02 | TBD | Pending |
-| FED-03 | TBD | Pending |
-| FED-04 | TBD | Pending |
-| HET-01 | TBD | Pending |
-| HET-02 | TBD | Pending |
-| HET-03 | TBD | Pending |
-| GIT-01 | TBD | Pending |
-| GIT-02 | TBD | Pending |
-| GIT-03 | TBD | Pending |
-| GIT-04 | TBD | Pending |
-| CHG-01 | TBD | Pending |
-| CHG-02 | TBD | Pending |
-| CHG-03 | TBD | Pending |
-| STS-01 | TBD | Pending |
-| STS-02 | TBD | Pending |
-| STS-03 | TBD | Pending |
-| DIF-01 | TBD | Pending |
-| DIF-02 | TBD | Pending |
-| DIF-03 | TBD | Pending |
-| TML-01 | TBD | Pending |
-| TML-02 | TBD | Pending |
-| TML-03 | TBD | Pending |
+| EXP-01 | Phase 7 | Pending |
+| EXP-02 | Phase 7 | Pending |
+| EXP-03 | Phase 7 | Pending |
+| FED-01 | Phase 8 | Pending |
+| FED-02 | Phase 8 | Pending |
+| FED-03 | Phase 8 | Pending |
+| FED-04 | Phase 8 | Pending |
+| CHG-01 | Phase 8 | Pending |
+| CHG-02 | Phase 8 | Pending |
+| CHG-03 | Phase 8 | Pending |
+| HET-01 | Phase 9 | Pending |
+| HET-02 | Phase 9 | Pending |
+| HET-03 | Phase 9 | Pending |
+| GIT-01 | Phase 10 | Pending |
+| GIT-02 | Phase 10 | Pending |
+| GIT-03 | Phase 10 | Pending |
+| GIT-04 | Phase 10 | Pending |
+| STS-01 | Phase 11 | Pending |
+| STS-02 | Phase 11 | Pending |
+| STS-03 | Phase 11 | Pending |
+| DIF-01 | Phase 11 | Pending |
+| DIF-02 | Phase 11 | Pending |
+| DIF-03 | Phase 11 | Pending |
+| TML-01 | Phase 12 | Pending |
+| TML-02 | Phase 12 | Pending |
+| TML-03 | Phase 12 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 26 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 26
+- Mapped to phases: 26 (100% coverage)
+- Unmapped: 0
+
+**Breakdown by Phase:**
+- Phase 7 (Expanded File Scope): 3 requirements
+- Phase 8 (Activity Feed & Change Indicators): 7 requirements
+- Phase 9 (Heat Map Visualization): 3 requirements
+- Phase 10 (Git Integration): 4 requirements
+- Phase 11 (Statistics & Diff Preview): 6 requirements
+- Phase 12 (Timeline Replay): 3 requirements
 
 ---
 *Requirements defined: 2026-01-22 (v1.0), 2026-01-23 (v1.1)*
-*Last updated: 2026-01-23 after v1.1 scoping*
+*Last updated: 2026-01-23 after v1.1 roadmap creation*
