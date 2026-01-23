@@ -365,16 +365,35 @@
     }
 
     @keyframes tree-flash {
-      from {
-        background-color: rgba(255, 255, 0, 0.6);
+      0% {
+        background-color: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
       }
-      to {
+      15% {
+        background-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+      }
+      30% {
+        background-color: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+      }
+      45% {
+        background-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 3px rgba(255, 255, 255, 0.2);
+      }
+      60% {
+        background-color: rgba(255, 255, 255, 0.6);
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      }
+      100% {
         background-color: transparent;
+        box-shadow: none;
       }
     }
 
     .tree-flash {
       animation: tree-flash 2s ease-out;
+      color: #1a1a2e !important; /* Dark text during flash for contrast */
     }
 
     .tree-toggle-icon {
