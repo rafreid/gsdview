@@ -102,26 +102,47 @@ function lerpColor(color1, color2, t) {
 // Find node ID from file path
 function findNodeIdFromPath(changedPath) {
   // changedPath is absolute: /path/to/project/.planning/some/file.md
-  // node.path is relative: some/file.md (relative to .planning/)
+  //                     or: /path/to/project/src/components/App.js
+  // node.path is relative: some/file.md (relative to .planning/ or src/)
+  // node.id is prefixed: planning-file-xxx or src-file-xxx
 
-  // Extract portion after .planning/
-  const planningIndex = changedPath.indexOf('.planning/');
-  if (planningIndex === -1) {
-    console.log('[Flash] Path not in .planning:', changedPath);
-    return null;
+  // Normalize path separators for cross-platform support
+  const normalizedPath = changedPath.replace(/\\/g, '/');
+
+  // Check for .planning/ path
+  const planningIndex = normalizedPath.indexOf('.planning/');
+  if (planningIndex !== -1) {
+    const relativePath = normalizedPath.substring(planningIndex + '.planning/'.length);
+    console.log('[Flash] Looking for planning node with path:', relativePath);
+
+    // Look for node with matching path and planning sourceType
+    const node = currentGraphData.nodes.find(n =>
+      n.path === relativePath && n.sourceType === 'planning'
+    );
+    if (node) {
+      console.log('[Flash] Found planning node:', node.id);
+      return node.id;
+    }
   }
 
-  const relativePath = changedPath.substring(planningIndex + '.planning/'.length);
-  console.log('[Flash] Looking for node with path:', relativePath);
+  // Check for src/ path
+  const srcIndex = normalizedPath.indexOf('/src/');
+  if (srcIndex !== -1) {
+    const relativePath = normalizedPath.substring(srcIndex + '/src/'.length);
+    console.log('[Flash] Looking for src node with path:', relativePath);
 
-  const node = currentGraphData.nodes.find(n => n.path === relativePath);
-  if (node) {
-    console.log('[Flash] Found node:', node.id);
-  } else {
-    console.log('[Flash] No node found for path:', relativePath);
+    // Look for node with matching path and src sourceType
+    const node = currentGraphData.nodes.find(n =>
+      n.path === relativePath && n.sourceType === 'src'
+    );
+    if (node) {
+      console.log('[Flash] Found src node:', node.id);
+      return node.id;
+    }
   }
 
-  return node ? node.id : null;
+  console.log('[Flash] No node found for path:', changedPath);
+  return null;
 }
 
 // Flash a node when its file changes
