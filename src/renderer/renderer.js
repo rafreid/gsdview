@@ -140,6 +140,26 @@ function flashNode(nodeId) {
   flashingNodes.set(nodeId, { rafId, startTime });
 }
 
+// Flash a tree item
+function flashTreeItem(nodeId) {
+  const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);
+  if (!treeItem) return;
+
+  // Remove existing animation
+  treeItem.classList.remove('tree-flash');
+
+  // Force reflow to restart animation
+  void treeItem.offsetWidth;
+
+  // Add animation class
+  treeItem.classList.add('tree-flash');
+
+  // Remove class after animation completes
+  setTimeout(() => {
+    treeItem.classList.remove('tree-flash');
+  }, 2000);
+}
+
 // Calculate connection count for each node
 function calculateConnectionCounts(graphData) {
   const counts = {};
@@ -1225,6 +1245,9 @@ function selectTreeItem(nodeId) {
       graphNode,
       1000
     );
+
+    // Flash the graph node
+    flashNode(nodeId);
   }
 
   // Show details panel
@@ -1250,6 +1273,9 @@ function highlightTreeItem(nodeId) {
         item.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     });
+
+    // Flash the tree item
+    flashTreeItem(nodeId);
   }, 50);
 }
 
