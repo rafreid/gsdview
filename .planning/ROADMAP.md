@@ -30,12 +30,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. User can select a project folder via file dialog
   3. App displays a 3D force-directed graph (placeholder nodes acceptable)
   4. User can orbit, zoom, and pan the graph view
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: Electron app scaffold with basic window
-- [ ] 01-02: 3d-force-graph integration with placeholder data
-- [ ] 01-03: Project folder selection dialog
+- [ ] 01-01-PLAN.md — Electron app scaffold with basic window
+- [ ] 01-02-PLAN.md — 3d-force-graph integration with placeholder data
+- [ ] 01-03-PLAN.md — Project folder selection dialog
 
 ### Phase 2: Graph Rendering
 **Goal**: Graph nodes are visually distinct by type, size reflects importance, edges show relationships
