@@ -1080,6 +1080,96 @@
       min-width: 35px;
     }
 
+    /* Flash Duration Slider */
+    #flash-duration-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 15px;
+      padding-left: 15px;
+      border-left: 1px solid rgba(255,255,255,0.2);
+    }
+
+    #flash-duration-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.8);
+      white-space: nowrap;
+    }
+
+    #flash-duration-slider {
+      width: 80px;
+      height: 4px;
+      -webkit-appearance: none;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    #flash-duration-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #4ECDC4;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #flash-duration-slider::-webkit-slider-thumb:hover {
+      background: #5ddfd6;
+    }
+
+    #flash-duration-value {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      min-width: 25px;
+    }
+
+    /* Flash Intensity Slider */
+    #flash-intensity-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 10px;
+    }
+
+    #flash-intensity-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.8);
+      white-space: nowrap;
+    }
+
+    #flash-intensity-slider {
+      width: 80px;
+      height: 4px;
+      -webkit-appearance: none;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    #flash-intensity-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #4ECDC4;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #flash-intensity-slider::-webkit-slider-thumb:hover {
+      background: #5ddfd6;
+    }
+
+    #flash-intensity-value {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      min-width: 25px;
+    }
+
     /* Git Branch Display */
     #branch-display {
       display: flex;
@@ -2082,6 +2172,16 @@
       <span id="heat-decay-label">Heat:</span>
       <input type="range" id="heat-decay-slider" min="30" max="600" value="300" title="Heat decay duration (seconds)">
       <span id="heat-decay-value">5m</span>
+    </div>
+    <div id="flash-duration-container" title="Flash animation duration (milliseconds)">
+      <span id="flash-duration-label">Flash:</span>
+      <input type="range" id="flash-duration-slider" min="500" max="5000" value="2000" step="100">
+      <span id="flash-duration-value">2s</span>
+    </div>
+    <div id="flash-intensity-container" title="Flash glow intensity multiplier">
+      <span id="flash-intensity-label">Glow:</span>
+      <input type="range" id="flash-intensity-slider" min="50" max="200" value="100" step="10">
+      <span id="flash-intensity-value">1x</span>
     </div>
     <div id="branch-display" title="Current git branch">
       <span class="branch-icon">&#9095;</span>
