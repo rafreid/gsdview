@@ -1611,6 +1611,112 @@ function updateGraph(graphData) {
   }
 }
 
+// =====================================================
+// INCREMENTAL GRAPH UPDATE FUNCTIONS
+// =====================================================
+
+// Helper function to update selected node reference after graph changes
+function updateSelectedNodeReference() {
+  if (selectedNode) {
+    const updatedNode = currentGraphData.nodes.find(n => n.id === selectedNode.id);
+    if (updatedNode) {
+      selectedNode = updatedNode;
+    } else {
+      // Node no longer exists, close details panel
+      hideDetailsPanel();
+      selectedNode = null;
+    }
+  }
+}
+
+// Apply incremental updates to graph without full rebuild
+function applyIncrementalUpdate(changeEvent) {
+  const { event, path, sourceType } = changeEvent;
+
+  console.log('Applying incremental update:', event, path, sourceType);
+
+  // Determine if this is a directory or file based on event type
+  const isDirectory = event === 'addDir' || event === 'unlinkDir';
+  const nodeId = `${sourceType}-${isDirectory ? 'dir' : 'file'}-${path}`;
+
+  // Save camera position before any graph data changes
+  let camPos = null;
+  if (Graph && Graph.cameraPosition) {
+    camPos = Graph.cameraPosition();
+  }
+
+  // Handle different event types
+  if (event === 'add' || event === 'addDir') {
+    // CREATE: Add new node to graph
+    const { node: newNode, parentId } = buildFileNode(path, sourceType);
+
+    // Add to currentGraphData.nodes
+    currentGraphData.nodes.push(newNode);
+
+    // Add link from parent to new node
+    currentGraphData.links.push({
+      source: parentId,
+      target: newNode.id,
+      type: 'contains'
+    });
+
+    // Update storedDirectoryData for tree panel
+    if (storedDirectoryData && storedDirectoryData.nodes) {
+      storedDirectoryData.nodes.push(newNode);
+      storedDirectoryData.links.push({
+        source: parentId,
+        target: newNode.id,
+        type: 'contains'
+      });
+    }
+
+    // Update graph
+    Graph.graphData(currentGraphData);
+
+  } else if (event === 'change') {
+    // MODIFY: Node already exists, no structural change needed
+    // The node object is already in the array, flash animation handles visual feedback
+    // No graphData() call needed
+
+  } else if (event === 'unlink' || event === 'unlinkDir') {
+    // DELETE: Remove node from graph
+
+    // Check if selected node is being deleted
+    if (selectedNode && selectedNode.id === nodeId) {
+      hideDetailsPanel();
+      selectedNode = null;
+    }
+
+    // Remove node from currentGraphData.nodes
+    currentGraphData.nodes = currentGraphData.nodes.filter(n => n.id !== nodeId);
+
+    // Remove links where this node is source or target
+    currentGraphData.links = currentGraphData.links.filter(
+      link => link.source.id !== nodeId && link.target.id !== nodeId &&
+              link.source !== nodeId && link.target !== nodeId
+    );
+
+    // Update storedDirectoryData for tree panel
+    if (storedDirectoryData && storedDirectoryData.nodes) {
+      storedDirectoryData.nodes = storedDirectoryData.nodes.filter(n => n.id !== nodeId);
+      storedDirectoryData.links = storedDirectoryData.links.filter(
+        link => link.source !== nodeId && link.target !== nodeId
+      );
+    }
+
+    // Update graph
+    Graph.graphData(currentGraphData);
+  }
+
+  // Restore camera position (instant, no animation)
+  if (camPos && Graph && Graph.cameraPosition) {
+    Graph.cameraPosition(camPos.x, camPos.y, camPos.z, 0);
+  }
+
+  // Update selected node reference if it exists
+  updateSelectedNodeReference();
+}
+
 // Load project and update graph
 async function loadProject(projectPath) {
   if (!window.electronAPI || !window.electronAPI.parseProject) {
