@@ -81877,6 +81877,7 @@ var<${access}> ${name} : ${structName};`;
     // null = use node's original color
   ];
   var nodeHeatMap = /* @__PURE__ */ new Map();
+  var storedDirectoryData = null;
   function formatHeatDuration(seconds) {
     if (seconds < 60) return `${seconds}s`;
     const minutes = Math.round(seconds / 60);
@@ -84678,7 +84679,6 @@ ${node.goal}`;
       updateActivityPanel();
     }
   }, 3e4);
-  var storedDirectoryData = null;
   document.getElementById("dimension-toggle").addEventListener("click", () => {
     const toggle = document.getElementById("dimension-toggle");
     is3D = !is3D;

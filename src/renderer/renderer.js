@@ -148,6 +148,67 @@ const heatGradient = [
 // Track heat state per node: nodeId -> { lastChangeTime, originalColor }
 const nodeHeatMap = new Map();
 
+// Store reference to directory data for tree panel sync
+let storedDirectoryData = null;
+
+// ============================================================================
+// Position Fixing Functions (for smooth incremental graph updates)
+// ============================================================================
+
+// Fix all existing nodes at their current positions
+// Call this BEFORE adding new nodes to prevent layout disruption
+function fixExistingNodePositions() {
+  currentGraphData.nodes.forEach(node => {
+    // Only fix if the node has settled (has position)
+    if (node.x !== undefined && node.y !== undefined) {
+      node.fx = node.x;
+      node.fy = node.y;
+      if (node.z !== undefined) {
+        node.fz = node.z;
+      }
+    }
+  });
+}
+
+// Remove fixed positions from specified nodes (or all if no ids provided)
+function unfixNodePositions(nodeIds = null) {
+  currentGraphData.nodes.forEach(node => {
+    if (nodeIds === null || nodeIds.includes(node.id)) {
+      delete node.fx;
+      delete node.fy;
+      delete node.fz;
+    }
+  });
+}
+
+// Update storedDirectoryData when files are added or removed
+function updateStoredDirectoryData(operation, node) {
+  if (!storedDirectoryData) return;
+
+  if (operation === 'add') {
+    // Add to nodes array
+    storedDirectoryData.nodes.push({
+      id: node.id,
+      name: node.name,
+      type: node.type,
+      path: node.path,
+      extension: node.extension,
+      sourceType: node.sourceType
+    });
+  } else if (operation === 'remove') {
+    // Remove from nodes array
+    storedDirectoryData.nodes = storedDirectoryData.nodes.filter(n => n.id !== node.id);
+    // Remove links
+    storedDirectoryData.links = storedDirectoryData.links.filter(
+      l => l.source !== node.id && l.target !== node.id
+    );
+  }
+}
+
+// ============================================================================
+// Heat & Animation Helper Functions
+// ============================================================================
+
 // Format duration in seconds to human-readable string
 function formatHeatDuration(seconds) {
   if (seconds < 60) return `${seconds}s`;
@@ -4042,9 +4103,6 @@ setInterval(() => {
     updateActivityPanel();
   }
 }, 30000);
-
-// Store directory data for tree building
-let storedDirectoryData = null;
 
 // Dimension toggle button handler
 document.getElementById('dimension-toggle').addEventListener('click', () => {
