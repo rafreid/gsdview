@@ -1931,6 +1931,91 @@
       background: #4ECDC4;
       border-radius: 3px;
     }
+
+    /* Modal Search Styles */
+    #modal-search-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      max-width: 400px;
+      margin: 0 16px;
+    }
+
+    #modal-search-container.hidden {
+      display: none;
+    }
+
+    #modal-search-input {
+      flex: 1;
+      height: 28px;
+      padding: 0 8px;
+      background: #2a2a4e;
+      border: 1px solid #555;
+      border-radius: 4px;
+      color: #eee;
+      font-size: 12px;
+      outline: none;
+    }
+
+    #modal-search-input:focus {
+      border-color: #4ECDC4;
+      box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.2);
+    }
+
+    #modal-search-info {
+      font-size: 11px;
+      color: #888;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    #modal-search-nav {
+      display: flex;
+      gap: 2px;
+    }
+
+    #modal-search-nav button,
+    #search-close {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      background: transparent;
+      border: 1px solid #555;
+      border-radius: 3px;
+      color: #888;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    #modal-search-nav button:hover,
+    #search-close:hover {
+      border-color: #4ECDC4;
+      color: #4ECDC4;
+      background: rgba(78, 205, 196, 0.1);
+    }
+
+    #modal-search-nav button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* Search match highlighting */
+    mark.search-match {
+      background: rgba(243, 156, 18, 0.4);
+      color: inherit;
+      padding: 2px 0;
+      border-radius: 2px;
+    }
+
+    mark.search-match.current {
+      background: rgba(78, 205, 196, 0.6);
+      box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.3);
+    }
   </style>
 </head>
 <body>
@@ -2017,6 +2102,15 @@
   <div id="file-inspector-modal" class="hidden">
     <div class="modal-header">
       <h2 id="inspector-title"></h2>
+      <div id="modal-search-container" class="hidden">
+        <input type="text" id="modal-search-input" placeholder="Search in file...">
+        <span id="modal-search-info"></span>
+        <div id="modal-search-nav">
+          <button id="search-prev" title="Previous match">▲</button>
+          <button id="search-next" title="Next match">▼</button>
+        </div>
+        <button id="search-close" title="Close search">×</button>
+      </div>
       <button id="inspector-close">&times;</button>
     </div>
     <div class="modal-body">
