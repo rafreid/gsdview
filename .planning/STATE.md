@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.2 File Deep Dive - Phase 13: Modal Foundation
+**Current focus:** v1.2 File Deep Dive - Phase 14: Diff Editor
 
 ## Current Position
 
-Phase: 13 - Modal Foundation
+Phase: 14 - Diff Editor
 Plan: 1 of 1
 Status: Phase complete
-Last activity: 2026-01-24 - Completed 13-01-PLAN.md
+Last activity: 2026-01-24 - Completed 14-01-PLAN.md
 
-Progress: [█████████████░░░░░░░░░░░░░░░] 13/17 phases (76% complete overall, 1/5 v1.2)
+Progress: [██████████████░░░░░░░░░░░░░░] 14/17 phases (82% complete overall, 2/5 v1.2)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 31 (v1.0: 23, v1.1: 14, v1.2: 1)
+- Total plans completed: 32 (v1.0: 23, v1.1: 14, v1.2: 2)
 - Average duration: Session duration
-- Total execution time: 2 days (v1.0: 1 day, v1.1: 1 day, v1.2: 2m 37s)
+- Total execution time: 2 days (v1.0: 1 day, v1.1: 1 day, v1.2: 5m 18s)
 
 **By Phase:**
 
@@ -52,7 +52,7 @@ Progress: [█████████████░░░░░░░░░░
 | Phase | Plans | Status | Target |
 |-------|-------|--------|--------|
 | 13. Modal Foundation | 1/1 | Complete | MOD-01, MOD-02 |
-| 14. Diff Editor | 0/? | Pending | DFE-01-05 |
+| 14. Diff Editor | 1/1 | Complete | DFE-01-05 |
 | 15. Structure Tree | 0/? | Pending | TRE-01-05 |
 | 16. File Context & Metadata | 0/? | Pending | CTX-01-04, CTX-06-07 |
 | 17. Search & Polish | 0/? | Pending | MOD-03-04, CTX-05 |
@@ -119,6 +119,11 @@ Recent decisions affecting current work:
 - Modal z-index 500-501 (overlay + modal), above all panels (13-01)
 - Escape key priority: close modal if open, else close details panel (13-01)
 - Modal sections default to expanded state on open (13-01)
+- Session snapshots stored as Map with filePath -> {content, timestamp} (14-01)
+- Default diff mode is Git (vs HEAD), user can toggle to Session (14-01)
+- Basic syntax highlighting for JS/TS, MD, JSON via regex replacement (14-01)
+- Line numbers use git hunk headers for accurate positioning (14-01)
+- Session diff uses simple line-by-line comparison (14-01)
 
 ### Pending Todos
 
@@ -146,6 +151,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 13-01-PLAN.md (Modal Foundation)
+Stopped at: Completed 14-01-PLAN.md (Diff Editor)
 Resume file: None
-Next action: Ready for Phase 14 (Diff Editor) - populate modal diff section with file changes.
+Next action: Ready for Phase 15 (Structure Tree) - add file structure tree to modal.
