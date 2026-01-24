@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 18 complete
+**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 19 complete
 
 ## Current Position
 
-Phase: 18 of 25 (Smooth Activity Updates)
-Plan: 3/3
-Status: Complete
-Last activity: 2026-01-24 — Phase 18 executed (all 3 plans)
+Phase: 19 of 25 (Enhanced Flash Effects)
+Plan: 1/1
+Status: Phase complete
+Last activity: 2026-01-24 - Completed 19-01-PLAN.md
 
-Progress: [██████████████████████████████░░] 18/25 phases complete (72%)
+Progress: [███████████████████████████████░] 19/25 phases complete (76%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 42 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 5)
+- Total plans completed: 43 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 6)
 - Average duration: 5min
-- Total execution time: 2 days + 39m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 22m)
+- Total execution time: 2 days + 42m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 25m)
 
 **By Milestone:**
 
@@ -39,7 +39,7 @@ Progress: [███████████████████████
 
 *v1.3 (Active):*
 - 8 phases planned
-- Status: Phase 18 wave 2 complete (plans 01-03 of 3 complete)
+- Status: Phase 19 complete (plans 01 of 1 complete)
 
 ## Accumulated Context
 
@@ -129,7 +129,7 @@ Recent decisions affecting current work:
 - Search matches highlighted with <mark> tags for semantic HTML (17-01)
 - Case-insensitive search for better UX (17-01)
 - Current match uses teal highlight, other matches use orange (17-01)
-- Escape key priority updated: search → modal → details panel (17-01)
+- Escape key priority updated: search -> modal -> details panel (17-01)
 - Ctrl+F/Cmd+F opens search only when modal is open (17-01)
 - applyIncrementalUpdate for surgical graph updates without rebuild (18-01)
 - Camera position save/restore with 0ms duration for instant positioning (18-01)
@@ -145,6 +145,13 @@ Recent decisions affecting current work:
 - Pending deletions tracking prevents duplicate fade animations (18-03)
 - Mid-animation existence check handles parent directory deletions (18-03)
 - Synchronized fade animations between graph and tree panel (18-03)
+- Enhanced flash colors: neon green (0x00FF88), bright amber (0xFFAA00), bright red (0xFF3333) (19-01)
+- Emissive glow effect pulsing with flash animation (19-01)
+- Scale pulsing from 1.0x to 1.5x during animation peaks (19-01)
+- Sin squared for smoother pulse peaks in flash animation (19-01)
+- Different pulse patterns: created (4 quick), modified (3 steady), deleted (2 slow) (19-01)
+- flashDuration and flashIntensity config variables for future adjustability (19-01)
+- CSS flash animations match 3D with inset shadows and text-shadow (19-01)
 
 ### Pending Todos
 
@@ -172,7 +179,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-24T23:07:49Z
-Stopped at: Completed 18-03-PLAN.md (Fade out deleted nodes) - Wave 2 complete
+Last session: 2026-01-24T23:15:00Z
+Stopped at: Completed 19-01-PLAN.md (Enhanced Flash Effects) - Phase 19 complete
 Resume file: None
-Next action: Phase 18 wave 2 complete. Continue with remaining phase 18 plans or proceed to next phase.
+Next action: Phase 19 complete. Proceed to Phase 20 or next milestone.
