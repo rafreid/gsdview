@@ -349,10 +349,11 @@ Plans:
   3. Modified files flash with distinct orange/yellow pulse pattern
   4. Deleted files flash with distinct red pulse pattern before fading
   5. User can adjust flash duration and intensity via settings panel
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD
+- [ ] 19-01-PLAN.md — Enhanced flash visuals with emissive glow and scale pulsing
+- [ ] 19-02-PLAN.md — Flash settings controls with persistence
 
 ### Phase 20: Activity Trails
 **Goal**: User can see visual flow of recent activity through the graph over time
@@ -485,7 +486,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | Phase | Plans Complete | Status | Target |
 |-------|----------------|--------|--------|
 | 18. Smooth Activity Updates | 3/3 | Complete | UPD-01-03 |
-| 19. Enhanced Flash Effects | 0/TBD | Pending | FLX-01-03 |
+| 19. Enhanced Flash Effects | 0/2 | Pending | FLX-01-03 |
 | 20. Activity Trails | 0/TBD | Pending | TRL-01-03 |
 | 21. Smart Camera Core | 0/TBD | Pending | CAM-01-02 |
 | 22. Bookmarks & History | 0/TBD | Pending | BKM-01-04 |
@@ -495,4 +496,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-24 (Phase 18 complete)*
+*Last updated: 2026-01-24 (Phase 19 planned)*
