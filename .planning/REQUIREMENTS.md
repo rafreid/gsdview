@@ -1,6 +1,6 @@
 # Requirements: GSD Viewer
 
-**Defined:** 2026-01-22 (v1.0), 2026-01-23 (v1.1)
+**Defined:** 2026-01-22 (v1.0), 2026-01-23 (v1.1), 2026-01-24 (v1.2)
 **Core Value:** Make the invisible structure of a GSD project visible and navigable
 
 ## v1.0 Requirements (Validated)
@@ -110,6 +110,45 @@ Requirements for milestone v1.1: Real-time Activity Visualization.
 
 ---
 
+## v1.2 Requirements (Active)
+
+Requirements for milestone v1.2: File Deep Dive.
+
+### Modal Core
+
+- [ ] **MOD-01**: Double-clicking a file node opens the file inspector modal
+- [ ] **MOD-02**: Modal has collapsible sections for diff, structure, and context
+- [ ] **MOD-03**: Esc key closes the modal
+- [ ] **MOD-04**: Ctrl+F opens search within modal
+
+### Diff Editor
+
+- [ ] **DFE-01**: Diff editor shows file content with syntax highlighting
+- [ ] **DFE-02**: Diff editor is collapsible (expand/collapse toggle)
+- [ ] **DFE-03**: User can toggle between git diff (vs HEAD) and session diff (vs last viewed)
+- [ ] **DFE-04**: Line numbers displayed with click-to-jump functionality
+- [ ] **DFE-05**: Added lines highlighted in green, removed lines in red
+
+### Structure Tree
+
+- [ ] **TRE-01**: Structure tree parses markdown files (headers, lists, code blocks)
+- [ ] **TRE-02**: Structure tree parses code files (functions, classes, imports, exports)
+- [ ] **TRE-03**: Structure tree parses config files (JSON/YAML keys and nested structure)
+- [ ] **TRE-04**: Tree nodes are collapsible/expandable
+- [ ] **TRE-05**: Clicking a tree node scrolls diff editor to that location
+
+### File Context
+
+- [ ] **CTX-01**: Metadata header shows file path, size, last modified date, and git status
+- [ ] **CTX-02**: Quick actions bar with "Open in Editor" button
+- [ ] **CTX-03**: Quick actions bar with "Copy Path" button
+- [ ] **CTX-04**: Quick actions bar with "Copy Content" button
+- [ ] **CTX-05**: Search input filters/highlights content in diff view
+- [ ] **CTX-06**: Recent activity section shows this file's changes from activity log
+- [ ] **CTX-07**: Related files section shows files that import/reference this file
+
+---
+
 ## v2 Requirements (Future)
 
 Deferred to future releases.
@@ -198,5 +237,5 @@ Which phases cover which requirements. Updated during roadmap creation.
 - Phase 12 (Timeline Replay): 3 requirements
 
 ---
-*Requirements defined: 2026-01-22 (v1.0), 2026-01-23 (v1.1)*
-*Last updated: 2026-01-23 (v1.1 complete)*
+*Requirements defined: 2026-01-22 (v1.0), 2026-01-23 (v1.1), 2026-01-24 (v1.2)*
+*Last updated: 2026-01-24 (v1.2 requirements defined)*
