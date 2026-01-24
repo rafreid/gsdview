@@ -116,18 +116,18 @@ Requirements for milestone v1.2: File Deep Dive.
 
 ### Modal Core
 
-- [ ] **MOD-01**: Double-clicking a file node opens the file inspector modal
-- [ ] **MOD-02**: Modal has collapsible sections for diff, structure, and context
+- [x] **MOD-01**: Double-clicking a file node opens the file inspector modal
+- [x] **MOD-02**: Modal has collapsible sections for diff, structure, and context
 - [ ] **MOD-03**: Esc key closes the modal
 - [ ] **MOD-04**: Ctrl+F opens search within modal
 
 ### Diff Editor
 
-- [ ] **DFE-01**: Diff editor shows file content with syntax highlighting
-- [ ] **DFE-02**: Diff editor is collapsible (expand/collapse toggle)
-- [ ] **DFE-03**: User can toggle between git diff (vs HEAD) and session diff (vs last viewed)
-- [ ] **DFE-04**: Line numbers displayed with click-to-jump functionality
-- [ ] **DFE-05**: Added lines highlighted in green, removed lines in red
+- [x] **DFE-01**: Diff editor shows file content with syntax highlighting
+- [x] **DFE-02**: Diff editor is collapsible (expand/collapse toggle)
+- [x] **DFE-03**: User can toggle between git diff (vs HEAD) and session diff (vs last viewed)
+- [x] **DFE-04**: Line numbers displayed with click-to-jump functionality
+- [x] **DFE-05**: Added lines highlighted in green, removed lines in red
 
 ### Structure Tree
 
@@ -244,11 +244,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MOD-02 | Phase 13 | Complete |
 | MOD-03 | Phase 17 | Pending |
 | MOD-04 | Phase 17 | Pending |
-| DFE-01 | Phase 14 | Pending |
-| DFE-02 | Phase 14 | Pending |
-| DFE-03 | Phase 14 | Pending |
-| DFE-04 | Phase 14 | Pending |
-| DFE-05 | Phase 14 | Pending |
+| DFE-01 | Phase 14 | Complete |
+| DFE-02 | Phase 14 | Complete |
+| DFE-03 | Phase 14 | Complete |
+| DFE-04 | Phase 14 | Complete |
+| DFE-05 | Phase 14 | Complete |
 | TRE-01 | Phase 15 | Pending |
 | TRE-02 | Phase 15 | Pending |
 | TRE-03 | Phase 15 | Pending |
@@ -276,4 +276,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-22 (v1.0), 2026-01-23 (v1.1), 2026-01-24 (v1.2)*
-*Last updated: 2026-01-24 (Phase 13 complete)*
+*Last updated: 2026-01-24 (Phase 14 complete)*

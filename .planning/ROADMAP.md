@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ### v1.2 (Active)
 
 - [x] **Phase 13: Modal Foundation** - Double-click file nodes to open inspector modal with collapsible sections
-- [ ] **Phase 14: Diff Editor** - Syntax-highlighted diff view with git/session toggle and line navigation
+- [x] **Phase 14: Diff Editor** - Syntax-highlighted diff view with git/session toggle and line navigation
 - [ ] **Phase 15: Structure Tree** - Parse file structure (headers, functions, classes) with click-to-jump
 - [ ] **Phase 16: File Context & Metadata** - Metadata header, quick actions, activity history, related files
 - [ ] **Phase 17: Search & Polish** - Keyboard shortcuts (Esc, Ctrl+F) and content search/highlighting
@@ -259,7 +259,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 14-01-PLAN.md — Diff mode toggle, session storage, line numbers, and syntax highlighting
+- [x] 14-01-PLAN.md — Diff mode toggle, session storage, line numbers, and syntax highlighting
 
 ### Phase 15: Structure Tree
 **Goal**: User can see parsed file structure (headers, functions, classes) and click to jump to locations
@@ -339,11 +339,11 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | Phase | Plans Complete | Status | Target |
 |-------|----------------|--------|--------|
 | 13. Modal Foundation | 1/1 | Complete | MOD-01, MOD-02 |
-| 14. Diff Editor | 0/1 | In Progress | DFE-01-05 |
+| 14. Diff Editor | 1/1 | Complete | DFE-01-05 |
 | 15. Structure Tree | 0/? | Pending | TRE-01-05 |
 | 16. File Context & Metadata | 0/? | Pending | CTX-01-04, CTX-06-07 |
 | 17. Search & Polish | 0/? | Pending | MOD-03-04, CTX-05 |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-24 (Phase 14 planned)*
+*Last updated: 2026-01-24 (Phase 14 complete)*
