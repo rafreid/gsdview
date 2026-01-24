@@ -327,34 +327,44 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CAM-01 | — | Pending |
-| CAM-02 | — | Pending |
-| CAM-03 | — | Pending |
-| CAM-04 | — | Pending |
-| BKM-01 | — | Pending |
-| BKM-02 | — | Pending |
-| BKM-03 | — | Pending |
-| BKM-04 | — | Pending |
-| MAP-01 | — | Pending |
-| MAP-02 | — | Pending |
-| MAP-03 | — | Pending |
-| BRD-01 | — | Pending |
-| BRD-02 | — | Pending |
-| UPD-01 | — | Pending |
-| UPD-02 | — | Pending |
-| UPD-03 | — | Pending |
-| FLX-01 | — | Pending |
-| FLX-02 | — | Pending |
-| FLX-03 | — | Pending |
-| TRL-01 | — | Pending |
-| TRL-02 | — | Pending |
-| TRL-03 | — | Pending |
+| UPD-01 | Phase 18 | Pending |
+| UPD-02 | Phase 18 | Pending |
+| UPD-03 | Phase 18 | Pending |
+| FLX-01 | Phase 19 | Pending |
+| FLX-02 | Phase 19 | Pending |
+| FLX-03 | Phase 19 | Pending |
+| TRL-01 | Phase 20 | Pending |
+| TRL-02 | Phase 20 | Pending |
+| TRL-03 | Phase 20 | Pending |
+| CAM-01 | Phase 21 | Pending |
+| CAM-02 | Phase 21 | Pending |
+| BKM-01 | Phase 22 | Pending |
+| BKM-02 | Phase 22 | Pending |
+| BKM-03 | Phase 22 | Pending |
+| BKM-04 | Phase 22 | Pending |
+| BRD-01 | Phase 23 | Pending |
+| BRD-02 | Phase 23 | Pending |
+| MAP-01 | Phase 24 | Pending |
+| MAP-02 | Phase 24 | Pending |
+| MAP-03 | Phase 24 | Pending |
+| CAM-03 | Phase 25 | Pending |
+| CAM-04 | Phase 25 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 22 total
-- Mapped to phases: 0 (pending roadmap creation)
-- Unmapped: 22
+- Mapped to phases: 22 (100% coverage)
+- Unmapped: 0
+
+**Breakdown by Phase:**
+- Phase 18 (Smooth Activity Updates): 3 requirements
+- Phase 19 (Enhanced Flash Effects): 3 requirements
+- Phase 20 (Activity Trails): 3 requirements
+- Phase 21 (Smart Camera Core): 2 requirements
+- Phase 22 (Bookmarks & History): 4 requirements
+- Phase 23 (Breadcrumb Trail): 2 requirements
+- Phase 24 (Minimap): 3 requirements
+- Phase 25 (Advanced Camera): 2 requirements
 
 ---
 *Requirements defined: 2026-01-22 (v1.0), 2026-01-23 (v1.1), 2026-01-24 (v1.2, v1.3)*
-*Last updated: 2026-01-24 (v1.3 requirements defined)*
+*Last updated: 2026-01-24 (v1.3 phase mappings added)*

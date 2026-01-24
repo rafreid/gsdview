@@ -12,7 +12,7 @@ Transform a GSD project's .planning/ folder into an explorable 3D force-directed
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-### v1.0 (Completed)
+### v1.0 (Complete)
 
 - [x] **Phase 1: Foundation** - Electron app with basic 3d-force-graph rendering and navigation
 - [x] **Phase 2: Graph Rendering** - Color-coded nodes, connection-based sizing, styled edges
@@ -37,6 +37,17 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 15: Structure Tree** - Parse file structure (headers, functions, classes) with click-to-jump
 - [x] **Phase 16: File Context & Metadata** - Metadata header, quick actions, activity history, related files
 - [x] **Phase 17: Search & Polish** - Keyboard shortcuts (Esc, Ctrl+F) and content search/highlighting
+
+### v1.3 (Active)
+
+- [ ] **Phase 18: Smooth Activity Updates** - Incremental graph updates without camera disruption
+- [ ] **Phase 19: Enhanced Flash Effects** - Brighter, configurable flash animations for file activity
+- [ ] **Phase 20: Activity Trails** - Visual trails showing change flow through graph
+- [ ] **Phase 21: Smart Camera Core** - Follow-active mode and zoom presets
+- [ ] **Phase 22: Bookmarks & History** - Named bookmarks with navigation history
+- [ ] **Phase 23: Breadcrumb Trail** - Hierarchy path navigation
+- [ ] **Phase 24: Minimap** - Bird's-eye overview panel with viewport indicator
+- [ ] **Phase 25: Advanced Camera** - Orbit mode and path animation
 
 ## Phase Details
 
@@ -309,10 +320,131 @@ Plans:
 Plans:
 - [x] 17-01-PLAN.md — Keyboard shortcuts (Esc, Ctrl+F) and search with real-time highlighting
 
+---
+
+### Phase 18: Smooth Activity Updates
+**Goal**: Graph updates smoothly without disrupting user's view when files change
+**Depends on**: Phase 17 (v1.2 foundation)
+**Requirements**: UPD-01, UPD-02, UPD-03
+**Success Criteria** (what must be TRUE):
+  1. When a file is created, a new node appears without rebuilding entire graph
+  2. When a file is modified, its node updates in place without moving other nodes
+  3. When a file is deleted, its node smoothly fades out without disrupting layout
+  4. Camera position and orientation remain exactly where user left them during updates
+  5. User's selected node remains selected and focused after graph updates
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
+
+### Phase 19: Enhanced Flash Effects
+**Goal**: File activity is immediately visible with brighter, more distinctive flash animations
+**Depends on**: Phase 18
+**Requirements**: FLX-01, FLX-02, FLX-03
+**Success Criteria** (what must be TRUE):
+  1. Flash effects are bright enough to see from any zoom level or viewing angle
+  2. Created files flash with distinct green pulse pattern that's unmistakable
+  3. Modified files flash with distinct orange/yellow pulse pattern
+  4. Deleted files flash with distinct red pulse pattern before fading
+  5. User can adjust flash duration and intensity via settings panel
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
+
+### Phase 20: Activity Trails
+**Goal**: User can see visual flow of recent activity through the graph over time
+**Depends on**: Phase 19
+**Requirements**: TRL-01, TRL-02, TRL-03
+**Success Criteria** (what must be TRUE):
+  1. Recently changed files leave visible trails connecting them in chronological order
+  2. Trail between most recent changes is brightest, fading for older connections
+  3. Trails automatically fade and disappear after configurable time period
+  4. User can toggle activity trails on/off via UI button
+  5. Trails don't interfere with normal node connections or navigation
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
+
+### Phase 21: Smart Camera Core
+**Goal**: Camera intelligently follows file activity and provides quick zoom shortcuts
+**Depends on**: Phase 20
+**Requirements**: CAM-01, CAM-02
+**Success Criteria** (what must be TRUE):
+  1. When follow-active mode is enabled, camera smoothly pans to newly changed files
+  2. User can toggle follow-active mode on/off via UI button
+  3. Overview zoom button instantly zooms out to show entire graph
+  4. Focus zoom button centers on selected node at medium distance
+  5. Detail zoom button zooms close to selected node for file inspection
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
+
+### Phase 22: Bookmarks & History
+**Goal**: User can save important positions and navigate through recently visited nodes
+**Depends on**: Phase 21
+**Requirements**: BKM-01, BKM-02, BKM-03, BKM-04
+**Success Criteria** (what must be TRUE):
+  1. User can save current camera position and selected node as named bookmark
+  2. Pressing keyboard shortcut 1-9 instantly jumps to corresponding saved bookmark
+  3. Back button navigates to previously visited node (like browser back button)
+  4. Forward button navigates forward through navigation history
+  5. Recent nodes dropdown shows last 10 visited nodes for quick return
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
+
+### Phase 23: Breadcrumb Trail
+**Goal**: User can see hierarchy path to current node and navigate to ancestors
+**Depends on**: Phase 21 (independent of bookmarks)
+**Requirements**: BRD-01, BRD-02
+**Success Criteria** (what must be TRUE):
+  1. Breadcrumb trail displays path from project root to currently selected node
+  2. Each breadcrumb segment shows node name (e.g., "Project / src / components / Graph.js")
+  3. Clicking any breadcrumb segment navigates camera to that ancestor node
+  4. Breadcrumb trail updates automatically when user selects different node
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
+
+### Phase 24: Minimap
+**Goal**: User can see bird's-eye overview of graph and quickly navigate to any region
+**Depends on**: Phase 23
+**Requirements**: MAP-01, MAP-02, MAP-03
+**Success Criteria** (what must be TRUE):
+  1. Minimap panel shows simplified overview of entire graph structure
+  2. Current camera viewport is indicated by highlighted rectangle on minimap
+  3. Clicking anywhere on minimap flies camera to that region of graph
+  4. Minimap updates in real-time as graph changes or camera moves
+  5. Minimap is positioned in corner and doesn't obstruct main graph view
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
+
+### Phase 25: Advanced Camera
+**Goal**: Camera provides presentation mode and guided tours through graph
+**Depends on**: Phase 22 (needs bookmarks for path animation)
+**Requirements**: CAM-03, CAM-04
+**Success Criteria** (what must be TRUE):
+  1. Orbit mode continuously rotates camera around currently focused node
+  2. User can start/stop orbit mode via UI button
+  3. Orbit speed is smooth and professional-looking for presentations
+  4. Path animation smoothly flies camera through multiple selected nodes in sequence
+  5. User can create and play back custom camera paths through graph
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12 -> 13 -> 14 -> 15 -> 16 -> 17
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12 -> 13 -> 14 -> 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 21 -> 22 -> 23 -> 24 -> 25
 
 ### v1.0 (Complete)
 
@@ -336,16 +468,29 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 11. Statistics & Diff Preview | 2/2 | Complete | 2026-01-23 |
 | 12. Timeline Replay | 1/1 | Complete | 2026-01-23 |
 
-### v1.2 (Active)
+### v1.2 (Complete)
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 13. Modal Foundation | 1/1 | Complete | 2026-01-24 |
+| 14. Diff Editor | 1/1 | Complete | 2026-01-24 |
+| 15. Structure Tree | 2/2 | Complete | 2026-01-24 |
+| 16. File Context & Metadata | 2/2 | Complete | 2026-01-24 |
+| 17. Search & Polish | 1/1 | Complete | 2026-01-24 |
+
+### v1.3 (Active)
 
 | Phase | Plans Complete | Status | Target |
 |-------|----------------|--------|--------|
-| 13. Modal Foundation | 1/1 | Complete | MOD-01, MOD-02 |
-| 14. Diff Editor | 1/1 | Complete | DFE-01-05 |
-| 15. Structure Tree | 2/2 | Complete | TRE-01-05 |
-| 16. File Context & Metadata | 2/2 | Complete | CTX-01-04, CTX-06-07 |
-| 17. Search & Polish | 1/1 | Complete | MOD-03-04, CTX-05 |
+| 18. Smooth Activity Updates | 0/TBD | Pending | UPD-01-03 |
+| 19. Enhanced Flash Effects | 0/TBD | Pending | FLX-01-03 |
+| 20. Activity Trails | 0/TBD | Pending | TRL-01-03 |
+| 21. Smart Camera Core | 0/TBD | Pending | CAM-01-02 |
+| 22. Bookmarks & History | 0/TBD | Pending | BKM-01-04 |
+| 23. Breadcrumb Trail | 0/TBD | Pending | BRD-01-02 |
+| 24. Minimap | 0/TBD | Pending | MAP-01-03 |
+| 25. Advanced Camera | 0/TBD | Pending | CAM-03-04 |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-24 (Phase 17 plan created)*
+*Last updated: 2026-01-24 (v1.3 phases 18-25 added)*

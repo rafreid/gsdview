@@ -5,59 +5,41 @@
 See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - STARTING
+**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 18 ready to plan
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 18 of 25 (Smooth Activity Updates)
 Plan: —
-Status: Defining requirements for v1.3
-Last activity: 2026-01-24 — Milestone v1.3 started
+Status: Ready to plan
+Last activity: 2026-01-24 — v1.3 roadmap created
 
-Progress: [█████████████████████████████] 17/17 phases complete (v1.0-v1.2)
+Progress: [█████████████████████████████░░░] 17/25 phases complete (68%)
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 37 (v1.0: 23, v1.1: 14, v1.2: 7)
 - Average duration: Session duration
-- Total execution time: 2 days (v1.0: 1 day, v1.1: 1 day, v1.2: 17m 0s)
+- Total execution time: 2 days + 17m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m)
 
-**By Phase:**
+**By Milestone:**
 
 *v1.0 (Complete):*
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 1. Foundation | 3 | Complete | -- |
-| 2. Graph Rendering | 3 | Complete | -- |
-| 3. GSD Parsing | 4 | Complete | -- |
-| 4. State Visualization | 4 | Complete | -- |
-| 5. Interactions | 4 | Complete | -- |
-| 6. Polish | 5 | Complete | -- |
+- 6 phases, 23 plans
+- Status: Shipped 2026-01-22
 
 *v1.1 (Complete):*
-
-| Phase | Plans | Status | Target |
-|-------|-------|--------|--------|
-| 7. Expanded File Scope | 3 | 3/3 complete | EXP-01-03 |
-| 8. Activity Feed & Change Indicators | 3 | 3/3 complete | FED-01-04, CHG-01-03 |
-| 9. Heat Map Visualization | 2 | 2/2 complete | HET-01-03 |
-| 10. Git Integration | 3 | 3/3 complete | GIT-01-04 |
-| 11. Statistics & Diff Preview | 2 | 2/2 complete | STS-01-03, DIF-01-03 |
-| 12. Timeline Replay | 1 | 1/1 complete | TML-01-03 |
+- 6 phases, 14 plans
+- Status: Shipped 2026-01-23
 
 *v1.2 (Complete):*
+- 5 phases, 7 plans
+- Status: Shipped 2026-01-24
 
-| Phase | Plans | Status | Target |
-|-------|-------|--------|--------|
-| 13. Modal Foundation | 1/1 | Complete | MOD-01, MOD-02 |
-| 14. Diff Editor | 1/1 | Complete | DFE-01-05 |
-| 15. Structure Tree | 2/2 | Complete | TRE-01-05 |
-| 16. File Context & Metadata | 2/2 | Complete | CTX-01-04, CTX-06-07 |
-| 17. Search & Polish | 1/1 | Complete | MOD-03-04, CTX-05 |
-
-*Updated after each plan completion*
+*v1.3 (Active):*
+- 8 phases planned
+- Status: Ready to start Phase 18
 
 ## Accumulated Context
 
@@ -177,6 +159,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Starting v1.3 milestone - defining requirements
+Stopped at: v1.3 roadmap created with phases 18-25
 Resume file: None
-Next action: Create REQUIREMENTS.md and ROADMAP.md for v1.3
+Next action: Plan Phase 18 (Smooth Activity Updates) via /gsd:plan-phase 18
