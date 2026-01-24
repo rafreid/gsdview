@@ -205,6 +205,57 @@ function updateStoredDirectoryData(operation, node) {
   }
 }
 
+// Build a file or directory node with positioning near parent
+// Returns { node, parentId } for easy linking
+function buildFileNode(filePath, sourceType) {
+  // Determine parent directory node ID
+  const pathParts = filePath.split('/');
+  const fileName = pathParts.pop();
+  const parentPath = pathParts.join('/');
+
+  // Build parent node ID
+  let parentId;
+  if (parentPath === '') {
+    // Direct child of root directory (planning or src)
+    parentId = sourceType === 'planning' ? 'dir-planning' : 'dir-src';
+  } else {
+    parentId = `${sourceType}-dir-${parentPath}`;
+  }
+
+  // Find parent node to get its position
+  const parentNode = currentGraphData.nodes.find(n => n.id === parentId);
+
+  // Determine if this is a file or directory based on extension
+  const isDirectory = !fileName.includes('.');
+  const nodeType = isDirectory ? 'directory' : 'file';
+  const nodeId = `${sourceType}-${nodeType === 'directory' ? 'dir' : 'file'}-${filePath}`;
+
+  // Build node object
+  const node = {
+    id: nodeId,
+    name: fileName,
+    type: nodeType,
+    path: filePath,
+    sourceType: sourceType
+  };
+
+  // If it's a file, extract extension
+  if (nodeType === 'file') {
+    const ext = fileName.split('.').pop();
+    node.extension = ext;
+  }
+
+  // Position near parent with some random offset
+  if (parentNode && parentNode.x !== undefined) {
+    const offset = 20;  // Distance from parent
+    node.x = parentNode.x + (Math.random() - 0.5) * offset;
+    node.y = parentNode.y + (Math.random() - 0.5) * offset;
+    node.z = (parentNode.z || 0) + (Math.random() - 0.5) * offset;
+  }
+
+  return { node, parentId };
+}
+
 // ============================================================================
 // Heat & Animation Helper Functions
 // ============================================================================
