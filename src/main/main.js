@@ -130,7 +130,7 @@ function stopWatching() {
 }
 
 app.whenReady().then(() => {
-  createWindow();
+  // Register ALL IPC handlers BEFORE creating window to avoid race conditions
 
   // IPC handler for folder selection
   ipcMain.handle('select-folder', async () => {
@@ -453,6 +453,9 @@ app.whenReady().then(() => {
       return { diff: null, error: error.message };
     }
   });
+
+  // Create window AFTER all IPC handlers are registered
+  createWindow();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
