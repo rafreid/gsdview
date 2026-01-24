@@ -1,6 +1,6 @@
 # Requirements: GSD Viewer
 
-**Defined:** 2026-01-22 (v1.0), 2026-01-23 (v1.1), 2026-01-24 (v1.2)
+**Defined:** 2026-01-22 (v1.0), 2026-01-23 (v1.1), 2026-01-24 (v1.2, v1.3)
 **Core Value:** Make the invisible structure of a GSD project visible and navigable
 
 ## v1.0 Requirements (Validated)
@@ -149,6 +149,55 @@ Requirements for milestone v1.2: File Deep Dive.
 
 ---
 
+## v1.3 Requirements (Active)
+
+Requirements for milestone v1.3: Enhanced Navigation + Smooth Activity.
+
+### Smart Camera
+
+- [ ] **CAM-01**: Camera automatically follows node when file changes are detected (follow-active)
+- [ ] **CAM-02**: Zoom preset buttons for overview, focus, and detail levels
+- [ ] **CAM-03**: Orbit mode auto-rotates camera around current focus for presentations
+- [ ] **CAM-04**: Path animation smoothly flies camera through selected nodes
+
+### Bookmarks & History
+
+- [ ] **BKM-01**: User can save named bookmarks (camera position + selected node)
+- [ ] **BKM-02**: Back/forward buttons navigate through recently visited nodes
+- [ ] **BKM-03**: Recent nodes dropdown shows last 10 visited nodes for quick return
+- [ ] **BKM-04**: Keyboard shortcuts (1-9) jump to saved bookmarks
+
+### Minimap
+
+- [ ] **MAP-01**: Minimap panel shows bird's-eye overview of entire graph
+- [ ] **MAP-02**: Current viewport position is indicated on minimap
+- [ ] **MAP-03**: Clicking on minimap navigates to that position
+
+### Breadcrumb Trail
+
+- [ ] **BRD-01**: Breadcrumb trail shows hierarchy path from root to current node
+- [ ] **BRD-02**: Clicking breadcrumb segment navigates to that ancestor node
+
+### Smooth Activity Updates
+
+- [ ] **UPD-01**: Graph updates incrementally (add/remove nodes without full rebuild)
+- [ ] **UPD-02**: Camera position is preserved when files change (never reset)
+- [ ] **UPD-03**: Graph layout maintains stability when nodes are added/removed
+
+### Enhanced Flash Effects
+
+- [ ] **FLX-01**: Flash effects use brighter, more visible pulse/glow animations
+- [ ] **FLX-02**: Flash duration and intensity are configurable
+- [ ] **FLX-03**: Different flash patterns for create/modify/delete events
+
+### Activity Trails
+
+- [ ] **TRL-01**: Visual trails show recent activity flow through graph
+- [ ] **TRL-02**: Trail intensity fades over time (recent = bright, older = dim)
+- [ ] **TRL-03**: User can toggle activity trails on/off
+
+---
+
 ## v2 Requirements (Future)
 
 Deferred to future releases.
@@ -274,6 +323,38 @@ Which phases cover which requirements. Updated during roadmap creation.
 - Phase 16 (File Context & Metadata): 6 requirements
 - Phase 17 (Search & Polish): 3 requirements
 
+### v1.3 Requirement Mapping
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| CAM-01 | — | Pending |
+| CAM-02 | — | Pending |
+| CAM-03 | — | Pending |
+| CAM-04 | — | Pending |
+| BKM-01 | — | Pending |
+| BKM-02 | — | Pending |
+| BKM-03 | — | Pending |
+| BKM-04 | — | Pending |
+| MAP-01 | — | Pending |
+| MAP-02 | — | Pending |
+| MAP-03 | — | Pending |
+| BRD-01 | — | Pending |
+| BRD-02 | — | Pending |
+| UPD-01 | — | Pending |
+| UPD-02 | — | Pending |
+| UPD-03 | — | Pending |
+| FLX-01 | — | Pending |
+| FLX-02 | — | Pending |
+| FLX-03 | — | Pending |
+| TRL-01 | — | Pending |
+| TRL-02 | — | Pending |
+| TRL-03 | — | Pending |
+
+**Coverage:**
+- v1.3 requirements: 22 total
+- Mapped to phases: 0 (pending roadmap creation)
+- Unmapped: 22
+
 ---
-*Requirements defined: 2026-01-22 (v1.0), 2026-01-23 (v1.1), 2026-01-24 (v1.2)*
-*Last updated: 2026-01-24 (Phase 15 complete)*
+*Requirements defined: 2026-01-22 (v1.0), 2026-01-23 (v1.1), 2026-01-24 (v1.2, v1.3)*
+*Last updated: 2026-01-24 (v1.3 requirements defined)*
