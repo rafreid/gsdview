@@ -41,7 +41,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ### v1.3 (Active)
 
 - [x] **Phase 18: Smooth Activity Updates** - Incremental graph updates without camera disruption
-- [ ] **Phase 19: Enhanced Flash Effects** - Brighter, configurable flash animations for file activity
+- [x] **Phase 19: Enhanced Flash Effects** - Brighter, configurable flash animations for file activity
 - [ ] **Phase 20: Activity Trails** - Visual trails showing change flow through graph
 - [ ] **Phase 21: Smart Camera Core** - Follow-active mode and zoom presets
 - [ ] **Phase 22: Bookmarks & History** - Named bookmarks with navigation history
@@ -352,8 +352,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 19-01-PLAN.md — Enhanced flash visuals with emissive glow and scale pulsing
-- [ ] 19-02-PLAN.md — Flash settings controls with persistence
+- [x] 19-01-PLAN.md — Enhanced flash visuals with emissive glow and scale pulsing
+- [x] 19-02-PLAN.md — Flash settings controls with persistence
 
 ### Phase 20: Activity Trails
 **Goal**: User can see visual flow of recent activity through the graph over time
@@ -486,7 +486,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | Phase | Plans Complete | Status | Target |
 |-------|----------------|--------|--------|
 | 18. Smooth Activity Updates | 3/3 | Complete | UPD-01-03 |
-| 19. Enhanced Flash Effects | 0/2 | Pending | FLX-01-03 |
+| 19. Enhanced Flash Effects | 2/2 | Complete | FLX-01-03 |
 | 20. Activity Trails | 0/TBD | Pending | TRL-01-03 |
 | 21. Smart Camera Core | 0/TBD | Pending | CAM-01-02 |
 | 22. Bookmarks & History | 0/TBD | Pending | BKM-01-04 |
@@ -496,4 +496,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-24 (Phase 19 planned)*
+*Last updated: 2026-01-24 (Phase 19 complete)*

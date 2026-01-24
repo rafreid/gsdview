@@ -186,9 +186,9 @@ Requirements for milestone v1.3: Enhanced Navigation + Smooth Activity.
 
 ### Enhanced Flash Effects
 
-- [ ] **FLX-01**: Flash effects use brighter, more visible pulse/glow animations
-- [ ] **FLX-02**: Flash duration and intensity are configurable
-- [ ] **FLX-03**: Different flash patterns for create/modify/delete events
+- [x] **FLX-01**: Flash effects use brighter, more visible pulse/glow animations
+- [x] **FLX-02**: Flash duration and intensity are configurable
+- [x] **FLX-03**: Different flash patterns for create/modify/delete events
 
 ### Activity Trails
 
@@ -330,9 +330,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UPD-01 | Phase 18 | Complete |
 | UPD-02 | Phase 18 | Complete |
 | UPD-03 | Phase 18 | Complete |
-| FLX-01 | Phase 19 | Pending |
-| FLX-02 | Phase 19 | Pending |
-| FLX-03 | Phase 19 | Pending |
+| FLX-01 | Phase 19 | Complete |
+| FLX-02 | Phase 19 | Complete |
+| FLX-03 | Phase 19 | Complete |
 | TRL-01 | Phase 20 | Pending |
 | TRL-02 | Phase 20 | Pending |
 | TRL-03 | Phase 20 | Pending |
