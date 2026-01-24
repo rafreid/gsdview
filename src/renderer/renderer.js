@@ -2513,6 +2513,9 @@ async function openFileInspector(node) {
   // Populate diff section
   await populateInspectorDiff();
 
+  // Populate structure tree section
+  await populateInspectorStructure();
+
   console.log('[Inspector] Opened for:', node.name, node.path);
 }
 
@@ -2612,6 +2615,87 @@ async function populateInspectorDiff() {
       diffSection.innerHTML = '<div class="diff-status">Error loading session diff</div>';
     }
   }
+}
+
+// Populate the structure tree section
+async function populateInspectorStructure() {
+  if (!inspectorNode || inspectorNode.type !== 'file') return;
+
+  const structureSection = document.querySelector('#section-structure .section-content');
+  if (!structureSection) return;
+
+  const filePath = getInspectorFilePath(inspectorNode);
+  if (!filePath) {
+    structureSection.innerHTML = '<p class="structure-empty">Could not determine file path</p>';
+    return;
+  }
+
+  try {
+    const content = await window.electronAPI.readFileContent(filePath);
+    const items = parseFileStructure(content, inspectorNode.name);
+
+    if (items.length === 0) {
+      structureSection.innerHTML = '<p class="structure-empty">No structure found in this file</p>';
+      return;
+    }
+
+    structureSection.innerHTML = `<div class="structure-tree">${renderStructureTree(items)}</div>`;
+  } catch (err) {
+    console.error('[Structure] Error loading:', err);
+    structureSection.innerHTML = `<p class="structure-empty">Error loading file structure</p>`;
+  }
+}
+
+// Render structure items as nested tree HTML
+function renderStructureTree(items, parentDepth = -1) {
+  const iconMap = {
+    header: 'H',
+    function: 'f',
+    class: 'C',
+    import: 'i',
+    export: 'e',
+    key: 'k',
+    list: '-',
+    codeblock: '<>'
+  };
+
+  let html = '';
+  let i = 0;
+
+  while (i < items.length) {
+    const item = items[i];
+    const hasChildren = i + 1 < items.length && items[i + 1].depth > item.depth;
+
+    // Collect children (items with greater depth until we hit same or lower depth)
+    const children = [];
+    if (hasChildren) {
+      let j = i + 1;
+      while (j < items.length && items[j].depth > item.depth) {
+        children.push(items[j]);
+        j++;
+      }
+    }
+
+    const icon = iconMap[item.type] || '?';
+    const toggleClass = hasChildren ? '' : 'no-children';
+    const indentStyle = `padding-left: ${item.depth * 12}px`;
+
+    html += `<div class="structure-item" data-line="${item.line}" style="${indentStyle}">
+      <span class="structure-toggle ${toggleClass}">&#9654;</span>
+      <span class="structure-icon ${item.type}">${icon}</span>
+      <span class="structure-name">${escapeHtml(item.name)}</span>
+      <span class="structure-line">:${item.line}</span>
+    </div>`;
+
+    if (children.length > 0) {
+      html += `<div class="structure-children">${renderStructureTree(children, item.depth)}</div>`;
+    }
+
+    // Skip children we've already processed
+    i += 1 + children.length;
+  }
+
+  return html;
 }
 
 // Compute a simple line-by-line session diff
@@ -2728,6 +2812,55 @@ document.querySelector('#section-diff .section-content').addEventListener('click
     const container = e.target.closest('.diff-line-container');
     if (container) {
       container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+});
+
+// Structure tree event delegation for clicks and collapse/expand
+document.querySelector('#section-structure .section-content').addEventListener('click', (e) => {
+  const structureItem = e.target.closest('.structure-item');
+  if (!structureItem) return;
+
+  const lineNum = parseInt(structureItem.dataset.line, 10);
+
+  // Check if clicking on toggle icon
+  if (e.target.classList.contains('structure-toggle')) {
+    const toggle = e.target;
+    const childrenContainer = structureItem.nextElementSibling;
+
+    if (childrenContainer && childrenContainer.classList.contains('structure-children')) {
+      toggle.classList.toggle('expanded');
+      childrenContainer.classList.toggle('expanded');
+    }
+    return;
+  }
+
+  // Click on structure item - scroll diff to that line
+  const diffContent = document.querySelector('#section-diff .section-content .diff-content');
+  if (diffContent && lineNum) {
+    // Find the line number element with matching line
+    const lineNumEl = diffContent.querySelector(`.diff-line-number[data-line="${lineNum}"]`);
+    if (lineNumEl) {
+      // Remove active state from all items
+      document.querySelectorAll('.structure-item.active').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      // Add active state to clicked item
+      structureItem.classList.add('active');
+
+      // Scroll into view with highlight
+      const container = lineNumEl.closest('.diff-line-container');
+      if (container) {
+        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Brief highlight effect
+        container.style.transition = 'background 0.15s';
+        container.style.background = 'rgba(78, 205, 196, 0.3)';
+        setTimeout(() => {
+          container.style.background = '';
+        }, 1500);
+      }
     }
   }
 });
