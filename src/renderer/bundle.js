@@ -82375,6 +82375,85 @@ var<${access}> ${name} : ${structName};`;
     }
     highlightedNodeId = null;
   }
+  var pendingDeletions = /* @__PURE__ */ new Set();
+  function fadeOutAndRemoveNode(nodeId) {
+    if (pendingDeletions.has(nodeId)) {
+      console.log("[Fade] Already fading:", nodeId);
+      return;
+    }
+    const node = currentGraphData.nodes.find((n2) => n2.id === nodeId);
+    if (!node) {
+      console.log("[Fade] Node not found:", nodeId);
+      return;
+    }
+    const threeObj = node.__threeObj;
+    if (!threeObj) {
+      console.log("[Fade] No THREE object for node:", nodeId);
+      removeNodeFromGraph(nodeId);
+      return;
+    }
+    pendingDeletions.add(nodeId);
+    if (flashingNodes.has(nodeId)) {
+      const existing = flashingNodes.get(nodeId);
+      if (existing.rafId) cancelAnimationFrame(existing.rafId);
+      flashingNodes.delete(nodeId);
+    }
+    nodeHeatMap.delete(nodeId);
+    if (highlightedNodeId === nodeId) {
+      clearNodeHighlight();
+    }
+    const materials = [];
+    if (threeObj.material) {
+      materials.push(threeObj.material);
+    }
+    if (threeObj.children) {
+      threeObj.children.forEach((child) => {
+        if (child.material) materials.push(child.material);
+      });
+    }
+    materials.forEach((material) => {
+      material.transparent = true;
+    });
+    const originalScale = threeObj.scale.clone();
+    const duration = 500;
+    const startTime = Date.now();
+    function animate() {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      materials.forEach((material) => {
+        material.opacity = 1 - easeProgress;
+      });
+      const scale2 = 1 - easeProgress * 0.3;
+      threeObj.scale.set(
+        originalScale.x * scale2,
+        originalScale.y * scale2,
+        originalScale.z * scale2
+      );
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        removeNodeFromGraph(nodeId);
+        pendingDeletions.delete(nodeId);
+      }
+    }
+    animate();
+    console.log("[Fade] Started fade-out for:", nodeId);
+  }
+  function removeNodeFromGraph(nodeId) {
+    currentGraphData.nodes = currentGraphData.nodes.filter((n2) => n2.id !== nodeId);
+    currentGraphData.links = currentGraphData.links.filter(
+      (link) => link.source.id !== nodeId && link.target.id !== nodeId && link.source !== nodeId && link.target !== nodeId
+    );
+    if (storedDirectoryData && storedDirectoryData.nodes) {
+      storedDirectoryData.nodes = storedDirectoryData.nodes.filter((n2) => n2.id !== nodeId);
+      storedDirectoryData.links = storedDirectoryData.links.filter(
+        (link) => link.source !== nodeId && link.target !== nodeId
+      );
+    }
+    Graph.graphData(currentGraphData);
+    console.log("[Fade] Removed node from graph:", nodeId);
+  }
   function flashTreeItem(nodeId, changeType = "modified") {
     const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);
     if (!treeItem) return;
@@ -82385,6 +82464,18 @@ var<${access}> ${name} : ${structName};`;
     setTimeout(() => {
       treeItem.classList.remove(className);
     }, 2e3);
+  }
+  function fadeTreeItem(nodeId) {
+    const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);
+    if (!treeItem) return;
+    treeItem.style.transition = "opacity 500ms ease-out, transform 500ms ease-out";
+    treeItem.style.opacity = "0";
+    treeItem.style.transform = "scale(0.7)";
+    setTimeout(() => {
+      if (treeItem.parentNode) {
+        treeItem.parentNode.removeChild(treeItem);
+      }
+    }, 500);
   }
   function calculateConnectionCounts(graphData) {
     const counts = {};
@@ -82904,17 +82995,8 @@ ${node.goal}`;
         hideDetailsPanel();
         selectedNode = null;
       }
-      currentGraphData.nodes = currentGraphData.nodes.filter((n2) => n2.id !== nodeId);
-      currentGraphData.links = currentGraphData.links.filter(
-        (link) => link.source.id !== nodeId && link.target.id !== nodeId && link.source !== nodeId && link.target !== nodeId
-      );
-      if (storedDirectoryData && storedDirectoryData.nodes) {
-        storedDirectoryData.nodes = storedDirectoryData.nodes.filter((n2) => n2.id !== nodeId);
-        storedDirectoryData.links = storedDirectoryData.links.filter(
-          (link) => link.source !== nodeId && link.target !== nodeId
-        );
-      }
-      Graph.graphData(currentGraphData);
+      fadeOutAndRemoveNode(nodeId);
+      fadeTreeItem(nodeId);
     }
     if (camPos && Graph && Graph.cameraPosition) {
       Graph.cameraPosition(camPos.x, camPos.y, camPos.z, 0);

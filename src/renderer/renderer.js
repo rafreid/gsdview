@@ -1084,6 +1084,24 @@ function flashTreeItem(nodeId, changeType = 'modified') {
   }, 2000);
 }
 
+// Fade out a tree item when deleted
+function fadeTreeItem(nodeId) {
+  const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);
+  if (!treeItem) return;
+
+  // Add fade-out class
+  treeItem.style.transition = 'opacity 500ms ease-out, transform 500ms ease-out';
+  treeItem.style.opacity = '0';
+  treeItem.style.transform = 'scale(0.7)';
+
+  // Remove from DOM after animation completes
+  setTimeout(() => {
+    if (treeItem.parentNode) {
+      treeItem.parentNode.removeChild(treeItem);
+    }
+  }, 500);
+}
+
 // Calculate connection count for each node
 function calculateConnectionCounts(graphData) {
   const counts = {};
@@ -1803,7 +1821,7 @@ function applyIncrementalUpdate(changeEvent) {
     // No graphData() call needed
 
   } else if (event === 'unlink' || event === 'unlinkDir') {
-    // DELETE: Remove node from graph
+    // DELETE: Fade out and remove node from graph
 
     // Check if selected node is being deleted
     if (selectedNode && selectedNode.id === nodeId) {
@@ -1811,25 +1829,11 @@ function applyIncrementalUpdate(changeEvent) {
       selectedNode = null;
     }
 
-    // Remove node from currentGraphData.nodes
-    currentGraphData.nodes = currentGraphData.nodes.filter(n => n.id !== nodeId);
+    // Trigger fade-out animation (removes from graph when complete)
+    fadeOutAndRemoveNode(nodeId);
 
-    // Remove links where this node is source or target
-    currentGraphData.links = currentGraphData.links.filter(
-      link => link.source.id !== nodeId && link.target.id !== nodeId &&
-              link.source !== nodeId && link.target !== nodeId
-    );
-
-    // Update storedDirectoryData for tree panel
-    if (storedDirectoryData && storedDirectoryData.nodes) {
-      storedDirectoryData.nodes = storedDirectoryData.nodes.filter(n => n.id !== nodeId);
-      storedDirectoryData.links = storedDirectoryData.links.filter(
-        link => link.source !== nodeId && link.target !== nodeId
-      );
-    }
-
-    // Update graph
-    Graph.graphData(currentGraphData);
+    // Fade tree item too
+    fadeTreeItem(nodeId);
   }
 
   // Restore camera position (instant, no animation)
