@@ -249,23 +249,6 @@ app.whenReady().then(() => {
     return store.get('recentProjects', []);
   });
 
-  // IPC handler for getting file stats
-  ipcMain.handle('get-file-stats', async (event, filePath) => {
-    try {
-      const stats = fs.statSync(filePath);
-      return {
-        size: stats.size,
-        mtime: stats.mtime,
-        ctime: stats.ctime,
-        isDirectory: stats.isDirectory(),
-        isFile: stats.isFile()
-      };
-    } catch (error) {
-      console.error('Error getting file stats:', error);
-      return { error: error.message };
-    }
-  });
-
   // IPC handler for reading file content
   ipcMain.handle('read-file-content', async (event, filePath) => {
     try {
