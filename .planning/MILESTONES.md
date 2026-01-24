@@ -30,8 +30,35 @@
 
 ---
 
+### v1.1 - Real-time Activity Visualization (2026-01-23)
+
+**Goal:** Make GSD's file operations visible and understandable in real-time, so users can see exactly what's happening as Claude writes, updates, and changes files.
+
+**Phases:** 7-12 (14 plans total)
+7. Expanded File Scope - Include src/ directory in graph
+8. Activity Feed & Change Indicators - Live feed with change type animations
+9. Heat Map Visualization - Recently changed files glow hot
+10. Git Integration - Uncommitted/staged changes, commits, branch
+11. Statistics & Diff Preview - Activity analytics and file diffs
+12. Timeline Replay - Scrub through activity history
+
+**Quick Tasks:** 3
+- Fix path error (missing sourceType)
+- Resizable panel divider
+- File Tree open by default
+
+**Key Deliverables:**
+- Expanded file graph (.planning/ + src/)
+- Live activity feed with change indicators
+- Heat map visualization with configurable decay
+- Git integration (staged, modified, untracked, commits)
+- Statistics panel and diff preview
+- Timeline replay with playback controls
+
+---
+
 ## Current Milestone
 
-**v1.1 - Real-time Activity Visualization** (Started 2026-01-23)
+**v1.2 - File Deep Dive** (Started 2026-01-24)
 
 See: `.planning/PROJECT.md` Current Milestone section
