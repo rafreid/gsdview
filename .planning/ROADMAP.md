@@ -365,10 +365,11 @@ Plans:
   3. Trails automatically fade and disappear after configurable time period
   4. User can toggle activity trails on/off via UI button
   5. Trails don't interfere with normal node connections or navigation
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD
+- [ ] 20-01-PLAN.md — Trail state management, rendering, and toggle button
+- [ ] 20-02-PLAN.md — Configurable trail duration and enhanced visual styling
 
 ### Phase 21: Smart Camera Core
 **Goal**: Camera intelligently follows file activity and provides quick zoom shortcuts
@@ -487,7 +488,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 |-------|----------------|--------|--------|
 | 18. Smooth Activity Updates | 3/3 | Complete | UPD-01-03 |
 | 19. Enhanced Flash Effects | 2/2 | Complete | FLX-01-03 |
-| 20. Activity Trails | 0/TBD | Pending | TRL-01-03 |
+| 20. Activity Trails | 0/2 | Pending | TRL-01-03 |
 | 21. Smart Camera Core | 0/TBD | Pending | CAM-01-02 |
 | 22. Bookmarks & History | 0/TBD | Pending | BKM-01-04 |
 | 23. Breadcrumb Trail | 0/TBD | Pending | BRD-01-02 |
@@ -496,4 +497,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-24 (Phase 19 complete)*
+*Last updated: 2026-01-24 (Phase 20 planned)*
