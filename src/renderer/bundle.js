@@ -81839,6 +81839,12 @@ var<${access}> ${name} : ${structName};`;
   var PLAYBACK_SPEED = 500;
   var flashingNodes = /* @__PURE__ */ new Map();
   var highlightedNodeId = null;
+  var lastClickTime = 0;
+  var lastClickNode = null;
+  var DOUBLE_CLICK_THRESHOLD = 300;
+  var inspectorNode = null;
+  var inspectorDiffMode = "git";
+  var sessionFileSnapshots = /* @__PURE__ */ new Map();
   var changeTypeColors = {
     created: 3066993,
     // Green
@@ -82582,6 +82588,15 @@ ${node.goal}`;
     }
     return false;
   }).linkColor((link) => getLinkColor(link, currentGraphData)).linkWidth((link) => getLinkWidth(link, currentGraphData)).linkOpacity(0.6).linkDirectionalArrowLength(3.5).linkDirectionalArrowRelPos(1).backgroundColor("#1a1a2e").showNavInfo(false).onNodeClick((node) => {
+    const now4 = Date.now();
+    if (node.type === "file" && lastClickNode === node && now4 - lastClickTime < DOUBLE_CLICK_THRESHOLD) {
+      openFileInspector(node);
+      lastClickTime = 0;
+      lastClickNode = null;
+      return;
+    }
+    lastClickTime = now4;
+    lastClickNode = node;
     const distance3 = 50 + getNodeSize(node, connectionCounts) * 4;
     if (is3D) {
       const distRatio = 1 + distance3 / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
@@ -82997,7 +83012,74 @@ ${node.goal}`;
   function escapeHtml(text) {
     return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
-  function renderDiffView(diffResult) {
+  function applySyntaxHighlighting(escapedLine, filename) {
+    if (!filename) return escapedLine;
+    const ext = filename.substring(filename.lastIndexOf(".")).toLowerCase();
+    if (escapedLine.startsWith("@@ ") || escapedLine.startsWith("diff ") || escapedLine.startsWith("index ") || escapedLine.startsWith("--- ") || escapedLine.startsWith("+++ ")) {
+      return escapedLine;
+    }
+    let prefix = "";
+    let content = escapedLine;
+    if (escapedLine.startsWith("+") || escapedLine.startsWith("-") || escapedLine.startsWith(" ")) {
+      prefix = escapedLine[0];
+      content = escapedLine.substring(1);
+    }
+    let highlighted = content;
+    if ([".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs"].includes(ext)) {
+      highlighted = highlighted.replace(
+        /\b(const|let|var|function|return|if|else|for|while|class|extends|import|export|from|async|await|new|this|try|catch|throw|typeof|instanceof|null|undefined|true|false)\b/g,
+        '<span class="syntax-keyword">$1</span>'
+      );
+      highlighted = highlighted.replace(
+        /(&apos;[^&]*&apos;|&quot;[^&]*&quot;|'[^']*'|"[^"]*")/g,
+        '<span class="syntax-string">$1</span>'
+      );
+      highlighted = highlighted.replace(
+        /(\/\/.*$)/g,
+        '<span class="syntax-comment">$1</span>'
+      );
+      highlighted = highlighted.replace(
+        /\b(\d+\.?\d*)\b/g,
+        '<span class="syntax-number">$1</span>'
+      );
+      highlighted = highlighted.replace(
+        /\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g,
+        '<span class="syntax-function">$1</span>('
+      );
+    } else if ([".md", ".markdown"].includes(ext)) {
+      highlighted = highlighted.replace(
+        /^(#{1,6}\s.*)$/g,
+        '<span class="syntax-keyword">$1</span>'
+      );
+      highlighted = highlighted.replace(
+        /(\*\*[^*]+\*\*)/g,
+        '<span class="syntax-string">$1</span>'
+      );
+      highlighted = highlighted.replace(
+        /(\[[^\]]+\]\([^)]+\))/g,
+        '<span class="syntax-function">$1</span>'
+      );
+    } else if ([".json"].includes(ext)) {
+      highlighted = highlighted.replace(
+        /(&quot;[^&]+&quot;|"[^"]+")(\s*:)/g,
+        '<span class="syntax-keyword">$1</span>$2'
+      );
+      highlighted = highlighted.replace(
+        /:(\s*)(&quot;[^&]*&quot;|"[^"]*")/g,
+        ':$1<span class="syntax-string">$2</span>'
+      );
+      highlighted = highlighted.replace(
+        /:\s*(\d+\.?\d*)/g,
+        ': <span class="syntax-number">$1</span>'
+      );
+      highlighted = highlighted.replace(
+        /\b(true|false|null)\b/g,
+        '<span class="syntax-keyword">$1</span>'
+      );
+    }
+    return prefix + highlighted;
+  }
+  function renderDiffView(diffResult, filename) {
     if (!diffResult) return '<div class="diff-status">Unable to load diff</div>';
     if (diffResult.error) {
       return `<div class="diff-status">Error: ${diffResult.error}</div>`;
@@ -83012,18 +83094,39 @@ ${node.goal}`;
     const MAX_DIFF_LINES = 100;
     const truncated = lines.length > MAX_DIFF_LINES;
     const displayLines = truncated ? lines.slice(0, MAX_DIFF_LINES) : lines;
-    const htmlLines = displayLines.map((line) => {
+    let oldLine = 0, newLine = 0;
+    const htmlLines = displayLines.map((line, idx) => {
       let className = "diff-line context";
-      if (line.startsWith("+") && !line.startsWith("+++")) {
+      let lineNum = idx + 1;
+      let displayLineNum = "";
+      const hunkMatch = line.match(/^@@ -(\d+),?\d* \+(\d+),?\d* @@/);
+      if (hunkMatch) {
+        oldLine = parseInt(hunkMatch[1], 10);
+        newLine = parseInt(hunkMatch[2], 10);
+        className = "diff-line header";
+        displayLineNum = "...";
+      } else if (line.startsWith("+") && !line.startsWith("+++")) {
         className = "diff-line added";
+        displayLineNum = newLine;
+        newLine++;
       } else if (line.startsWith("-") && !line.startsWith("---")) {
         className = "diff-line removed";
-      } else if (line.startsWith("@@")) {
-        className = "diff-line header";
+        displayLineNum = oldLine;
+        oldLine++;
       } else if (line.startsWith("diff ") || line.startsWith("index ") || line.startsWith("---") || line.startsWith("+++")) {
         className = "diff-line header";
+        displayLineNum = "";
+      } else if (oldLine > 0 || newLine > 0) {
+        displayLineNum = newLine || oldLine;
+        oldLine++;
+        newLine++;
       }
-      return `<div class="${className}">${escapeHtml(line)}</div>`;
+      const escaped = escapeHtml(line);
+      const highlighted = filename ? applySyntaxHighlighting(escaped, filename) : escaped;
+      return `<div class="diff-line-container">
+      <span class="diff-line-number" data-line="${lineNum}">${displayLineNum}</span>
+      <span class="diff-line-content ${className}">${highlighted}</span>
+    </div>`;
     }).join("");
     let truncateMsg = "";
     if (truncated) {
@@ -83174,6 +83277,154 @@ ${node.goal}`;
     panel.classList.add("hidden");
     selectedNode = null;
   }
+  async function openFileInspector(node) {
+    if (node.type !== "file") return;
+    inspectorNode = node;
+    const overlay = document.getElementById("file-inspector-overlay");
+    const modal = document.getElementById("file-inspector-modal");
+    const title = document.getElementById("inspector-title");
+    title.textContent = node.name;
+    overlay.classList.remove("hidden");
+    overlay.classList.add("visible");
+    modal.classList.remove("hidden");
+    document.querySelectorAll(".collapsible-section").forEach((section) => {
+      section.classList.remove("collapsed");
+    });
+    inspectorDiffMode = "git";
+    document.querySelectorAll(".diff-mode-toggle .mode-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.mode === "git");
+    });
+    const fullPath = getInspectorFilePath(node);
+    if (fullPath && !sessionFileSnapshots.has(fullPath)) {
+      try {
+        const content = await window.electronAPI.readFileContent(fullPath);
+        sessionFileSnapshots.set(fullPath, {
+          content: content || "",
+          timestamp: Date.now()
+        });
+        console.log("[Inspector] Initial snapshot stored for:", fullPath);
+      } catch (err) {
+        console.log("[Inspector] Could not store initial snapshot:", err.message);
+      }
+    }
+    await populateInspectorDiff();
+    console.log("[Inspector] Opened for:", node.name, node.path);
+  }
+  function getInspectorFilePath(node) {
+    if (!selectedProjectPath || !node) return null;
+    if (node.sourceType === "src") {
+      return `${selectedProjectPath}/src/${node.path}`;
+    } else if (node.sourceType === "planning") {
+      return `${selectedProjectPath}/.planning/${node.path}`;
+    } else if (node.path) {
+      return `${selectedProjectPath}/.planning/${node.path}`;
+    }
+    return null;
+  }
+  function closeFileInspector() {
+    const overlay = document.getElementById("file-inspector-overlay");
+    const modal = document.getElementById("file-inspector-modal");
+    overlay.classList.remove("visible");
+    setTimeout(() => {
+      overlay.classList.add("hidden");
+    }, 200);
+    modal.classList.add("hidden");
+    inspectorNode = null;
+    console.log("[Inspector] Closed");
+  }
+  async function populateInspectorDiff() {
+    if (!inspectorNode || inspectorNode.type !== "file") return;
+    const diffSection = document.querySelector("#section-diff .section-content");
+    if (!diffSection) return;
+    diffSection.innerHTML = '<div class="diff-status">Loading...</div>';
+    const fullPath = getInspectorFilePath(inspectorNode);
+    if (!fullPath) {
+      diffSection.innerHTML = '<div class="diff-status">Unable to determine file path</div>';
+      return;
+    }
+    let relativePath;
+    if (inspectorNode.sourceType === "planning") {
+      relativePath = ".planning/" + inspectorNode.path;
+    } else if (inspectorNode.sourceType === "src") {
+      relativePath = "src/" + inspectorNode.path;
+    } else {
+      relativePath = inspectorNode.path;
+    }
+    if (inspectorDiffMode === "git") {
+      if (!selectedProjectPath || !window.electronAPI || !window.electronAPI.getGitDiff) {
+        diffSection.innerHTML = '<div class="diff-status">Git diff not available</div>';
+        return;
+      }
+      try {
+        const diffResult = await window.electronAPI.getGitDiff(selectedProjectPath, relativePath);
+        diffSection.innerHTML = renderDiffView(diffResult, inspectorNode.name);
+      } catch (err) {
+        console.error("[Inspector] Error loading git diff:", err);
+        diffSection.innerHTML = '<div class="diff-status">Error loading git diff</div>';
+      }
+    } else {
+      try {
+        const currentContent = await window.electronAPI.readFileContent(fullPath);
+        const snapshot = sessionFileSnapshots.get(fullPath);
+        if (!snapshot) {
+          diffSection.innerHTML = '<div class="diff-status">No previous session snapshot available</div>';
+          return;
+        }
+        if (currentContent === snapshot.content) {
+          diffSection.innerHTML = '<div class="diff-status">No changes since last viewed</div>';
+        } else {
+          const sessionDiff = computeSessionDiff(snapshot.content, currentContent);
+          diffSection.innerHTML = renderSessionDiffView(sessionDiff, inspectorNode.name);
+        }
+        sessionFileSnapshots.set(fullPath, {
+          content: currentContent || "",
+          timestamp: Date.now()
+        });
+      } catch (err) {
+        console.error("[Inspector] Error computing session diff:", err);
+        diffSection.innerHTML = '<div class="diff-status">Error loading session diff</div>';
+      }
+    }
+  }
+  function computeSessionDiff(oldContent, newContent) {
+    const oldLines = (oldContent || "").split("\n");
+    const newLines = (newContent || "").split("\n");
+    const result = [];
+    let i2 = 0, j2 = 0;
+    while (i2 < oldLines.length || j2 < newLines.length) {
+      if (i2 >= oldLines.length) {
+        result.push({ type: "added", line: newLines[j2], lineNum: j2 + 1 });
+        j2++;
+      } else if (j2 >= newLines.length) {
+        result.push({ type: "removed", line: oldLines[i2], lineNum: i2 + 1 });
+        i2++;
+      } else if (oldLines[i2] === newLines[j2]) {
+        result.push({ type: "context", line: oldLines[i2], lineNum: j2 + 1 });
+        i2++;
+        j2++;
+      } else {
+        result.push({ type: "removed", line: oldLines[i2], lineNum: i2 + 1 });
+        result.push({ type: "added", line: newLines[j2], lineNum: j2 + 1 });
+        i2++;
+        j2++;
+      }
+    }
+    return result;
+  }
+  function renderSessionDiffView(diffLines, filename) {
+    if (!diffLines || diffLines.length === 0) {
+      return '<div class="diff-status">No changes</div>';
+    }
+    const htmlLines = diffLines.map((item) => {
+      const lineClass = item.type === "added" ? "added" : item.type === "removed" ? "removed" : "context";
+      const lineContent = applySyntaxHighlighting(escapeHtml(item.line), filename);
+      return `<div class="diff-line-container">
+      <span class="diff-line-number" data-line="${item.lineNum}">${item.lineNum}</span>
+      <span class="diff-line-content diff-line ${lineClass}">${lineContent}</span>
+    </div>`;
+    }).join("");
+    return `<div class="diff-content">${htmlLines}</div>`;
+  }
   async function refreshDiffSection() {
     if (!selectedNode || selectedNode.type !== "file") return;
     if (!selectedProjectPath || !window.electronAPI || !window.electronAPI.getGitDiff) return;
@@ -83197,9 +83448,43 @@ ${node.goal}`;
     }
   }
   document.getElementById("close-panel").addEventListener("click", hideDetailsPanel);
+  document.getElementById("inspector-close").addEventListener("click", closeFileInspector);
+  document.getElementById("file-inspector-overlay").addEventListener("click", closeFileInspector);
+  document.querySelectorAll(".collapsible-section .section-header").forEach((header) => {
+    header.addEventListener("click", (e2) => {
+      if (e2.target.classList.contains("mode-btn")) return;
+      const section = header.closest(".collapsible-section");
+      section.classList.toggle("collapsed");
+    });
+  });
+  document.querySelectorAll(".diff-mode-toggle .mode-btn").forEach((btn) => {
+    btn.addEventListener("click", async (e2) => {
+      e2.stopPropagation();
+      const mode = btn.dataset.mode;
+      if (mode === inspectorDiffMode) return;
+      document.querySelectorAll(".diff-mode-toggle .mode-btn").forEach((b) => {
+        b.classList.toggle("active", b === btn);
+      });
+      inspectorDiffMode = mode;
+      await populateInspectorDiff();
+    });
+  });
+  document.querySelector("#section-diff .section-content").addEventListener("click", (e2) => {
+    if (e2.target.classList.contains("diff-line-number")) {
+      const container2 = e2.target.closest(".diff-line-container");
+      if (container2) {
+        container2.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  });
   document.addEventListener("keydown", (e2) => {
     if (e2.key === "Escape") {
-      hideDetailsPanel();
+      const modal = document.getElementById("file-inspector-modal");
+      if (modal && !modal.classList.contains("hidden")) {
+        closeFileInspector();
+      } else {
+        hideDetailsPanel();
+      }
     }
   });
   document.getElementById("refresh-btn").addEventListener("click", async () => {

@@ -111,6 +111,8 @@ const DOUBLE_CLICK_THRESHOLD = 300; // ms
 
 // File inspector modal state
 let inspectorNode = null; // Currently inspected file node
+let inspectorDiffMode = 'git'; // 'git' or 'session'
+const sessionFileSnapshots = new Map(); // filePath -> { content: string, timestamp: number }
 
 // Change type colors for type-specific animations
 const changeTypeColors = {
@@ -1758,8 +1760,104 @@ function escapeHtml(text) {
     .replace(/>/g, '&gt;');
 }
 
-// Render diff view with syntax highlighting for diff lines
-function renderDiffView(diffResult) {
+// Apply basic syntax highlighting based on file extension
+function applySyntaxHighlighting(escapedLine, filename) {
+  if (!filename) return escapedLine;
+
+  const ext = filename.substring(filename.lastIndexOf('.')).toLowerCase();
+
+  // Skip highlighting for diff metadata lines
+  if (escapedLine.startsWith('@@ ') || escapedLine.startsWith('diff ') ||
+      escapedLine.startsWith('index ') || escapedLine.startsWith('--- ') ||
+      escapedLine.startsWith('+++ ')) {
+    return escapedLine;
+  }
+
+  // Remove diff prefix for syntax processing
+  let prefix = '';
+  let content = escapedLine;
+  if (escapedLine.startsWith('+') || escapedLine.startsWith('-') || escapedLine.startsWith(' ')) {
+    prefix = escapedLine[0];
+    content = escapedLine.substring(1);
+  }
+
+  let highlighted = content;
+
+  // JavaScript/TypeScript highlighting
+  if (['.js', '.ts', '.jsx', '.tsx', '.mjs', '.cjs'].includes(ext)) {
+    // Keywords
+    highlighted = highlighted.replace(
+      /\b(const|let|var|function|return|if|else|for|while|class|extends|import|export|from|async|await|new|this|try|catch|throw|typeof|instanceof|null|undefined|true|false)\b/g,
+      '<span class="syntax-keyword">$1</span>'
+    );
+    // Strings (single and double quotes)
+    highlighted = highlighted.replace(
+      /(&apos;[^&]*&apos;|&quot;[^&]*&quot;|'[^']*'|"[^"]*")/g,
+      '<span class="syntax-string">$1</span>'
+    );
+    // Comments (// style)
+    highlighted = highlighted.replace(
+      /(\/\/.*$)/g,
+      '<span class="syntax-comment">$1</span>'
+    );
+    // Numbers
+    highlighted = highlighted.replace(
+      /\b(\d+\.?\d*)\b/g,
+      '<span class="syntax-number">$1</span>'
+    );
+    // Function calls
+    highlighted = highlighted.replace(
+      /\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g,
+      '<span class="syntax-function">$1</span>('
+    );
+  }
+  // Markdown highlighting
+  else if (['.md', '.markdown'].includes(ext)) {
+    // Headers
+    highlighted = highlighted.replace(
+      /^(#{1,6}\s.*)$/g,
+      '<span class="syntax-keyword">$1</span>'
+    );
+    // Bold
+    highlighted = highlighted.replace(
+      /(\*\*[^*]+\*\*)/g,
+      '<span class="syntax-string">$1</span>'
+    );
+    // Links [text](url)
+    highlighted = highlighted.replace(
+      /(\[[^\]]+\]\([^)]+\))/g,
+      '<span class="syntax-function">$1</span>'
+    );
+  }
+  // JSON highlighting
+  else if (['.json'].includes(ext)) {
+    // Keys (quoted strings followed by colon)
+    highlighted = highlighted.replace(
+      /(&quot;[^&]+&quot;|"[^"]+")(\s*:)/g,
+      '<span class="syntax-keyword">$1</span>$2'
+    );
+    // String values
+    highlighted = highlighted.replace(
+      /:(\s*)(&quot;[^&]*&quot;|"[^"]*")/g,
+      ':$1<span class="syntax-string">$2</span>'
+    );
+    // Numbers
+    highlighted = highlighted.replace(
+      /:\s*(\d+\.?\d*)/g,
+      ': <span class="syntax-number">$1</span>'
+    );
+    // Booleans
+    highlighted = highlighted.replace(
+      /\b(true|false|null)\b/g,
+      '<span class="syntax-keyword">$1</span>'
+    );
+  }
+
+  return prefix + highlighted;
+}
+
+// Render diff view with line numbers and syntax highlighting for diff lines
+function renderDiffView(diffResult, filename) {
   if (!diffResult) return '<div class="diff-status">Unable to load diff</div>';
 
   if (diffResult.error) {
@@ -1783,19 +1881,47 @@ function renderDiffView(diffResult) {
   const truncated = lines.length > MAX_DIFF_LINES;
   const displayLines = truncated ? lines.slice(0, MAX_DIFF_LINES) : lines;
 
-  const htmlLines = displayLines.map(line => {
+  // Track line numbers from hunk headers
+  let oldLine = 0, newLine = 0;
+
+  const htmlLines = displayLines.map((line, idx) => {
     let className = 'diff-line context';
-    if (line.startsWith('+') && !line.startsWith('+++')) {
+    let lineNum = idx + 1;
+    let displayLineNum = '';
+
+    // Parse @@ header for line numbers
+    const hunkMatch = line.match(/^@@ -(\d+),?\d* \+(\d+),?\d* @@/);
+    if (hunkMatch) {
+      oldLine = parseInt(hunkMatch[1], 10);
+      newLine = parseInt(hunkMatch[2], 10);
+      className = 'diff-line header';
+      displayLineNum = '...';
+    } else if (line.startsWith('+') && !line.startsWith('+++')) {
       className = 'diff-line added';
+      displayLineNum = newLine;
+      newLine++;
     } else if (line.startsWith('-') && !line.startsWith('---')) {
       className = 'diff-line removed';
-    } else if (line.startsWith('@@')) {
-      className = 'diff-line header';
+      displayLineNum = oldLine;
+      oldLine++;
     } else if (line.startsWith('diff ') || line.startsWith('index ') ||
                line.startsWith('---') || line.startsWith('+++')) {
       className = 'diff-line header';
+      displayLineNum = '';
+    } else if (oldLine > 0 || newLine > 0) {
+      // Context line
+      displayLineNum = newLine || oldLine;
+      oldLine++;
+      newLine++;
     }
-    return `<div class="${className}">${escapeHtml(line)}</div>`;
+
+    const escaped = escapeHtml(line);
+    const highlighted = filename ? applySyntaxHighlighting(escaped, filename) : escaped;
+
+    return `<div class="diff-line-container">
+      <span class="diff-line-number" data-line="${lineNum}">${displayLineNum}</span>
+      <span class="diff-line-content ${className}">${highlighted}</span>
+    </div>`;
   }).join('');
 
   let truncateMsg = '';
@@ -1998,7 +2124,7 @@ function refreshDetailsPanel() {
 }
 
 // Open file inspector modal for a file node
-function openFileInspector(node) {
+async function openFileInspector(node) {
   if (node.type !== 'file') return;
 
   inspectorNode = node;
@@ -2020,7 +2146,45 @@ function openFileInspector(node) {
     section.classList.remove('collapsed');
   });
 
+  // Reset diff mode toggle to Git Diff active
+  inspectorDiffMode = 'git';
+  document.querySelectorAll('.diff-mode-toggle .mode-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === 'git');
+  });
+
+  // Initialize session snapshot if not present
+  const fullPath = getInspectorFilePath(node);
+  if (fullPath && !sessionFileSnapshots.has(fullPath)) {
+    try {
+      const content = await window.electronAPI.readFileContent(fullPath);
+      sessionFileSnapshots.set(fullPath, {
+        content: content || '',
+        timestamp: Date.now()
+      });
+      console.log('[Inspector] Initial snapshot stored for:', fullPath);
+    } catch (err) {
+      console.log('[Inspector] Could not store initial snapshot:', err.message);
+    }
+  }
+
+  // Populate diff section
+  await populateInspectorDiff();
+
   console.log('[Inspector] Opened for:', node.name, node.path);
+}
+
+// Get full file path for inspector node
+function getInspectorFilePath(node) {
+  if (!selectedProjectPath || !node) return null;
+
+  if (node.sourceType === 'src') {
+    return `${selectedProjectPath}/src/${node.path}`;
+  } else if (node.sourceType === 'planning') {
+    return `${selectedProjectPath}/.planning/${node.path}`;
+  } else if (node.path) {
+    return `${selectedProjectPath}/.planning/${node.path}`;
+  }
+  return null;
 }
 
 // Close file inspector modal
@@ -2036,6 +2200,121 @@ function closeFileInspector() {
 
   inspectorNode = null;
   console.log('[Inspector] Closed');
+}
+
+// Populate the inspector diff section based on current mode
+async function populateInspectorDiff() {
+  if (!inspectorNode || inspectorNode.type !== 'file') return;
+
+  const diffSection = document.querySelector('#section-diff .section-content');
+  if (!diffSection) return;
+
+  diffSection.innerHTML = '<div class="diff-status">Loading...</div>';
+
+  const fullPath = getInspectorFilePath(inspectorNode);
+  if (!fullPath) {
+    diffSection.innerHTML = '<div class="diff-status">Unable to determine file path</div>';
+    return;
+  }
+
+  // Build relative path for git
+  let relativePath;
+  if (inspectorNode.sourceType === 'planning') {
+    relativePath = '.planning/' + inspectorNode.path;
+  } else if (inspectorNode.sourceType === 'src') {
+    relativePath = 'src/' + inspectorNode.path;
+  } else {
+    relativePath = inspectorNode.path;
+  }
+
+  if (inspectorDiffMode === 'git') {
+    // Git diff mode - compare against HEAD
+    if (!selectedProjectPath || !window.electronAPI || !window.electronAPI.getGitDiff) {
+      diffSection.innerHTML = '<div class="diff-status">Git diff not available</div>';
+      return;
+    }
+
+    try {
+      const diffResult = await window.electronAPI.getGitDiff(selectedProjectPath, relativePath);
+      diffSection.innerHTML = renderDiffView(diffResult, inspectorNode.name);
+    } catch (err) {
+      console.error('[Inspector] Error loading git diff:', err);
+      diffSection.innerHTML = '<div class="diff-status">Error loading git diff</div>';
+    }
+  } else {
+    // Session diff mode - compare against last viewed
+    try {
+      const currentContent = await window.electronAPI.readFileContent(fullPath);
+      const snapshot = sessionFileSnapshots.get(fullPath);
+
+      if (!snapshot) {
+        diffSection.innerHTML = '<div class="diff-status">No previous session snapshot available</div>';
+        return;
+      }
+
+      if (currentContent === snapshot.content) {
+        diffSection.innerHTML = '<div class="diff-status">No changes since last viewed</div>';
+      } else {
+        const sessionDiff = computeSessionDiff(snapshot.content, currentContent);
+        diffSection.innerHTML = renderSessionDiffView(sessionDiff, inspectorNode.name);
+      }
+
+      // Update snapshot to current content after viewing
+      sessionFileSnapshots.set(fullPath, {
+        content: currentContent || '',
+        timestamp: Date.now()
+      });
+    } catch (err) {
+      console.error('[Inspector] Error computing session diff:', err);
+      diffSection.innerHTML = '<div class="diff-status">Error loading session diff</div>';
+    }
+  }
+}
+
+// Compute a simple line-by-line session diff
+function computeSessionDiff(oldContent, newContent) {
+  const oldLines = (oldContent || '').split('\n');
+  const newLines = (newContent || '').split('\n');
+  const result = [];
+
+  let i = 0, j = 0;
+  while (i < oldLines.length || j < newLines.length) {
+    if (i >= oldLines.length) {
+      result.push({ type: 'added', line: newLines[j], lineNum: j + 1 });
+      j++;
+    } else if (j >= newLines.length) {
+      result.push({ type: 'removed', line: oldLines[i], lineNum: i + 1 });
+      i++;
+    } else if (oldLines[i] === newLines[j]) {
+      result.push({ type: 'context', line: oldLines[i], lineNum: j + 1 });
+      i++; j++;
+    } else {
+      // Changed line - show as removed then added
+      result.push({ type: 'removed', line: oldLines[i], lineNum: i + 1 });
+      result.push({ type: 'added', line: newLines[j], lineNum: j + 1 });
+      i++; j++;
+    }
+  }
+  return result;
+}
+
+// Render session diff view
+function renderSessionDiffView(diffLines, filename) {
+  if (!diffLines || diffLines.length === 0) {
+    return '<div class="diff-status">No changes</div>';
+  }
+
+  const htmlLines = diffLines.map(item => {
+    const lineClass = item.type === 'added' ? 'added' :
+                      item.type === 'removed' ? 'removed' : 'context';
+    const lineContent = applySyntaxHighlighting(escapeHtml(item.line), filename);
+    return `<div class="diff-line-container">
+      <span class="diff-line-number" data-line="${item.lineNum}">${item.lineNum}</span>
+      <span class="diff-line-content diff-line ${lineClass}">${lineContent}</span>
+    </div>`;
+  }).join('');
+
+  return `<div class="diff-content">${htmlLines}</div>`;
 }
 
 // Refresh only the diff section in details panel (more efficient than full refresh)
@@ -2075,10 +2354,39 @@ document.getElementById('file-inspector-overlay').addEventListener('click', clos
 
 // Collapsible section toggle
 document.querySelectorAll('.collapsible-section .section-header').forEach(header => {
-  header.addEventListener('click', () => {
+  header.addEventListener('click', (e) => {
+    // Don't toggle when clicking mode buttons
+    if (e.target.classList.contains('mode-btn')) return;
     const section = header.closest('.collapsible-section');
     section.classList.toggle('collapsed');
   });
+});
+
+// Diff mode toggle handler
+document.querySelectorAll('.diff-mode-toggle .mode-btn').forEach(btn => {
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation(); // Prevent section collapse
+    const mode = btn.dataset.mode;
+    if (mode === inspectorDiffMode) return; // Already active
+
+    // Update active state
+    document.querySelectorAll('.diff-mode-toggle .mode-btn').forEach(b => {
+      b.classList.toggle('active', b === btn);
+    });
+
+    inspectorDiffMode = mode;
+    await populateInspectorDiff();
+  });
+});
+
+// Line number click-to-jump handler (event delegation)
+document.querySelector('#section-diff .section-content').addEventListener('click', (e) => {
+  if (e.target.classList.contains('diff-line-number')) {
+    const container = e.target.closest('.diff-line-container');
+    if (container) {
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 });
 
 // Close modal on Escape key (also closes details panel)

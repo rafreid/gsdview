@@ -1486,6 +1486,66 @@
       background: #4ECDC4;
       border-radius: 3px;
     }
+
+    /* Diff mode toggle */
+    .diff-mode-toggle {
+      display: flex;
+      gap: 4px;
+      margin-left: auto;
+    }
+    .mode-btn {
+      padding: 4px 10px;
+      border: 1px solid #555;
+      background: transparent;
+      color: #888;
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: all 0.2s;
+    }
+    .mode-btn:hover {
+      border-color: #4ECDC4;
+      color: #ccc;
+    }
+    .mode-btn.active {
+      background: #4ECDC4;
+      border-color: #4ECDC4;
+      color: #1a1a2e;
+    }
+
+    /* Line numbers in diff view */
+    .diff-line-container {
+      display: flex;
+    }
+    .diff-line-number {
+      min-width: 40px;
+      padding: 2px 8px;
+      text-align: right;
+      color: #555;
+      background: rgba(0,0,0,0.2);
+      border-right: 1px solid #333;
+      user-select: none;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: 'Consolas', 'Monaco', monospace;
+    }
+    .diff-line-number:hover {
+      color: #4ECDC4;
+      background: rgba(78, 205, 196, 0.1);
+    }
+    .diff-line-content {
+      flex: 1;
+      padding: 2px 8px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Basic syntax highlighting */
+    .syntax-keyword { color: #C678DD; }
+    .syntax-string { color: #98C379; }
+    .syntax-comment { color: #5C6370; font-style: italic; }
+    .syntax-number { color: #D19A66; }
+    .syntax-function { color: #61AFEF; }
   </style>
 </head>
 <body>
@@ -1579,9 +1639,13 @@
         <div class="section-header">
           <span class="section-toggle">&#9660;</span>
           <span class="section-title">Diff</span>
+          <div class="diff-mode-toggle">
+            <button class="mode-btn active" data-mode="git">Git Diff</button>
+            <button class="mode-btn" data-mode="session">Session Diff</button>
+          </div>
         </div>
         <div class="section-content">
-          <p class="section-placeholder">Diff content will appear here (Phase 14)</p>
+          <div class="diff-status">Loading...</div>
         </div>
       </div>
       <div class="collapsible-section" id="section-structure">
