@@ -244,7 +244,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 13-01-PLAN.md — Modal structure, double-click handler, and collapsible sections
+- [x] 13-01-PLAN.md — Modal structure, double-click handler, and collapsible sections
 
 ### Phase 14: Diff Editor
 **Goal**: User can view file content with syntax highlighting, toggle diff modes, and navigate by line numbers
@@ -338,7 +338,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Target |
 |-------|----------------|--------|--------|
-| 13. Modal Foundation | 0/1 | Planned | MOD-01, MOD-02 |
+| 13. Modal Foundation | 1/1 | Complete | MOD-01, MOD-02 |
 | 14. Diff Editor | 0/? | Pending | DFE-01-05 |
 | 15. Structure Tree | 0/? | Pending | TRE-01-05 |
 | 16. File Context & Metadata | 0/? | Pending | CTX-01-04, CTX-06-07 |
@@ -346,4 +346,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-24 (Phase 13 planned)*
+*Last updated: 2026-01-24 (Phase 13 complete)*
