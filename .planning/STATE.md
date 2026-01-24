@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.2 File Deep Dive - Phase 15: Structure Tree
+**Current focus:** v1.2 File Deep Dive - Phase 16: File Context & Metadata
 
 ## Current Position
 
-Phase: 15 - Structure Tree
+Phase: 16 - File Context & Metadata
 Plan: 2 of 2
 Status: Phase complete
-Last activity: 2026-01-24 - Completed 15-02-PLAN.md
+Last activity: 2026-01-24 - Completed 16-02-PLAN.md
 
-Progress: [████████████████░░░░░░░░░░░░] 15/17 phases (88% complete overall, 4/5 v1.2)
+Progress: [████████████████░░░░░░░░░░░░] 16/17 phases (94% complete overall, 5/5 v1.2)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 34 (v1.0: 23, v1.1: 14, v1.2: 4)
+- Total plans completed: 36 (v1.0: 23, v1.1: 14, v1.2: 6)
 - Average duration: Session duration
-- Total execution time: 2 days (v1.0: 1 day, v1.1: 1 day, v1.2: 6m 34s)
+- Total execution time: 2 days (v1.0: 1 day, v1.1: 1 day, v1.2: 14m 24s)
 
 **By Phase:**
 
@@ -54,7 +54,7 @@ Progress: [████████████████░░░░░░░
 | 13. Modal Foundation | 1/1 | Complete | MOD-01, MOD-02 |
 | 14. Diff Editor | 1/1 | Complete | DFE-01-05 |
 | 15. Structure Tree | 2/2 | Complete | TRE-01-05 |
-| 16. File Context & Metadata | 0/? | Pending | CTX-01-04, CTX-06-07 |
+| 16. File Context & Metadata | 2/2 | Complete | CTX-01-04, CTX-06-07 |
 | 17. Search & Polish | 0/? | Pending | MOD-03-04, CTX-05 |
 
 *Updated after each plan completion*
@@ -133,6 +133,17 @@ Recent decisions affecting current work:
 - Icon mapping: H=header, f=function, C=class, i=import, e=export, k=key (15-02)
 - Click-to-scroll uses scrollIntoView with block: 'center' (15-02)
 - 1.5s highlight duration for scrolled-to diff lines (15-02)
+- Metadata grid uses 2-column label-value layout for file stats (16-01)
+- Git status badges color-coded (green=staged, orange=modified, purple=untracked, gray=clean) (16-01)
+- Toast notification system for non-intrusive user feedback (16-01)
+- get-file-stats IPC handler for fetching file metadata (size, mtime, ctime) (16-01)
+- Quick actions: Open in Editor, Copy Path, Copy Content with clipboard API (16-01)
+- Recent activity filters global activityEntries by current file path (16-02)
+- Relative timestamps (Just now, X min ago, X hours ago, date) for activity (16-02)
+- Import detection via simple pattern matching (import/require/from keywords) (16-02)
+- Related files scan limited to 50 files for performance (16-02)
+- Code file detection for .js, .ts, .jsx, .tsx, .py, .go extensions (16-02)
+- Event delegation for related file navigation with camera focus (16-02)
 
 ### Pending Todos
 
@@ -160,6 +171,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 15-02-PLAN.md (Structure Tree UI)
+Stopped at: Completed 16-02-PLAN.md (File Context & Metadata)
 Resume file: None
-Next action: Ready for Phase 16 (File Context & Metadata) - CTX-01-04, CTX-06-07 requirements.
+Next action: Ready for Phase 17 (Search & Polish) - Final v1.2 phase with file search and UX refinements.
