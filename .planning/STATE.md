@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.2 File Deep Dive - Defining requirements
+**Current focus:** v1.2 File Deep Dive - Phase 13: Modal Foundation
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 13 - Modal Foundation
 Plan: —
-Status: Defining requirements
-Last activity: 2026-01-24 - Milestone v1.2 started
+Status: Pending
+Last activity: 2026-01-24 - v1.2 roadmap created
 
-Progress: [░░░░░░░░░░░] 0% (v1.2: 0/? phases)
+Progress: [████████████░░░░░░░░░░░░░░░░] 12/17 phases (71% complete overall, 0/5 v1.2)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 30 (22 from v1.0 + 09-01 + 09-02 + 10-01 + 10-02 + 10-03 + 11-01 + 11-02 + 12-01)
+- Total plans completed: 30 (v1.0: 23, v1.1: 14, v1.2: 0)
 - Average duration: Session duration
-- Total execution time: 1 day (v1.0)
+- Total execution time: 2 days (v1.0: 1 day, v1.1: 1 day)
 
 **By Phase:**
 
@@ -46,6 +46,16 @@ Progress: [░░░░░░░░░░░] 0% (v1.2: 0/? phases)
 | 10. Git Integration | 3 | 3/3 complete | GIT-01-04 |
 | 11. Statistics & Diff Preview | 2 | 2/2 complete | STS-01-03, DIF-01-03 |
 | 12. Timeline Replay | 1 | 1/1 complete | TML-01-03 |
+
+*v1.2 (Active):*
+
+| Phase | Plans | Status | Target |
+|-------|-------|--------|--------|
+| 13. Modal Foundation | 0/? | Pending | MOD-01, MOD-02 |
+| 14. Diff Editor | 0/? | Pending | DFE-01-05 |
+| 15. Structure Tree | 0/? | Pending | TRE-01-05 |
+| 16. File Context & Metadata | 0/? | Pending | CTX-01-04, CTX-06-07 |
+| 17. Search & Polish | 0/? | Pending | MOD-03-04, CTX-05 |
 
 *Updated after each plan completion*
 
@@ -132,6 +142,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Starting v1.2 File Deep Dive milestone
+Stopped at: v1.2 roadmap created, ready to plan Phase 13
 Resume file: None
-Next action: Define requirements, then create roadmap.
+Next action: Run `/gsd:plan-phase 13` to create execution plan for Modal Foundation.

@@ -30,6 +30,14 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 11: Statistics & Diff Preview** - Activity analytics and file diffs
 - [x] **Phase 12: Timeline Replay** - Scrub through activity history with playback controls
 
+### v1.2 (Active)
+
+- [ ] **Phase 13: Modal Foundation** - Double-click file nodes to open inspector modal with collapsible sections
+- [ ] **Phase 14: Diff Editor** - Syntax-highlighted diff view with git/session toggle and line navigation
+- [ ] **Phase 15: Structure Tree** - Parse file structure (headers, functions, classes) with click-to-jump
+- [ ] **Phase 16: File Context & Metadata** - Metadata header, quick actions, activity history, related files
+- [ ] **Phase 17: Search & Polish** - Keyboard shortcuts (Esc, Ctrl+F) and content search/highlighting
+
 ## Phase Details
 
 ### Phase 1: Foundation
@@ -222,10 +230,87 @@ Plans:
 Plans:
 - [x] 12-01-PLAN.md — Timeline UI, playback controls, and graph state filtering
 
+---
+
+### Phase 13: Modal Foundation
+**Goal**: User can double-click any file node to open a dedicated inspector modal with collapsible sections
+**Depends on**: Phase 12 (v1.1 foundation)
+**Requirements**: MOD-01, MOD-02
+**Success Criteria** (what must be TRUE):
+  1. Double-clicking any file node opens the file inspector modal
+  2. Modal displays with basic structure: header, collapsible diff section, collapsible structure section, collapsible context section
+  3. Modal appears centered on screen with overlay backdrop
+  4. Each section can be independently expanded or collapsed
+**Plans**: 0 plans (pending)
+
+Plans:
+- [ ] TBD
+
+### Phase 14: Diff Editor
+**Goal**: User can view file content with syntax highlighting, toggle diff modes, and navigate by line numbers
+**Depends on**: Phase 13
+**Requirements**: DFE-01, DFE-02, DFE-03, DFE-04, DFE-05
+**Success Criteria** (what must be TRUE):
+  1. Diff section shows file content with language-appropriate syntax highlighting
+  2. User can toggle between git diff (vs HEAD) and session diff (vs last viewed)
+  3. Line numbers appear in left gutter and are clickable for jump-to-line
+  4. Added lines display with green background, removed lines with red background
+  5. Diff section can be collapsed to hide content or expanded to fill modal height
+**Plans**: 0 plans (pending)
+
+Plans:
+- [ ] TBD
+
+### Phase 15: Structure Tree
+**Goal**: User can see parsed file structure (headers, functions, classes) and click to jump to locations
+**Depends on**: Phase 14
+**Requirements**: TRE-01, TRE-02, TRE-03, TRE-04, TRE-05
+**Success Criteria** (what must be TRUE):
+  1. Markdown files show parsed structure: headers (H1-H6), lists, code block boundaries
+  2. Code files show parsed structure: functions, classes, imports, exports
+  3. Config files (JSON/YAML) show nested key structure
+  4. Tree nodes can be collapsed/expanded to show or hide nested elements
+  5. Clicking any tree node scrolls the diff editor to that location in the file
+**Plans**: 0 plans (pending)
+
+Plans:
+- [ ] TBD
+
+### Phase 16: File Context & Metadata
+**Goal**: User can see file metadata, perform quick actions, view activity history, and discover related files
+**Depends on**: Phase 15
+**Requirements**: CTX-01, CTX-02, CTX-03, CTX-04, CTX-06, CTX-07
+**Success Criteria** (what must be TRUE):
+  1. Metadata header displays: full file path, file size, last modified timestamp, git status
+  2. Quick actions bar has "Open in Editor" button that launches external editor
+  3. Quick actions bar has "Copy Path" button that copies file path to clipboard
+  4. Quick actions bar has "Copy Content" button that copies file content to clipboard
+  5. Recent activity section shows all changes to this file from the activity log
+  6. Related files section shows other files that import or reference this file (for code files)
+**Plans**: 0 plans (pending)
+
+Plans:
+- [ ] TBD
+
+### Phase 17: Search & Polish
+**Goal**: User can search within modal content and use keyboard shortcuts for efficient navigation
+**Depends on**: Phase 16
+**Requirements**: MOD-03, MOD-04, CTX-05
+**Success Criteria** (what must be TRUE):
+  1. Pressing Esc key closes the modal from any focused element
+  2. Pressing Ctrl+F opens search input and focuses cursor
+  3. Search input filters/highlights matching text in the diff view
+  4. Search highlights update in real-time as user types
+  5. Search shows match count (e.g., "3 of 12 matches")
+**Plans**: 0 plans (pending)
+
+Plans:
+- [ ] TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12 -> 13 -> 14 -> 15 -> 16 -> 17
 
 ### v1.0 (Complete)
 
@@ -249,6 +334,16 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 11. Statistics & Diff Preview | 2/2 | Complete | 2026-01-23 |
 | 12. Timeline Replay | 1/1 | Complete | 2026-01-23 |
 
+### v1.2 (Active)
+
+| Phase | Plans Complete | Status | Target |
+|-------|----------------|--------|--------|
+| 13. Modal Foundation | 0/? | Pending | MOD-01, MOD-02 |
+| 14. Diff Editor | 0/? | Pending | DFE-01-05 |
+| 15. Structure Tree | 0/? | Pending | TRE-01-05 |
+| 16. File Context & Metadata | 0/? | Pending | CTX-01-04, CTX-06-07 |
+| 17. Search & Polish | 0/? | Pending | MOD-03-04, CTX-05 |
+
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-23 (v1.1 complete)*
+*Last updated: 2026-01-24 (v1.2 phases added)*

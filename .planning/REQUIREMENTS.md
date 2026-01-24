@@ -236,6 +236,44 @@ Which phases cover which requirements. Updated during roadmap creation.
 - Phase 11 (Statistics & Diff Preview): 6 requirements
 - Phase 12 (Timeline Replay): 3 requirements
 
+### v1.2 Requirement Mapping
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| MOD-01 | Phase 13 | Pending |
+| MOD-02 | Phase 13 | Pending |
+| MOD-03 | Phase 17 | Pending |
+| MOD-04 | Phase 17 | Pending |
+| DFE-01 | Phase 14 | Pending |
+| DFE-02 | Phase 14 | Pending |
+| DFE-03 | Phase 14 | Pending |
+| DFE-04 | Phase 14 | Pending |
+| DFE-05 | Phase 14 | Pending |
+| TRE-01 | Phase 15 | Pending |
+| TRE-02 | Phase 15 | Pending |
+| TRE-03 | Phase 15 | Pending |
+| TRE-04 | Phase 15 | Pending |
+| TRE-05 | Phase 15 | Pending |
+| CTX-01 | Phase 16 | Pending |
+| CTX-02 | Phase 16 | Pending |
+| CTX-03 | Phase 16 | Pending |
+| CTX-04 | Phase 16 | Pending |
+| CTX-05 | Phase 17 | Pending |
+| CTX-06 | Phase 16 | Pending |
+| CTX-07 | Phase 16 | Pending |
+
+**Coverage:**
+- v1.2 requirements: 18 total
+- Mapped to phases: 18 (100% coverage)
+- Unmapped: 0
+
+**Breakdown by Phase:**
+- Phase 13 (Modal Foundation): 2 requirements
+- Phase 14 (Diff Editor): 5 requirements
+- Phase 15 (Structure Tree): 5 requirements
+- Phase 16 (File Context & Metadata): 6 requirements
+- Phase 17 (Search & Polish): 3 requirements
+
 ---
 *Requirements defined: 2026-01-22 (v1.0), 2026-01-23 (v1.1), 2026-01-24 (v1.2)*
-*Last updated: 2026-01-24 (v1.2 requirements defined)*
+*Last updated: 2026-01-24 (v1.2 traceability added)*
