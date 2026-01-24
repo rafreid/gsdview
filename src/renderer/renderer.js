@@ -332,6 +332,27 @@ async function loadFlashSettings() {
   }
 }
 
+// Load trail settings from store
+async function loadTrailSettings() {
+  try {
+    const savedEnabled = await window.electronAPI.store.get('activityTrailsEnabled');
+    if (savedEnabled !== undefined && savedEnabled !== null) {
+      activityTrailsEnabled = savedEnabled;
+      const toggle = document.getElementById('trails-toggle');
+      if (toggle) {
+        if (activityTrailsEnabled) {
+          toggle.classList.add('active');
+        } else {
+          toggle.classList.remove('active');
+        }
+      }
+    }
+    console.log('[Trail] Loaded settings, enabled:', activityTrailsEnabled);
+  } catch (err) {
+    console.log('[Trail] Using default trail settings');
+  }
+}
+
 // Color interpolation helper for flash animation
 function lerpColor(color1, color2, t) {
   const r1 = (color1 >> 16) & 0xFF, g1 = (color1 >> 8) & 0xFF, b1 = color1 & 0xFF;
@@ -5470,6 +5491,34 @@ document.getElementById('flash-intensity-slider')?.addEventListener('input', asy
 
 // Load flash settings on startup
 loadFlashSettings();
+
+// Activity trails toggle handler
+document.getElementById('trails-toggle')?.addEventListener('click', async () => {
+  activityTrailsEnabled = !activityTrailsEnabled;
+
+  const toggle = document.getElementById('trails-toggle');
+  if (toggle) {
+    if (activityTrailsEnabled) {
+      toggle.classList.add('active');
+      console.log('[Trail] Activity trails enabled');
+    } else {
+      toggle.classList.remove('active');
+      // Clear existing trails when disabled
+      clearAllTrails();
+      console.log('[Trail] Activity trails disabled');
+    }
+  }
+
+  // Save to store
+  try {
+    await window.electronAPI.store.set('activityTrailsEnabled', activityTrailsEnabled);
+  } catch (err) {
+    console.log('[Trail] Could not save setting:', err);
+  }
+});
+
+// Load trail settings on startup
+loadTrailSettings();
 
 // Modal search event listeners
 document.getElementById('modal-search-input')?.addEventListener('input', (e) => {

@@ -1174,6 +1174,38 @@
       min-width: 25px;
     }
 
+    /* Trails Toggle Button */
+    #trails-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      margin-left: 10px;
+      background: rgba(78, 205, 196, 0.2);
+      border: 1px solid rgba(78, 205, 196, 0.5);
+      border-radius: 4px;
+      font-size: 12px;
+      color: rgba(78, 205, 196, 0.7);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #trails-toggle:hover {
+      background: rgba(78, 205, 196, 0.3);
+      border-color: rgba(78, 205, 196, 0.7);
+      color: #4ECDC4;
+    }
+
+    #trails-toggle.active {
+      background: rgba(78, 205, 196, 0.3);
+      border-color: #4ECDC4;
+      color: #4ECDC4;
+    }
+
+    #trails-toggle .trails-icon {
+      font-size: 14px;
+    }
+
     /* Git Branch Display */
     #branch-display {
       display: flex;
@@ -2187,6 +2219,9 @@
       <input type="range" id="flash-intensity-slider" min="50" max="200" value="100" step="10">
       <span id="flash-intensity-value">1x</span>
     </div>
+    <button id="trails-toggle" class="active" title="Toggle activity trails connecting changed files">
+      <span class="trails-icon">&#9872;</span> Trails
+    </button>
     <div id="branch-display" title="Current git branch">
       <span class="branch-icon">&#9095;</span>
       <span id="branch-name">&#8212;</span>
