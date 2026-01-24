@@ -1009,6 +1009,14 @@ function fadeOutAndRemoveNode(nodeId) {
     const elapsed = Date.now() - startTime;
     const progress = Math.min(elapsed / duration, 1);
 
+    // Check if node still exists (may have been removed by parent directory deletion)
+    const stillExists = currentGraphData.nodes.find(n => n.id === nodeId);
+    if (!stillExists) {
+      console.log('[Fade] Node removed during animation:', nodeId);
+      pendingDeletions.delete(nodeId);
+      return;
+    }
+
     // Ease-out curve for smooth deceleration
     const easeProgress = 1 - Math.pow(1 - progress, 3);
 
@@ -1040,6 +1048,21 @@ function fadeOutAndRemoveNode(nodeId) {
 
 // Remove a node from the graph data and refresh
 function removeNodeFromGraph(nodeId) {
+  // Find child nodes if this is a directory
+  const childNodeIds = [];
+  currentGraphData.links.forEach(link => {
+    const sourceId = link.source.id || link.source;
+    const targetId = link.target.id || link.target;
+    if (sourceId === nodeId) {
+      childNodeIds.push(targetId);
+    }
+  });
+
+  // Remove child nodes from pending deletions (they'll be removed with parent)
+  childNodeIds.forEach(childId => {
+    pendingDeletions.delete(childId);
+  });
+
   // Remove node from currentGraphData.nodes
   currentGraphData.nodes = currentGraphData.nodes.filter(n => n.id !== nodeId);
 

@@ -82420,6 +82420,12 @@ var<${access}> ${name} : ${structName};`;
     function animate() {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
+      const stillExists = currentGraphData.nodes.find((n2) => n2.id === nodeId);
+      if (!stillExists) {
+        console.log("[Fade] Node removed during animation:", nodeId);
+        pendingDeletions.delete(nodeId);
+        return;
+      }
       const easeProgress = 1 - Math.pow(1 - progress, 3);
       materials.forEach((material) => {
         material.opacity = 1 - easeProgress;
@@ -82441,6 +82447,17 @@ var<${access}> ${name} : ${structName};`;
     console.log("[Fade] Started fade-out for:", nodeId);
   }
   function removeNodeFromGraph(nodeId) {
+    const childNodeIds = [];
+    currentGraphData.links.forEach((link) => {
+      const sourceId = link.source.id || link.source;
+      const targetId = link.target.id || link.target;
+      if (sourceId === nodeId) {
+        childNodeIds.push(targetId);
+      }
+    });
+    childNodeIds.forEach((childId) => {
+      pendingDeletions.delete(childId);
+    });
     currentGraphData.nodes = currentGraphData.nodes.filter((n2) => n2.id !== nodeId);
     currentGraphData.links = currentGraphData.links.filter(
       (link) => link.source.id !== nodeId && link.target.id !== nodeId && link.source !== nodeId && link.target !== nodeId
