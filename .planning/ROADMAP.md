@@ -40,7 +40,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 ### v1.3 (Active)
 
-- [ ] **Phase 18: Smooth Activity Updates** - Incremental graph updates without camera disruption
+- [x] **Phase 18: Smooth Activity Updates** - Incremental graph updates without camera disruption
 - [ ] **Phase 19: Enhanced Flash Effects** - Brighter, configurable flash animations for file activity
 - [ ] **Phase 20: Activity Trails** - Visual trails showing change flow through graph
 - [ ] **Phase 21: Smart Camera Core** - Follow-active mode and zoom presets
@@ -335,9 +335,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 18-01-PLAN.md — Incremental graph updates with camera preservation
-- [ ] 18-02-PLAN.md — Layout stability via fixed node positions
-- [ ] 18-03-PLAN.md — Delete fade animation and edge case handling
+- [x] 18-01-PLAN.md — Incremental graph updates with camera preservation
+- [x] 18-02-PLAN.md — Layout stability via fixed node positions
+- [x] 18-03-PLAN.md — Delete fade animation and edge case handling
 
 ### Phase 19: Enhanced Flash Effects
 **Goal**: File activity is immediately visible with brighter, more distinctive flash animations
@@ -484,7 +484,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Target |
 |-------|----------------|--------|--------|
-| 18. Smooth Activity Updates | 0/3 | Pending | UPD-01-03 |
+| 18. Smooth Activity Updates | 3/3 | Complete | UPD-01-03 |
 | 19. Enhanced Flash Effects | 0/TBD | Pending | FLX-01-03 |
 | 20. Activity Trails | 0/TBD | Pending | TRL-01-03 |
 | 21. Smart Camera Core | 0/TBD | Pending | CAM-01-02 |
@@ -495,4 +495,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-24 (Phase 18 plans created)*
+*Last updated: 2026-01-24 (Phase 18 complete)*

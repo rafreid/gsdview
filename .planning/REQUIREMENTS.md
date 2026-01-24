@@ -180,9 +180,9 @@ Requirements for milestone v1.3: Enhanced Navigation + Smooth Activity.
 
 ### Smooth Activity Updates
 
-- [ ] **UPD-01**: Graph updates incrementally (add/remove nodes without full rebuild)
-- [ ] **UPD-02**: Camera position is preserved when files change (never reset)
-- [ ] **UPD-03**: Graph layout maintains stability when nodes are added/removed
+- [x] **UPD-01**: Graph updates incrementally (add/remove nodes without full rebuild)
+- [x] **UPD-02**: Camera position is preserved when files change (never reset)
+- [x] **UPD-03**: Graph layout maintains stability when nodes are added/removed
 
 ### Enhanced Flash Effects
 
@@ -327,9 +327,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| UPD-01 | Phase 18 | Pending |
-| UPD-02 | Phase 18 | Pending |
-| UPD-03 | Phase 18 | Pending |
+| UPD-01 | Phase 18 | Complete |
+| UPD-02 | Phase 18 | Complete |
+| UPD-03 | Phase 18 | Complete |
 | FLX-01 | Phase 19 | Pending |
 | FLX-02 | Phase 19 | Pending |
 | FLX-03 | Phase 19 | Pending |
