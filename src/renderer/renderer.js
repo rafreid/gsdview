@@ -98,6 +98,11 @@ let isTimelinePlaying = false;
 let playbackInterval = null;
 const PLAYBACK_SPEED = 500; // ms between steps during playback
 
+// Modal search state
+let currentSearchQuery = '';
+let searchMatches = [];
+let currentMatchIndex = -1;
+
 // Track nodes currently flashing (nodeId -> animation state)
 const flashingNodes = new Map();
 
@@ -2547,8 +2552,196 @@ function closeFileInspector() {
   }, 200); // Match CSS transition
   modal.classList.add('hidden');
 
+  // Clear search state
+  closeModalSearch();
+
   inspectorNode = null;
   console.log('[Inspector] Closed');
+}
+
+// Open modal search
+function openModalSearch() {
+  const searchContainer = document.getElementById('modal-search-container');
+  const searchInput = document.getElementById('modal-search-input');
+
+  if (!searchContainer || !searchInput) return;
+
+  searchContainer.classList.remove('hidden');
+  searchInput.focus();
+  searchInput.select(); // Select existing text if any
+
+  // If there's already a query, re-run search
+  if (searchInput.value) {
+    performSearch(searchInput.value);
+  }
+
+  console.log('[Search] Opened');
+}
+
+// Close modal search
+function closeModalSearch() {
+  const searchContainer = document.getElementById('modal-search-container');
+  const searchInput = document.getElementById('modal-search-input');
+
+  if (!searchContainer || !searchInput) return;
+
+  searchContainer.classList.add('hidden');
+  searchInput.value = '';
+  currentSearchQuery = '';
+  searchMatches = [];
+  currentMatchIndex = -1;
+
+  // Remove all highlights
+  clearSearchHighlights();
+
+  console.log('[Search] Closed');
+}
+
+// Perform search in diff content
+function performSearch(query) {
+  if (!query || query.trim().length === 0) {
+    clearSearchHighlights();
+    updateSearchInfo(0, 0);
+    return;
+  }
+
+  currentSearchQuery = query.trim();
+  const diffSection = document.querySelector('#section-diff .section-content');
+
+  if (!diffSection) {
+    console.log('[Search] No diff content to search');
+    return;
+  }
+
+  // Clear previous highlights
+  clearSearchHighlights();
+
+  // Get all diff lines
+  const diffLines = diffSection.querySelectorAll('.diff-line-content');
+  searchMatches = [];
+
+  // Case-insensitive search
+  const lowerQuery = currentSearchQuery.toLowerCase();
+
+  diffLines.forEach((line, lineIndex) => {
+    const textContent = line.textContent;
+    const lowerText = textContent.toLowerCase();
+    let startIndex = 0;
+
+    while (true) {
+      const foundIndex = lowerText.indexOf(lowerQuery, startIndex);
+      if (foundIndex === -1) break;
+
+      searchMatches.push({
+        lineElement: line,
+        lineIndex,
+        startIndex: foundIndex,
+        length: currentSearchQuery.length
+      });
+
+      startIndex = foundIndex + 1;
+    }
+  });
+
+  const matchCount = searchMatches.length;
+
+  // Highlight all matches
+  if (matchCount > 0) {
+    highlightSearchMatches();
+    currentMatchIndex = 0;
+    scrollToMatch(0);
+  }
+
+  updateSearchInfo(currentMatchIndex + 1, matchCount);
+  console.log(`[Search] Found ${matchCount} matches for "${currentSearchQuery}"`);
+}
+
+// Highlight all search matches
+function highlightSearchMatches() {
+  searchMatches.forEach((match, index) => {
+    const line = match.lineElement;
+    const textContent = line.textContent;
+
+    // Extract text before, match, and after
+    const before = textContent.substring(0, match.startIndex);
+    const matchText = textContent.substring(match.startIndex, match.startIndex + match.length);
+    const after = textContent.substring(match.startIndex + match.length);
+
+    // Build highlighted HTML
+    const isCurrent = index === currentMatchIndex;
+    const markClass = isCurrent ? 'search-match current' : 'search-match';
+    const newHTML = `${escapeHtml(before)}<mark class="${markClass}" data-match-index="${index}">${escapeHtml(matchText)}</mark>${escapeHtml(after)}`;
+
+    line.innerHTML = newHTML;
+  });
+}
+
+// Clear all search highlights
+function clearSearchHighlights() {
+  const diffSection = document.querySelector('#section-diff .section-content');
+  if (!diffSection) return;
+
+  const marks = diffSection.querySelectorAll('mark.search-match');
+  marks.forEach(mark => {
+    const parent = mark.parentElement;
+    if (parent) {
+      parent.textContent = parent.textContent; // Strip HTML, restore plain text
+    }
+  });
+}
+
+// Update search info display
+function updateSearchInfo(current, total) {
+  const infoSpan = document.getElementById('modal-search-info');
+  const prevBtn = document.getElementById('search-prev');
+  const nextBtn = document.getElementById('search-next');
+
+  if (!infoSpan) return;
+
+  if (total === 0) {
+    infoSpan.textContent = 'No matches';
+  } else {
+    infoSpan.textContent = `${current} of ${total}`;
+  }
+
+  // Enable/disable navigation buttons
+  if (prevBtn) prevBtn.disabled = total === 0;
+  if (nextBtn) nextBtn.disabled = total === 0;
+}
+
+// Navigate to specific match
+function scrollToMatch(index) {
+  if (index < 0 || index >= searchMatches.length) return;
+
+  currentMatchIndex = index;
+
+  // Update highlights (remove 'current' from old, add to new)
+  const allMarks = document.querySelectorAll('mark.search-match');
+  allMarks.forEach((mark, i) => {
+    mark.classList.toggle('current', i === currentMatchIndex);
+  });
+
+  // Scroll to match
+  const match = searchMatches[currentMatchIndex];
+  if (match && match.lineElement) {
+    match.lineElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  updateSearchInfo(currentMatchIndex + 1, searchMatches.length);
+}
+
+// Navigate to next match
+function nextMatch() {
+  if (searchMatches.length === 0) return;
+  const nextIndex = (currentMatchIndex + 1) % searchMatches.length;
+  scrollToMatch(nextIndex);
+}
+
+// Navigate to previous match
+function prevMatch() {
+  if (searchMatches.length === 0) return;
+  const prevIndex = currentMatchIndex === 0 ? searchMatches.length - 1 : currentMatchIndex - 1;
+  scrollToMatch(prevIndex);
 }
 
 // Populate the inspector diff section based on current mode
@@ -3220,10 +3413,30 @@ document.querySelector('#section-structure .section-content').addEventListener('
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     const modal = document.getElementById('file-inspector-modal');
+    const searchContainer = document.getElementById('modal-search-container');
+
+    // If search is open, close search first
+    if (searchContainer && !searchContainer.classList.contains('hidden')) {
+      closeModalSearch();
+      return;
+    }
+
+    // If modal is open, close modal
     if (modal && !modal.classList.contains('hidden')) {
       closeFileInspector();
     } else {
       hideDetailsPanel();
+    }
+  }
+});
+
+// Ctrl+F opens search within modal
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+    const modal = document.getElementById('file-inspector-modal');
+    if (modal && !modal.classList.contains('hidden')) {
+      e.preventDefault(); // Prevent browser search
+      openModalSearch();
     }
   }
 });
@@ -4468,5 +4681,26 @@ document.getElementById('heat-decay-slider')?.addEventListener('input', async (e
 
 // Load heat decay setting on startup
 loadHeatDecaySetting();
+
+// Modal search event listeners
+document.getElementById('modal-search-input')?.addEventListener('input', (e) => {
+  performSearch(e.target.value);
+});
+
+document.getElementById('search-prev')?.addEventListener('click', prevMatch);
+document.getElementById('search-next')?.addEventListener('click', nextMatch);
+document.getElementById('search-close')?.addEventListener('click', closeModalSearch);
+
+// Enter key navigates to next match
+document.getElementById('modal-search-input')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (e.shiftKey) {
+      prevMatch();
+    } else {
+      nextMatch();
+    }
+  }
+});
 
 console.log('GSD Viewer initialized - select a project folder to visualize');
