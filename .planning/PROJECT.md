@@ -8,22 +8,21 @@ A desktop application that visualizes GSD project structure as an interactive 3D
 
 Make the invisible structure of a GSD project visible and navigable — so users always know where they are, what's connected, and what's blocked.
 
-## Current Milestone: v1.2 File Deep Dive
+## Current Milestone: v1.3 Enhanced Navigation + Smooth Activity
 
-**Goal:** Enable users to deeply inspect any file through a modal that reveals content, structure, and context — turning the graph from an overview tool into a complete file exploration interface.
+**Goal:** Transform graph navigation with smart camera behaviors, bookmarks, and a minimap — while fixing activity visualization to update smoothly without disrupting the user's view.
 
 **Target features:**
-- Double-click file node opens inspector modal
-- Collapsible diff editor with syntax highlighting
-- Toggle between git diff (HEAD) and session diff (since last viewed)
-- Structural breakdown tree (headers, functions, classes, sections)
-- File metadata header (path, size, modified date, git status)
-- Quick actions bar (open in editor, copy path, copy content)
-- Search within file content
-- Line numbers with jump-to-line
-- Keyboard shortcuts (Esc to close, Ctrl+F to search)
-- Recent activity section (this file's changes from activity log)
-- Related files section (imports/references for code files)
+- Smart camera: follow active node, zoom presets, orbit mode, path animation
+- Named bookmarks with keyboard shortcuts (1-9)
+- Back/forward navigation through visited nodes
+- Recent nodes dropdown for quick return
+- Minimap panel showing current position in graph
+- Breadcrumb trail showing hierarchy to current node
+- Incremental graph updates (no full rebuild on file changes)
+- Preserve camera position when files change
+- Stronger flash effects for file activity
+- Activity trails showing change flow through graph
 
 ## Requirements
 
@@ -64,21 +63,38 @@ Make the invisible structure of a GSD project visible and navigable — so users
 - [x] Timeline scrubber for activity replay
 - [x] Commit nodes in graph
 
+*Shipped in v1.2:*
+
+- [x] Double-click file node opens inspector modal
+- [x] Collapsible diff editor with syntax highlighting
+- [x] Toggle between git diff and session diff
+- [x] Structural breakdown tree for all text files
+- [x] File metadata header
+- [x] Quick actions bar
+- [x] Search within file
+- [x] Line numbers with jump-to-line
+- [x] Keyboard shortcuts
+- [x] Recent activity for selected file
+- [x] Related files section
+
 ### Active
 
-*v1.2 scope:*
+*v1.3 scope:*
 
-- [ ] Double-click file node opens inspector modal
-- [ ] Collapsible diff editor with syntax highlighting
-- [ ] Toggle between git diff and session diff
-- [ ] Structural breakdown tree for all text files
-- [ ] File metadata header
-- [ ] Quick actions bar
-- [ ] Search within file
-- [ ] Line numbers with jump-to-line
-- [ ] Keyboard shortcuts
-- [ ] Recent activity for selected file
-- [ ] Related files section
+- [ ] Smart camera with follow-active behavior
+- [ ] Zoom presets (overview/focus/detail)
+- [ ] Orbit mode for presentations
+- [ ] Path animation between nodes
+- [ ] Named bookmarks with custom names
+- [ ] Back/forward navigation buttons
+- [ ] Recent nodes dropdown
+- [ ] Bookmark keyboard shortcuts (1-9)
+- [ ] Minimap panel
+- [ ] Breadcrumb trail
+- [ ] Incremental graph updates (no full rebuild)
+- [ ] Preserve camera on file changes
+- [ ] Stronger flash effects
+- [ ] Activity trails visualization
 
 ### Out of Scope
 
@@ -128,4 +144,4 @@ Make the invisible structure of a GSD project visible and navigable — so users
 | Limit scope to .planning/ + src/ | Performance and relevance balance | — Pending |
 
 ---
-*Last updated: 2026-01-24 after v1.2 milestone start*
+*Last updated: 2026-01-24 after v1.3 milestone start*

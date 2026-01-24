@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.2 File Deep Dive - COMPLETE (Phase 17: Search & Polish finished)
+**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - STARTING
 
 ## Current Position
 
-Phase: 17 - Search & Polish
-Plan: 1 of 1
-Status: Phase complete, v1.2 milestone complete
-Last activity: 2026-01-24 - Completed 17-01-PLAN.md
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements for v1.3
+Last activity: 2026-01-24 — Milestone v1.3 started
 
-Progress: [█████████████████████████████] 17/17 phases (100% complete overall, 6/6 v1.2)
+Progress: [█████████████████████████████] 17/17 phases complete (v1.0-v1.2)
 
 ## Performance Metrics
 
@@ -177,6 +177,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Quick task 011 - Fixed Open in Editor bug (missing sourceType)
+Stopped at: Starting v1.3 milestone - defining requirements
 Resume file: None
-Next action: v1.2 milestone complete! All file deep dive features delivered. Ready for v1.3 planning or user testing/feedback.
+Next action: Create REQUIREMENTS.md and ROADMAP.md for v1.3

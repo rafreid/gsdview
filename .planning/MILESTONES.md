@@ -57,8 +57,31 @@
 
 ---
 
+### v1.2 - File Deep Dive (2026-01-24)
+
+**Goal:** Enable users to deeply inspect any file through a modal that reveals content, structure, and context.
+
+**Phases:** 13-17 (7 plans total)
+13. Modal Foundation - Double-click to open file inspector modal
+14. Diff Editor - Collapsible diff with syntax highlighting, git/session toggle
+15. Structure Tree - File breakdown (headers, functions, classes)
+16. File Context & Metadata - Metadata header, quick actions, recent activity
+17. Search & Polish - In-file search, keyboard shortcuts, related files
+
+**Quick Tasks:** 1
+- Fix Open in Editor and IPC handler bugs
+
+**Key Deliverables:**
+- File inspector modal with double-click activation
+- Diff editor with git/session comparison
+- Structure tree for code navigation
+- File metadata and quick actions
+- In-file search with highlighting
+
+---
+
 ## Current Milestone
 
-**v1.2 - File Deep Dive** (Started 2026-01-24)
+**v1.3 - Enhanced Navigation + Smooth Activity** (Started 2026-01-24)
 
 See: `.planning/PROJECT.md` Current Milestone section
