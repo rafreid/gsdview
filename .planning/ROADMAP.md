@@ -271,10 +271,11 @@ Plans:
   3. Config files (JSON/YAML) show nested key structure
   4. Tree nodes can be collapsed/expanded to show or hide nested elements
   5. Clicking any tree node scrolls the diff editor to that location in the file
-**Plans**: 0 plans (pending)
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD
+- [ ] 15-01-PLAN.md — File structure parsing (markdown, code, config)
+- [ ] 15-02-PLAN.md — Structure tree rendering and click-to-scroll
 
 ### Phase 16: File Context & Metadata
 **Goal**: User can see file metadata, perform quick actions, view activity history, and discover related files
@@ -340,10 +341,10 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 |-------|----------------|--------|--------|
 | 13. Modal Foundation | 1/1 | Complete | MOD-01, MOD-02 |
 | 14. Diff Editor | 1/1 | Complete | DFE-01-05 |
-| 15. Structure Tree | 0/? | Pending | TRE-01-05 |
+| 15. Structure Tree | 0/2 | Pending | TRE-01-05 |
 | 16. File Context & Metadata | 0/? | Pending | CTX-01-04, CTX-06-07 |
 | 17. Search & Polish | 0/? | Pending | MOD-03-04, CTX-05 |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-24 (Phase 14 complete)*
+*Last updated: 2026-01-24 (Phase 15 planned)*
