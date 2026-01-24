@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 13: Modal Foundation** - Double-click file nodes to open inspector modal with collapsible sections
 - [x] **Phase 14: Diff Editor** - Syntax-highlighted diff view with git/session toggle and line navigation
 - [x] **Phase 15: Structure Tree** - Parse file structure (headers, functions, classes) with click-to-jump
-- [ ] **Phase 16: File Context & Metadata** - Metadata header, quick actions, activity history, related files
+- [x] **Phase 16: File Context & Metadata** - Metadata header, quick actions, activity history, related files
 - [ ] **Phase 17: Search & Polish** - Keyboard shortcuts (Esc, Ctrl+F) and content search/highlighting
 
 ## Phase Details
@@ -291,8 +291,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 16-01-PLAN.md — Metadata header and quick actions (CTX-01-04)
-- [ ] 16-02-PLAN.md — Recent activity and related files (CTX-06-07)
+- [x] 16-01-PLAN.md — Metadata header and quick actions (CTX-01-04)
+- [x] 16-02-PLAN.md — Recent activity and related files (CTX-06-07)
 
 ### Phase 17: Search & Polish
 **Goal**: User can search within modal content and use keyboard shortcuts for efficient navigation
@@ -304,10 +304,10 @@ Plans:
   3. Search input filters/highlights matching text in the diff view
   4. Search highlights update in real-time as user types
   5. Search shows match count (e.g., "3 of 12 matches")
-**Plans**: 0 plans (pending)
+**Plans**: 1 plan
 
 Plans:
-- [ ] TBD
+- [ ] 17-01-PLAN.md — Keyboard shortcuts (Esc, Ctrl+F) and search with real-time highlighting
 
 ## Progress
 
@@ -343,9 +343,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 13. Modal Foundation | 1/1 | Complete | MOD-01, MOD-02 |
 | 14. Diff Editor | 1/1 | Complete | DFE-01-05 |
 | 15. Structure Tree | 2/2 | Complete | TRE-01-05 |
-| 16. File Context & Metadata | 0/2 | Pending | CTX-01-04, CTX-06-07 |
-| 17. Search & Polish | 0/? | Pending | MOD-03-04, CTX-05 |
+| 16. File Context & Metadata | 2/2 | Complete | CTX-01-04, CTX-06-07 |
+| 17. Search & Polish | 0/1 | Pending | MOD-03-04, CTX-05 |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-24 (Phase 16 plans created)*
+*Last updated: 2026-01-24 (Phase 17 plan created)*
