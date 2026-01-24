@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-01-23)
+See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** Phase 12 - Timeline Replay (v1.1) - COMPLETE
+**Current focus:** v1.2 File Deep Dive - Defining requirements
 
 ## Current Position
 
-Phase: 12 of 12 (Timeline Replay)
-Plan: 1 of 1 complete
-Status: v1.1 COMPLETE
-Last activity: 2026-01-23 - Completed quick task 010: File Tree open by default
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-01-24 - Milestone v1.2 started
 
-Progress: [███████████] 100% (v1.0: 6/6 phases + v1.1: 6/6 phases)
+Progress: [░░░░░░░░░░░] 0% (v1.2: 0/? phases)
 
 ## Performance Metrics
 
@@ -131,7 +131,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-23
-Stopped at: Completed 12-01-PLAN.md (Timeline Replay)
+Last session: 2026-01-24
+Stopped at: Starting v1.2 File Deep Dive milestone
 Resume file: None
-Next action: v1.1 milestone complete. Ready for v1.2 planning or production release.
+Next action: Define requirements, then create roadmap.

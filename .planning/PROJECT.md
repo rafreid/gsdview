@@ -8,20 +8,22 @@ A desktop application that visualizes GSD project structure as an interactive 3D
 
 Make the invisible structure of a GSD project visible and navigable — so users always know where they are, what's connected, and what's blocked.
 
-## Current Milestone: v1.1 Real-time Activity Visualization
+## Current Milestone: v1.2 File Deep Dive
 
-**Goal:** Make GSD's file operations visible and understandable in real-time, so users can see exactly what's happening as Claude writes, updates, and changes files.
+**Goal:** Enable users to deeply inspect any file through a modal that reveals content, structure, and context — turning the graph from an overview tool into a complete file exploration interface.
 
 **Target features:**
-- Expanded file graph showing `.planning/` + `src/` directories
-- Live activity feed panel showing each file change as it happens
-- Heat map visualization (recently changed files glow hot, cool down over time)
-- Git integration (uncommitted changes, staged files, recent commits visible)
-- Change type indicators (create/modify/delete with distinct colors)
-- Activity statistics (most edited files, change frequency)
-- File diff preview for recently changed files
-- Timeline scrubber to replay recent activity
-- Commit nodes showing what was bundled together
+- Double-click file node opens inspector modal
+- Collapsible diff editor with syntax highlighting
+- Toggle between git diff (HEAD) and session diff (since last viewed)
+- Structural breakdown tree (headers, functions, classes, sections)
+- File metadata header (path, size, modified date, git status)
+- Quick actions bar (open in editor, copy path, copy content)
+- Search within file content
+- Line numbers with jump-to-line
+- Keyboard shortcuts (Esc to close, Ctrl+F to search)
+- Recent activity section (this file's changes from activity log)
+- Related files section (imports/references for code files)
 
 ## Requirements
 
@@ -50,19 +52,33 @@ Make the invisible structure of a GSD project visible and navigable — so users
 - [x] Flash animations on file changes
 - [x] Comprehensive file extension color coding (39+ extensions)
 
+*Shipped in v1.1:*
+
+- [x] Expanded file graph showing `.planning/` + `src/` directories
+- [x] Live activity feed panel with scrolling file change log
+- [x] Heat map visualization for recently changed files
+- [x] Git integration showing uncommitted and staged files
+- [x] Change type indicators (create/modify/delete)
+- [x] Activity statistics panel
+- [x] File diff preview for changed files
+- [x] Timeline scrubber for activity replay
+- [x] Commit nodes in graph
+
 ### Active
 
-*v1.1 scope:*
+*v1.2 scope:*
 
-- [ ] Expanded file graph showing `.planning/` + `src/` directories
-- [ ] Live activity feed panel with scrolling file change log
-- [ ] Heat map visualization for recently changed files
-- [ ] Git integration showing uncommitted and staged files
-- [ ] Change type indicators (create/modify/delete)
-- [ ] Activity statistics panel
-- [ ] File diff preview for changed files
-- [ ] Timeline scrubber for activity replay
-- [ ] Commit nodes in graph
+- [ ] Double-click file node opens inspector modal
+- [ ] Collapsible diff editor with syntax highlighting
+- [ ] Toggle between git diff and session diff
+- [ ] Structural breakdown tree for all text files
+- [ ] File metadata header
+- [ ] Quick actions bar
+- [ ] Search within file
+- [ ] Line numbers with jump-to-line
+- [ ] Keyboard shortcuts
+- [ ] Recent activity for selected file
+- [ ] Related files section
 
 ### Out of Scope
 
@@ -112,4 +128,4 @@ Make the invisible structure of a GSD project visible and navigable — so users
 | Limit scope to .planning/ + src/ | Performance and relevance balance | — Pending |
 
 ---
-*Last updated: 2026-01-23 after v1.1 milestone start*
+*Last updated: 2026-01-24 after v1.2 milestone start*
