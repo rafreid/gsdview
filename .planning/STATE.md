@@ -172,10 +172,11 @@ None.
 | 008 | Fix path error - missing sourceType in graph node building | 2026-01-23 | [008-fix-path-error-missing-sourcetype](./quick/008-fix-path-error-missing-sourcetype/) |
 | 009 | Resizable divider between file tree panel and graph | 2026-01-23 | [009-resizable-panel-divider](./quick/009-resizable-panel-divider/) |
 | 010 | File Tree panel open by default on startup | 2026-01-23 | [010-file-tree-open-by-default](./quick/010-file-tree-open-by-default/) |
+| 011 | Fix Open in Editor not launching - missing sourceType in graph-builder | 2026-01-24 | [011-fix-open-in-editor](./quick/011-fix-double-click-and-open-in-editor-not-/) |
 
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 17-01-PLAN.md (Search & Polish) - v1.2 milestone complete
+Stopped at: Quick task 011 - Fixed Open in Editor bug (missing sourceType)
 Resume file: None
 Next action: v1.2 milestone complete! All file deep dive features delivered. Ready for v1.3 planning or user testing/feedback.
