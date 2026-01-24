@@ -131,11 +131,11 @@ Requirements for milestone v1.2: File Deep Dive.
 
 ### Structure Tree
 
-- [ ] **TRE-01**: Structure tree parses markdown files (headers, lists, code blocks)
-- [ ] **TRE-02**: Structure tree parses code files (functions, classes, imports, exports)
-- [ ] **TRE-03**: Structure tree parses config files (JSON/YAML keys and nested structure)
-- [ ] **TRE-04**: Tree nodes are collapsible/expandable
-- [ ] **TRE-05**: Clicking a tree node scrolls diff editor to that location
+- [x] **TRE-01**: Structure tree parses markdown files (headers, lists, code blocks)
+- [x] **TRE-02**: Structure tree parses code files (functions, classes, imports, exports)
+- [x] **TRE-03**: Structure tree parses config files (JSON/YAML keys and nested structure)
+- [x] **TRE-04**: Tree nodes are collapsible/expandable
+- [x] **TRE-05**: Clicking a tree node scrolls diff editor to that location
 
 ### File Context
 
@@ -249,11 +249,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DFE-03 | Phase 14 | Complete |
 | DFE-04 | Phase 14 | Complete |
 | DFE-05 | Phase 14 | Complete |
-| TRE-01 | Phase 15 | Pending |
-| TRE-02 | Phase 15 | Pending |
-| TRE-03 | Phase 15 | Pending |
-| TRE-04 | Phase 15 | Pending |
-| TRE-05 | Phase 15 | Pending |
+| TRE-01 | Phase 15 | Complete |
+| TRE-02 | Phase 15 | Complete |
+| TRE-03 | Phase 15 | Complete |
+| TRE-04 | Phase 15 | Complete |
+| TRE-05 | Phase 15 | Complete |
 | CTX-01 | Phase 16 | Pending |
 | CTX-02 | Phase 16 | Pending |
 | CTX-03 | Phase 16 | Pending |
@@ -276,4 +276,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-22 (v1.0), 2026-01-23 (v1.1), 2026-01-24 (v1.2)*
-*Last updated: 2026-01-24 (Phase 14 complete)*
+*Last updated: 2026-01-24 (Phase 15 complete)*
