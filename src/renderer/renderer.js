@@ -104,6 +104,14 @@ const flashingNodes = new Map();
 // Track currently highlighted node (for hover effect)
 let highlightedNodeId = null;
 
+// Double-click detection for file inspector
+let lastClickTime = 0;
+let lastClickNode = null;
+const DOUBLE_CLICK_THRESHOLD = 300; // ms
+
+// File inspector modal state
+let inspectorNode = null; // Currently inspected file node
+
 // Change type colors for type-specific animations
 const changeTypeColors = {
   created: 0x2ECC71,  // Green
@@ -1176,6 +1184,18 @@ const Graph = ForceGraph3D()(container)
   .showNavInfo(false)
   // Click-to-fly navigation
   .onNodeClick(node => {
+    // Double-click detection for file nodes
+    const now = Date.now();
+    if (node.type === 'file' && lastClickNode === node && (now - lastClickTime) < DOUBLE_CLICK_THRESHOLD) {
+      // Double-click detected - open file inspector
+      openFileInspector(node);
+      lastClickTime = 0;
+      lastClickNode = null;
+      return; // Don't proceed with single-click behavior
+    }
+    lastClickTime = now;
+    lastClickNode = node;
+
     // Calculate distance based on node size for optimal viewing
     const distance = 50 + getNodeSize(node, connectionCounts) * 4;
 
@@ -1977,6 +1997,47 @@ function refreshDetailsPanel() {
   }
 }
 
+// Open file inspector modal for a file node
+function openFileInspector(node) {
+  if (node.type !== 'file') return;
+
+  inspectorNode = node;
+
+  const overlay = document.getElementById('file-inspector-overlay');
+  const modal = document.getElementById('file-inspector-modal');
+  const title = document.getElementById('inspector-title');
+
+  // Set title to file name
+  title.textContent = node.name;
+
+  // Show modal
+  overlay.classList.remove('hidden');
+  overlay.classList.add('visible');
+  modal.classList.remove('hidden');
+
+  // Reset sections to expanded state
+  document.querySelectorAll('.collapsible-section').forEach(section => {
+    section.classList.remove('collapsed');
+  });
+
+  console.log('[Inspector] Opened for:', node.name, node.path);
+}
+
+// Close file inspector modal
+function closeFileInspector() {
+  const overlay = document.getElementById('file-inspector-overlay');
+  const modal = document.getElementById('file-inspector-modal');
+
+  overlay.classList.remove('visible');
+  setTimeout(() => {
+    overlay.classList.add('hidden');
+  }, 200); // Match CSS transition
+  modal.classList.add('hidden');
+
+  inspectorNode = null;
+  console.log('[Inspector] Closed');
+}
+
 // Refresh only the diff section in details panel (more efficient than full refresh)
 async function refreshDiffSection() {
   if (!selectedNode || selectedNode.type !== 'file') return;
@@ -2008,10 +2069,27 @@ async function refreshDiffSection() {
 // Close panel button handler
 document.getElementById('close-panel').addEventListener('click', hideDetailsPanel);
 
-// Close panel when clicking on background (optional - ESC key)
+// File inspector modal event listeners
+document.getElementById('inspector-close').addEventListener('click', closeFileInspector);
+document.getElementById('file-inspector-overlay').addEventListener('click', closeFileInspector);
+
+// Collapsible section toggle
+document.querySelectorAll('.collapsible-section .section-header').forEach(header => {
+  header.addEventListener('click', () => {
+    const section = header.closest('.collapsible-section');
+    section.classList.toggle('collapsed');
+  });
+});
+
+// Close modal on Escape key (also closes details panel)
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    hideDetailsPanel();
+    const modal = document.getElementById('file-inspector-modal');
+    if (modal && !modal.classList.contains('hidden')) {
+      closeFileInspector();
+    } else {
+      hideDetailsPanel();
+    }
   }
 });
 
