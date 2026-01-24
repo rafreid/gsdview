@@ -220,12 +220,31 @@ app.whenReady().then(() => {
   // IPC handler for opening files in external editor
   ipcMain.handle('open-file', async (event, filePath) => {
     try {
+      // Try VS Code first (most likely editor for developers)
+      try {
+        execSync(`code "${filePath}"`, { stdio: 'ignore' });
+        return { success: true, editor: 'vscode' };
+      } catch (codeErr) {
+        // VS Code not available, try other common editors
+        const editors = ['subl', 'atom', 'gedit', 'kate', 'xed'];
+        for (const editor of editors) {
+          try {
+            execSync(`which ${editor}`, { stdio: 'ignore' });
+            execSync(`${editor} "${filePath}"`, { stdio: 'ignore' });
+            return { success: true, editor };
+          } catch (e) {
+            // Editor not found, try next
+          }
+        }
+      }
+
+      // Fall back to shell.openPath (system default)
       const result = await shell.openPath(filePath);
       if (result) {
         // shell.openPath returns empty string on success, error message on failure
         return { error: result };
       }
-      return { success: true };
+      return { success: true, editor: 'system' };
     } catch (error) {
       console.error('Error opening file:', error);
       return { error: error.message };
