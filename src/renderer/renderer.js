@@ -2504,9 +2504,9 @@ async function openFileInspector(node) {
   const fullPath = getInspectorFilePath(node);
   if (fullPath && !sessionFileSnapshots.has(fullPath)) {
     try {
-      const content = await window.electronAPI.readFileContent(fullPath);
+      const result = await window.electronAPI.readFileContent(fullPath);
       sessionFileSnapshots.set(fullPath, {
-        content: content || '',
+        content: result.content || '',
         timestamp: Date.now()
       });
       console.log('[Inspector] Initial snapshot stored for:', fullPath);
@@ -2786,7 +2786,8 @@ async function populateInspectorDiff() {
   } else {
     // Session diff mode - compare against last viewed
     try {
-      const currentContent = await window.electronAPI.readFileContent(fullPath);
+      const result = await window.electronAPI.readFileContent(fullPath);
+      const currentContent = result.content || '';
       const snapshot = sessionFileSnapshots.get(fullPath);
 
       if (!snapshot) {
@@ -2827,7 +2828,13 @@ async function populateInspectorStructure() {
   }
 
   try {
-    const content = await window.electronAPI.readFileContent(filePath);
+    const result = await window.electronAPI.readFileContent(filePath);
+    if (result.error) {
+      structureSection.innerHTML = `<p class="structure-empty">${result.error}</p>`;
+      return;
+    }
+
+    const content = result.content || '';
     const items = parseFileStructure(content, inspectorNode.name);
 
     if (items.length === 0) {
@@ -3035,8 +3042,8 @@ async function populateInspectorContext() {
       copyContentBtn.addEventListener('click', async () => {
         try {
           if (window.electronAPI && window.electronAPI.readFileContent) {
-            const content = await window.electronAPI.readFileContent(fullPath);
-            await navigator.clipboard.writeText(content || '');
+            const result = await window.electronAPI.readFileContent(fullPath);
+            await navigator.clipboard.writeText(result.content || '');
             showToast('Content copied to clipboard');
           } else {
             showToast('Read file not available', true);
@@ -3166,7 +3173,8 @@ async function renderRelatedFiles(filePath, fileName) {
       const candidatePath = getInspectorFilePath(candidateNode);
       if (!candidatePath) continue;
 
-      const content = await window.electronAPI.readFileContent(candidatePath);
+      const result = await window.electronAPI.readFileContent(candidatePath);
+      const content = result.content || '';
       if (!content) continue;
 
       // Check for import/require statements that reference current file

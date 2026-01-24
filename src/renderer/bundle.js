@@ -83561,9 +83561,9 @@ ${node.goal}`;
     const fullPath = getInspectorFilePath(node);
     if (fullPath && !sessionFileSnapshots.has(fullPath)) {
       try {
-        const content = await window.electronAPI.readFileContent(fullPath);
+        const result = await window.electronAPI.readFileContent(fullPath);
         sessionFileSnapshots.set(fullPath, {
-          content: content || "",
+          content: result.content || "",
           timestamp: Date.now()
         });
         console.log("[Inspector] Initial snapshot stored for:", fullPath);
@@ -83756,7 +83756,8 @@ ${node.goal}`;
       }
     } else {
       try {
-        const currentContent = await window.electronAPI.readFileContent(fullPath);
+        const result = await window.electronAPI.readFileContent(fullPath);
+        const currentContent = result.content || "";
         const snapshot = sessionFileSnapshots.get(fullPath);
         if (!snapshot) {
           diffSection.innerHTML = '<div class="diff-status">No previous session snapshot available</div>';
@@ -83788,7 +83789,12 @@ ${node.goal}`;
       return;
     }
     try {
-      const content = await window.electronAPI.readFileContent(filePath);
+      const result = await window.electronAPI.readFileContent(filePath);
+      if (result.error) {
+        structureSection.innerHTML = `<p class="structure-empty">${result.error}</p>`;
+        return;
+      }
+      const content = result.content || "";
       const items = parseFileStructure(content, inspectorNode.name);
       if (items.length === 0) {
         structureSection.innerHTML = '<p class="structure-empty">No structure found in this file</p>';
@@ -83958,8 +83964,8 @@ ${node.goal}`;
         copyContentBtn.addEventListener("click", async () => {
           try {
             if (window.electronAPI && window.electronAPI.readFileContent) {
-              const content = await window.electronAPI.readFileContent(fullPath);
-              await navigator.clipboard.writeText(content || "");
+              const result = await window.electronAPI.readFileContent(fullPath);
+              await navigator.clipboard.writeText(result.content || "");
               showToast("Content copied to clipboard");
             } else {
               showToast("Read file not available", true);
@@ -84049,7 +84055,8 @@ ${node.goal}`;
       try {
         const candidatePath = getInspectorFilePath(candidateNode);
         if (!candidatePath) continue;
-        const content = await window.electronAPI.readFileContent(candidatePath);
+        const result = await window.electronAPI.readFileContent(candidatePath);
+        const content = result.content || "";
         if (!content) continue;
         const hasReference = content.split("\n").some((line) => {
           const lowerLine = line.toLowerCase();
