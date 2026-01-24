@@ -3749,8 +3749,19 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
         updateTimelineUI();
       }
 
-      showRefreshIndicator();
-      await loadProject(selectedProjectPath);
+      // Apply incremental graph update (instead of full rebuild)
+      applyIncrementalUpdate({
+        event: data.event,
+        path: data.path,
+        sourceType: data.sourceType
+      });
+
+      // Update tree panel for new/deleted files
+      if (data.event === 'add' || data.event === 'addDir' || data.event === 'unlink' || data.event === 'unlinkDir') {
+        // Rebuild tree data from storedDirectoryData (updated by applyIncrementalUpdate)
+        treeData = buildTreeStructure(storedDirectoryData);
+        updateTreePanel();
+      }
 
       // Refresh git status after file changes
       await fetchGitStatus(selectedProjectPath);
