@@ -2782,6 +2782,27 @@ async function populateInspectorContext() {
       </div>
     `;
 
+    // Add Recent Activity section
+    html += `
+      <div class="context-subsection">
+        <h4 class="context-subsection-title">Recent Activity</h4>
+        <div class="activity-list">
+          ${renderRecentActivity(fullPath)}
+        </div>
+      </div>
+    `;
+
+    // Add Related Files section
+    const relatedFilesHtml = await renderRelatedFiles(fullPath, inspectorNode.name);
+    html += `
+      <div class="context-subsection">
+        <h4 class="context-subsection-title">Related Files</h4>
+        <div class="related-files-list">
+          ${relatedFilesHtml}
+        </div>
+      </div>
+    `;
+
     contextSection.innerHTML = html;
 
     // Attach event listeners for quick actions
@@ -2834,10 +2855,170 @@ async function populateInspectorContext() {
       });
     }
 
+    // Add event delegation for related file item clicks
+    contextSection.addEventListener('click', (e) => {
+      const item = e.target.closest('.related-file-item');
+      if (item) {
+        const nodePath = item.dataset.nodePath;
+        const sourceType = item.dataset.sourceType;
+        if (nodePath && currentGraphData) {
+          // Find the node in the graph
+          const node = currentGraphData.nodes.find(n =>
+            n.path === nodePath && n.sourceType === sourceType
+          );
+          if (node) {
+            // Focus camera on the node
+            focusOnNode(node);
+            console.log('[Context] Navigating to related file:', nodePath);
+          }
+        }
+      }
+    });
+
   } catch (err) {
     console.error('[Context] Error loading metadata:', err);
     contextSection.innerHTML = '<div class="context-error">Error loading file metadata</div>';
   }
+}
+
+// Render recent activity for current file
+function renderRecentActivity(filePath) {
+  if (!filePath || !activityEntries || activityEntries.length === 0) {
+    return '<div class="context-empty">No recent activity for this file</div>';
+  }
+
+  // Filter activity entries by current file path
+  const fileActivity = activityEntries.filter(entry => {
+    const entryPath = entry.sourceType === 'src'
+      ? `src/${entry.relativePath}`
+      : `.planning/${entry.relativePath}`;
+    return entryPath === filePath || entry.relativePath === filePath;
+  });
+
+  if (fileActivity.length === 0) {
+    return '<div class="context-empty">No recent activity for this file</div>';
+  }
+
+  // Sort by timestamp (newest first) and limit to 10
+  const sortedActivity = fileActivity
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, 10);
+
+  // Generate HTML for each entry
+  const html = sortedActivity.map(entry => {
+    const changeType = entry.event || 'modified';
+    const timestamp = formatRelativeTime(entry.timestamp);
+
+    return `
+      <div class="activity-item ${changeType}">
+        <span class="activity-type-badge">${changeType}</span>
+        <span class="activity-timestamp">${timestamp}</span>
+      </div>
+    `;
+  }).join('');
+
+  return html;
+}
+
+// Format timestamp as relative time
+function formatRelativeTime(timestamp) {
+  const diff = Date.now() - timestamp;
+  const seconds = Math.floor(diff / 1000);
+
+  if (seconds < 60) {
+    return 'Just now';
+  } else if (seconds < 3600) {
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes} min ago`;
+  } else if (seconds < 86400) {
+    const hours = Math.floor(seconds / 3600);
+    return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  } else {
+    return new Date(timestamp).toLocaleDateString();
+  }
+}
+
+// Render related files that import or reference current file
+async function renderRelatedFiles(filePath, fileName) {
+  if (!filePath || !fileName || !currentGraphData) {
+    return '<div class="context-empty">No files reference this file</div>';
+  }
+
+  // Check if this is a code file (by extension)
+  const codeExtensions = ['.js', '.ts', '.jsx', '.tsx', '.py', '.go', '.java', '.cpp', '.c', '.h'];
+  const isCodeFile = codeExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
+
+  if (!isCodeFile) {
+    return '<div class="context-empty">Related files detection available for code files only</div>';
+  }
+
+  // Get file name without extension for matching
+  const fileNameWithoutExt = fileName.replace(/\.[^/.]+$/, '');
+
+  // Build list of candidate files (exclude directories and current file)
+  const candidateFiles = currentGraphData.nodes.filter(node =>
+    node.type === 'file' &&
+    node.path !== inspectorNode.path &&
+    node.sourceType === inspectorNode.sourceType
+  );
+
+  // Limit scan to first 50 files for performance
+  const filesToScan = candidateFiles.slice(0, 50);
+
+  const relatedFiles = [];
+
+  // Scan each candidate file for imports/references
+  for (const candidateNode of filesToScan) {
+    try {
+      const candidatePath = getInspectorFilePath(candidateNode);
+      if (!candidatePath) continue;
+
+      const content = await window.electronAPI.readFileContent(candidatePath);
+      if (!content) continue;
+
+      // Check for import/require statements that reference current file
+      const hasReference = content.split('\n').some(line => {
+        const lowerLine = line.toLowerCase();
+        const lowerFileName = fileNameWithoutExt.toLowerCase();
+
+        // JavaScript/TypeScript patterns
+        if (lowerLine.includes('import') && lowerLine.includes(lowerFileName)) return true;
+        if (lowerLine.includes('require') && lowerLine.includes(lowerFileName)) return true;
+
+        // Python patterns
+        if (lowerLine.includes('from') && lowerLine.includes(lowerFileName)) return true;
+
+        return false;
+      });
+
+      if (hasReference) {
+        relatedFiles.push(candidateNode);
+      }
+    } catch (err) {
+      // Skip files that can't be read
+      continue;
+    }
+  }
+
+  if (relatedFiles.length === 0) {
+    return '<div class="context-empty">No files reference this file</div>';
+  }
+
+  // Generate HTML for related files
+  const html = relatedFiles.map(node => {
+    const displayPath = node.sourceType === 'src'
+      ? `src/${node.path}`
+      : `.planning/${node.path}`;
+
+    return `
+      <div class="related-file-item" data-node-path="${escapeHtml(node.path)}" data-source-type="${node.sourceType}">
+        <span class="related-file-icon">📄</span>
+        <span class="related-file-path">${escapeHtml(displayPath)}</span>
+      </div>
+    `;
+  }).join('');
+
+  return html;
 }
 
 // Show toast notification
