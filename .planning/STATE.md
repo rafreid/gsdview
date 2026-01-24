@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.2 File Deep Dive - Phase 16: File Context & Metadata
+**Current focus:** v1.2 File Deep Dive - COMPLETE (Phase 17: Search & Polish finished)
 
 ## Current Position
 
-Phase: 16 - File Context & Metadata
-Plan: 2 of 2
-Status: Phase complete
-Last activity: 2026-01-24 - Completed 16-02-PLAN.md
+Phase: 17 - Search & Polish
+Plan: 1 of 1
+Status: Phase complete, v1.2 milestone complete
+Last activity: 2026-01-24 - Completed 17-01-PLAN.md
 
-Progress: [████████████████░░░░░░░░░░░░] 16/17 phases (94% complete overall, 5/5 v1.2)
+Progress: [█████████████████████████████] 17/17 phases (100% complete overall, 6/6 v1.2)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 36 (v1.0: 23, v1.1: 14, v1.2: 6)
+- Total plans completed: 37 (v1.0: 23, v1.1: 14, v1.2: 7)
 - Average duration: Session duration
-- Total execution time: 2 days (v1.0: 1 day, v1.1: 1 day, v1.2: 14m 24s)
+- Total execution time: 2 days (v1.0: 1 day, v1.1: 1 day, v1.2: 17m 0s)
 
 **By Phase:**
 
@@ -47,7 +47,7 @@ Progress: [████████████████░░░░░░░
 | 11. Statistics & Diff Preview | 2 | 2/2 complete | STS-01-03, DIF-01-03 |
 | 12. Timeline Replay | 1 | 1/1 complete | TML-01-03 |
 
-*v1.2 (Active):*
+*v1.2 (Complete):*
 
 | Phase | Plans | Status | Target |
 |-------|-------|--------|--------|
@@ -55,7 +55,7 @@ Progress: [████████████████░░░░░░░
 | 14. Diff Editor | 1/1 | Complete | DFE-01-05 |
 | 15. Structure Tree | 2/2 | Complete | TRE-01-05 |
 | 16. File Context & Metadata | 2/2 | Complete | CTX-01-04, CTX-06-07 |
-| 17. Search & Polish | 0/? | Pending | MOD-03-04, CTX-05 |
+| 17. Search & Polish | 1/1 | Complete | MOD-03-04, CTX-05 |
 
 *Updated after each plan completion*
 
@@ -144,6 +144,11 @@ Recent decisions affecting current work:
 - Related files scan limited to 50 files for performance (16-02)
 - Code file detection for .js, .ts, .jsx, .tsx, .py, .go extensions (16-02)
 - Event delegation for related file navigation with camera focus (16-02)
+- Search matches highlighted with <mark> tags for semantic HTML (17-01)
+- Case-insensitive search for better UX (17-01)
+- Current match uses teal highlight, other matches use orange (17-01)
+- Escape key priority updated: search → modal → details panel (17-01)
+- Ctrl+F/Cmd+F opens search only when modal is open (17-01)
 
 ### Pending Todos
 
@@ -171,6 +176,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 16-02-PLAN.md (File Context & Metadata)
+Stopped at: Completed 17-01-PLAN.md (Search & Polish) - v1.2 milestone complete
 Resume file: None
-Next action: Ready for Phase 17 (Search & Polish) - Final v1.2 phase with file search and UX refinements.
+Next action: v1.2 milestone complete! All file deep dive features delivered. Ready for v1.3 planning or user testing/feedback.
