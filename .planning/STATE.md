@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-24)
 ## Current Position
 
 Phase: 18 of 25 (Smooth Activity Updates)
-Plan: 01 of 3
-Status: In progress
-Last activity: 2026-01-24 — Completed 18-01-PLAN.md (Incremental graph updates)
+Plan: 03 of 3
+Status: Wave 2 complete
+Last activity: 2026-01-24 — Completed 18-03-PLAN.md (Fade out deleted nodes)
 
 Progress: [█████████████████████████████░░░] 17/25 phases complete (68%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 39 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 2)
+- Total plans completed: 42 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 5)
 - Average duration: 5min
-- Total execution time: 2 days + 26m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 9m)
+- Total execution time: 2 days + 39m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 22m)
 
 **By Milestone:**
 
@@ -39,7 +39,7 @@ Progress: [███████████████████████
 
 *v1.3 (Active):*
 - 8 phases planned
-- Status: Phase 18 in progress (plan 01 of 3 complete)
+- Status: Phase 18 wave 2 complete (plans 01-03 of 3 complete)
 
 ## Accumulated Context
 
@@ -140,6 +140,11 @@ Recent decisions affecting current work:
 - 2-second delay before unfixing nodes to allow settling (18-02)
 - Position new nodes within 20 units of parent with random offset (18-02)
 - storedDirectoryData moved to top of file, duplicate removed (18-02)
+- fadeOutAndRemoveNode() for smooth 500ms deletion animations (18-03)
+- Ease-out curve with opacity fade and scale-down (0.7x) for deletions (18-03)
+- Pending deletions tracking prevents duplicate fade animations (18-03)
+- Mid-animation existence check handles parent directory deletions (18-03)
+- Synchronized fade animations between graph and tree panel (18-03)
 
 ### Pending Todos
 
@@ -167,7 +172,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-24T22:59:48Z
-Stopped at: Completed 18-01-PLAN.md (Incremental graph updates)
+Last session: 2026-01-24T23:07:49Z
+Stopped at: Completed 18-03-PLAN.md (Fade out deleted nodes) - Wave 2 complete
 Resume file: None
-Next action: Execute 18-02 or 18-03 (remaining wave 1 plans)
+Next action: Phase 18 wave 2 complete. Continue with remaining phase 18 plans or proceed to next phase.
