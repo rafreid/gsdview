@@ -939,6 +939,130 @@ function clearNodeHighlight() {
   highlightedNodeId = null;
 }
 
+// Track pending deletions to prevent duplicate fade animations
+const pendingDeletions = new Set();
+
+// Fade out and remove a node from the graph
+function fadeOutAndRemoveNode(nodeId) {
+  // Prevent duplicate animations
+  if (pendingDeletions.has(nodeId)) {
+    console.log('[Fade] Already fading:', nodeId);
+    return;
+  }
+
+  const node = currentGraphData.nodes.find(n => n.id === nodeId);
+  if (!node) {
+    console.log('[Fade] Node not found:', nodeId);
+    return;
+  }
+
+  const threeObj = node.__threeObj;
+  if (!threeObj) {
+    console.log('[Fade] No THREE object for node:', nodeId);
+    // Remove immediately if no visual object
+    removeNodeFromGraph(nodeId);
+    return;
+  }
+
+  // Mark as pending deletion
+  pendingDeletions.add(nodeId);
+
+  // Cancel any active flash animation for this node
+  if (flashingNodes.has(nodeId)) {
+    const existing = flashingNodes.get(nodeId);
+    if (existing.rafId) cancelAnimationFrame(existing.rafId);
+    flashingNodes.delete(nodeId);
+  }
+
+  // Clear from heat tracking
+  nodeHeatMap.delete(nodeId);
+
+  // Clear highlight if this is the highlighted node
+  if (highlightedNodeId === nodeId) {
+    clearNodeHighlight();
+  }
+
+  // Collect all materials to animate
+  const materials = [];
+  if (threeObj.material) {
+    materials.push(threeObj.material);
+  }
+  if (threeObj.children) {
+    threeObj.children.forEach(child => {
+      if (child.material) materials.push(child.material);
+    });
+  }
+
+  // Enable transparency for opacity animation
+  materials.forEach(material => {
+    material.transparent = true;
+  });
+
+  // Store original scale for animation
+  const originalScale = threeObj.scale.clone();
+
+  // Animation parameters
+  const duration = 500; // 500ms fade
+  const startTime = Date.now();
+
+  function animate() {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // Ease-out curve for smooth deceleration
+    const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+    // Fade opacity to 0
+    materials.forEach(material => {
+      material.opacity = 1 - easeProgress;
+    });
+
+    // Slight scale-down for better visual effect (to 0.7x)
+    const scale = 1 - (easeProgress * 0.3);
+    threeObj.scale.set(
+      originalScale.x * scale,
+      originalScale.y * scale,
+      originalScale.z * scale
+    );
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      // Animation complete - remove from graph
+      removeNodeFromGraph(nodeId);
+      pendingDeletions.delete(nodeId);
+    }
+  }
+
+  animate();
+  console.log('[Fade] Started fade-out for:', nodeId);
+}
+
+// Remove a node from the graph data and refresh
+function removeNodeFromGraph(nodeId) {
+  // Remove node from currentGraphData.nodes
+  currentGraphData.nodes = currentGraphData.nodes.filter(n => n.id !== nodeId);
+
+  // Remove links where this node is source or target
+  currentGraphData.links = currentGraphData.links.filter(
+    link => link.source.id !== nodeId && link.target.id !== nodeId &&
+            link.source !== nodeId && link.target !== nodeId
+  );
+
+  // Update storedDirectoryData for tree panel
+  if (storedDirectoryData && storedDirectoryData.nodes) {
+    storedDirectoryData.nodes = storedDirectoryData.nodes.filter(n => n.id !== nodeId);
+    storedDirectoryData.links = storedDirectoryData.links.filter(
+      link => link.source !== nodeId && link.target !== nodeId
+    );
+  }
+
+  // Update graph
+  Graph.graphData(currentGraphData);
+
+  console.log('[Fade] Removed node from graph:', nodeId);
+}
+
 // Flash a tree item with change-type-specific color
 function flashTreeItem(nodeId, changeType = 'modified') {
   const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);

@@ -81878,6 +81878,39 @@ var<${access}> ${name} : ${structName};`;
   ];
   var nodeHeatMap = /* @__PURE__ */ new Map();
   var storedDirectoryData = null;
+  function buildFileNode(filePath, sourceType) {
+    const pathParts = filePath.split("/");
+    const fileName = pathParts.pop();
+    const parentPath = pathParts.join("/");
+    let parentId;
+    if (parentPath === "") {
+      parentId = sourceType === "planning" ? "dir-planning" : "dir-src";
+    } else {
+      parentId = `${sourceType}-dir-${parentPath}`;
+    }
+    const parentNode = currentGraphData.nodes.find((n2) => n2.id === parentId);
+    const isDirectory = !fileName.includes(".");
+    const nodeType = isDirectory ? "directory" : "file";
+    const nodeId = `${sourceType}-${nodeType === "directory" ? "dir" : "file"}-${filePath}`;
+    const node = {
+      id: nodeId,
+      name: fileName,
+      type: nodeType,
+      path: filePath,
+      sourceType
+    };
+    if (nodeType === "file") {
+      const ext = fileName.split(".").pop();
+      node.extension = ext;
+    }
+    if (parentNode && parentNode.x !== void 0) {
+      const offset = 20;
+      node.x = parentNode.x + (Math.random() - 0.5) * offset;
+      node.y = parentNode.y + (Math.random() - 0.5) * offset;
+      node.z = (parentNode.z || 0) + (Math.random() - 0.5) * offset;
+    }
+    return { node, parentId };
+  }
   function formatHeatDuration(seconds) {
     if (seconds < 60) return `${seconds}s`;
     const minutes = Math.round(seconds / 60);
@@ -82827,6 +82860,66 @@ ${node.goal}`;
       }
       updateTreePanel();
     }
+  }
+  function updateSelectedNodeReference() {
+    if (selectedNode) {
+      const updatedNode = currentGraphData.nodes.find((n2) => n2.id === selectedNode.id);
+      if (updatedNode) {
+        selectedNode = updatedNode;
+      } else {
+        hideDetailsPanel();
+        selectedNode = null;
+      }
+    }
+  }
+  function applyIncrementalUpdate(changeEvent) {
+    const { event, path, sourceType } = changeEvent;
+    console.log("Applying incremental update:", event, path, sourceType);
+    const isDirectory = event === "addDir" || event === "unlinkDir";
+    const nodeId = `${sourceType}-${isDirectory ? "dir" : "file"}-${path}`;
+    let camPos = null;
+    if (Graph && Graph.cameraPosition) {
+      camPos = Graph.cameraPosition();
+    }
+    if (event === "add" || event === "addDir") {
+      const { node: newNode, parentId } = buildFileNode(path, sourceType);
+      currentGraphData.nodes.push(newNode);
+      currentGraphData.links.push({
+        source: parentId,
+        target: newNode.id,
+        type: "contains"
+      });
+      if (storedDirectoryData && storedDirectoryData.nodes) {
+        storedDirectoryData.nodes.push(newNode);
+        storedDirectoryData.links.push({
+          source: parentId,
+          target: newNode.id,
+          type: "contains"
+        });
+      }
+      Graph.graphData(currentGraphData);
+    } else if (event === "change") {
+    } else if (event === "unlink" || event === "unlinkDir") {
+      if (selectedNode && selectedNode.id === nodeId) {
+        hideDetailsPanel();
+        selectedNode = null;
+      }
+      currentGraphData.nodes = currentGraphData.nodes.filter((n2) => n2.id !== nodeId);
+      currentGraphData.links = currentGraphData.links.filter(
+        (link) => link.source.id !== nodeId && link.target.id !== nodeId && link.source !== nodeId && link.target !== nodeId
+      );
+      if (storedDirectoryData && storedDirectoryData.nodes) {
+        storedDirectoryData.nodes = storedDirectoryData.nodes.filter((n2) => n2.id !== nodeId);
+        storedDirectoryData.links = storedDirectoryData.links.filter(
+          (link) => link.source !== nodeId && link.target !== nodeId
+        );
+      }
+      Graph.graphData(currentGraphData);
+    }
+    if (camPos && Graph && Graph.cameraPosition) {
+      Graph.cameraPosition(camPos.x, camPos.y, camPos.z, 0);
+    }
+    updateSelectedNodeReference();
   }
   async function loadProject(projectPath) {
     if (!window.electronAPI || !window.electronAPI.parseProject) {
@@ -84313,8 +84406,15 @@ ${node.goal}`;
         if (timelinePosition === null) {
           updateTimelineUI();
         }
-        showRefreshIndicator();
-        await loadProject(selectedProjectPath);
+        applyIncrementalUpdate({
+          event: data.event,
+          path: data.path,
+          sourceType: data.sourceType
+        });
+        if (data.event === "add" || data.event === "addDir" || data.event === "unlink" || data.event === "unlinkDir") {
+          treeData = buildTreeStructure(storedDirectoryData);
+          updateTreePanel();
+        }
         await fetchGitStatus(selectedProjectPath);
       }
     });
