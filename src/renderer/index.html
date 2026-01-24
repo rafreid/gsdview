@@ -1546,6 +1546,96 @@
     .syntax-comment { color: #5C6370; font-style: italic; }
     .syntax-number { color: #D19A66; }
     .syntax-function { color: #61AFEF; }
+
+    /* Structure Tree Styles */
+    .structure-tree {
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 12px;
+    }
+
+    .structure-item {
+      display: flex;
+      align-items: center;
+      padding: 4px 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-radius: 3px;
+    }
+
+    .structure-item:hover {
+      background: rgba(78, 205, 196, 0.15);
+    }
+
+    .structure-item.active {
+      background: rgba(78, 205, 196, 0.25);
+      border-left: 2px solid #4ECDC4;
+    }
+
+    .structure-toggle {
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 4px;
+      color: #888;
+      font-size: 8px;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .structure-toggle.expanded {
+      transform: rotate(90deg);
+    }
+
+    .structure-toggle.no-children {
+      visibility: hidden;
+    }
+
+    .structure-icon {
+      margin-right: 6px;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .structure-icon.header { color: #4ECDC4; }
+    .structure-icon.function { color: #61AFEF; }
+    .structure-icon.class { color: #E5C07B; }
+    .structure-icon.import { color: #C678DD; }
+    .structure-icon.export { color: #98C379; }
+    .structure-icon.key { color: #D19A66; }
+    .structure-icon.list { color: #ABB2BF; }
+    .structure-icon.codeblock { color: #56B6C2; }
+
+    .structure-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #ccc;
+    }
+
+    .structure-line {
+      margin-left: 8px;
+      font-size: 10px;
+      color: #666;
+    }
+
+    .structure-children {
+      display: none;
+      margin-left: 16px;
+    }
+
+    .structure-children.expanded {
+      display: block;
+    }
+
+    .structure-empty {
+      padding: 20px;
+      text-align: center;
+      color: #666;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
