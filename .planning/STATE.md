@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-01-24)
 ## Current Position
 
 Phase: 15 - Structure Tree
-Plan: 1 of 2
-Status: In progress
-Last activity: 2026-01-24 - Completed 15-01-PLAN.md
+Plan: 2 of 2
+Status: Phase complete
+Last activity: 2026-01-24 - Completed 15-02-PLAN.md
 
-Progress: [██████████████░░░░░░░░░░░░░░] 14/17 phases (82% complete overall, 3/5 v1.2)
+Progress: [████████████████░░░░░░░░░░░░] 15/17 phases (88% complete overall, 4/5 v1.2)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 33 (v1.0: 23, v1.1: 14, v1.2: 3)
+- Total plans completed: 34 (v1.0: 23, v1.1: 14, v1.2: 4)
 - Average duration: Session duration
 - Total execution time: 2 days (v1.0: 1 day, v1.1: 1 day, v1.2: 6m 34s)
 
@@ -53,7 +53,7 @@ Progress: [██████████████░░░░░░░░░
 |-------|-------|--------|--------|
 | 13. Modal Foundation | 1/1 | Complete | MOD-01, MOD-02 |
 | 14. Diff Editor | 1/1 | Complete | DFE-01-05 |
-| 15. Structure Tree | 1/2 | In progress | TRE-01-05 |
+| 15. Structure Tree | 2/2 | Complete | TRE-01-05 |
 | 16. File Context & Metadata | 0/? | Pending | CTX-01-04, CTX-06-07 |
 | 17. Search & Polish | 0/? | Pending | MOD-03-04, CTX-05 |
 
@@ -128,6 +128,11 @@ Recent decisions affecting current work:
 - Structure items use { type, name, line, depth } format (15-01)
 - JSON recursion limited to depth 5 for performance (15-01)
 - Brace depth tracking for JS class method scope detection (15-01)
+- Event delegation on structure section for tree click handling (15-02)
+- 12px per depth level indentation for structure tree (15-02)
+- Icon mapping: H=header, f=function, C=class, i=import, e=export, k=key (15-02)
+- Click-to-scroll uses scrollIntoView with block: 'center' (15-02)
+- 1.5s highlight duration for scrolled-to diff lines (15-02)
 
 ### Pending Todos
 
@@ -155,6 +160,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 15-01-PLAN.md (File Structure Parsing)
+Stopped at: Completed 15-02-PLAN.md (Structure Tree UI)
 Resume file: None
-Next action: Ready for 15-02-PLAN.md - integrate structure tree UI in inspector modal.
+Next action: Ready for Phase 16 (File Context & Metadata) - CTX-01-04, CTX-06-07 requirements.
