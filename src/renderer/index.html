@@ -501,32 +501,84 @@
       color: #1a1a2e !important; /* Dark text during flash for contrast */
     }
 
-    /* Change-type-specific tree flash animations */
+    /* Change-type-specific tree flash animations - Enhanced with brighter colors and glow */
+    /* Created: 4 quick pulses with neon green (0x00FF88 = rgba(0, 255, 136)) */
     @keyframes tree-flash-created {
-      0% { background-color: rgba(46, 204, 113, 0.9); box-shadow: 0 0 15px rgba(46, 204, 113, 0.8); }
-      15% { background-color: rgba(46, 204, 113, 0.3); box-shadow: 0 0 5px rgba(46, 204, 113, 0.3); }
-      30% { background-color: rgba(46, 204, 113, 0.8); box-shadow: 0 0 12px rgba(46, 204, 113, 0.7); }
-      45% { background-color: rgba(46, 204, 113, 0.2); box-shadow: 0 0 3px rgba(46, 204, 113, 0.2); }
-      60% { background-color: rgba(46, 204, 113, 0.6); box-shadow: 0 0 10px rgba(46, 204, 113, 0.5); }
-      100% { background-color: transparent; box-shadow: none; }
+      0% {
+        background-color: rgba(0, 255, 136, 1.0);
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.9), inset 0 0 10px rgba(0, 255, 136, 0.5);
+        text-shadow: 0 0 8px rgba(0, 255, 136, 0.8);
+      }
+      10% { background-color: rgba(0, 255, 136, 0.1); box-shadow: none; text-shadow: none; }
+      20% {
+        background-color: rgba(0, 255, 136, 0.95);
+        box-shadow: 0 0 25px rgba(0, 255, 136, 0.85), inset 0 0 10px rgba(0, 255, 136, 0.4);
+        text-shadow: 0 0 8px rgba(0, 255, 136, 0.7);
+      }
+      30% { background-color: rgba(0, 255, 136, 0.1); box-shadow: none; text-shadow: none; }
+      40% {
+        background-color: rgba(0, 255, 136, 0.9);
+        box-shadow: 0 0 22px rgba(0, 255, 136, 0.8), inset 0 0 8px rgba(0, 255, 136, 0.4);
+        text-shadow: 0 0 6px rgba(0, 255, 136, 0.6);
+      }
+      50% { background-color: rgba(0, 255, 136, 0.1); box-shadow: none; text-shadow: none; }
+      60% {
+        background-color: rgba(0, 255, 136, 0.8);
+        box-shadow: 0 0 18px rgba(0, 255, 136, 0.7), inset 0 0 6px rgba(0, 255, 136, 0.3);
+        text-shadow: 0 0 5px rgba(0, 255, 136, 0.5);
+      }
+      70% { background-color: rgba(0, 255, 136, 0.1); box-shadow: none; text-shadow: none; }
+      80% {
+        background-color: rgba(0, 255, 136, 0.6);
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        text-shadow: 0 0 4px rgba(0, 255, 136, 0.4);
+      }
+      100% { background-color: transparent; box-shadow: none; text-shadow: none; }
     }
 
+    /* Modified: 3 steady pulses with bright amber (0xFFAA00 = rgba(255, 170, 0)) */
     @keyframes tree-flash-modified {
-      0% { background-color: rgba(243, 156, 18, 0.9); box-shadow: 0 0 15px rgba(243, 156, 18, 0.8); }
-      15% { background-color: rgba(243, 156, 18, 0.3); box-shadow: 0 0 5px rgba(243, 156, 18, 0.3); }
-      30% { background-color: rgba(243, 156, 18, 0.8); box-shadow: 0 0 12px rgba(243, 156, 18, 0.7); }
-      45% { background-color: rgba(243, 156, 18, 0.2); box-shadow: 0 0 3px rgba(243, 156, 18, 0.2); }
-      60% { background-color: rgba(243, 156, 18, 0.6); box-shadow: 0 0 10px rgba(243, 156, 18, 0.5); }
-      100% { background-color: transparent; box-shadow: none; }
+      0% {
+        background-color: rgba(255, 170, 0, 1.0);
+        box-shadow: 0 0 20px rgba(255, 170, 0, 0.9), inset 0 0 10px rgba(255, 170, 0, 0.5);
+        text-shadow: 0 0 8px rgba(255, 170, 0, 0.8);
+      }
+      16% { background-color: rgba(255, 170, 0, 0.1); box-shadow: none; text-shadow: none; }
+      33% {
+        background-color: rgba(255, 170, 0, 0.95);
+        box-shadow: 0 0 22px rgba(255, 170, 0, 0.85), inset 0 0 8px rgba(255, 170, 0, 0.4);
+        text-shadow: 0 0 7px rgba(255, 170, 0, 0.7);
+      }
+      50% { background-color: rgba(255, 170, 0, 0.1); box-shadow: none; text-shadow: none; }
+      66% {
+        background-color: rgba(255, 170, 0, 0.85);
+        box-shadow: 0 0 18px rgba(255, 170, 0, 0.75), inset 0 0 6px rgba(255, 170, 0, 0.3);
+        text-shadow: 0 0 6px rgba(255, 170, 0, 0.6);
+      }
+      83% { background-color: rgba(255, 170, 0, 0.1); box-shadow: none; text-shadow: none; }
+      100% { background-color: transparent; box-shadow: none; text-shadow: none; }
     }
 
+    /* Deleted: 2 slow pulses then fade with bright red (0xFF3333 = rgba(255, 51, 51)) */
     @keyframes tree-flash-deleted {
-      0% { background-color: rgba(231, 76, 60, 0.9); box-shadow: 0 0 15px rgba(231, 76, 60, 0.8); }
-      15% { background-color: rgba(231, 76, 60, 0.3); box-shadow: 0 0 5px rgba(231, 76, 60, 0.3); }
-      30% { background-color: rgba(231, 76, 60, 0.8); box-shadow: 0 0 12px rgba(231, 76, 60, 0.7); }
-      45% { background-color: rgba(231, 76, 60, 0.2); box-shadow: 0 0 3px rgba(231, 76, 60, 0.2); }
-      60% { background-color: rgba(231, 76, 60, 0.6); box-shadow: 0 0 10px rgba(231, 76, 60, 0.5); }
-      100% { background-color: transparent; box-shadow: none; opacity: 0.5; }
+      0% {
+        background-color: rgba(255, 51, 51, 1.0);
+        box-shadow: 0 0 20px rgba(255, 51, 51, 0.9), inset 0 0 10px rgba(255, 51, 51, 0.5);
+        text-shadow: 0 0 8px rgba(255, 51, 51, 0.8);
+      }
+      25% { background-color: rgba(255, 51, 51, 0.1); box-shadow: none; text-shadow: none; }
+      50% {
+        background-color: rgba(255, 51, 51, 0.9);
+        box-shadow: 0 0 18px rgba(255, 51, 51, 0.8), inset 0 0 8px rgba(255, 51, 51, 0.4);
+        text-shadow: 0 0 6px rgba(255, 51, 51, 0.7);
+      }
+      75% { background-color: rgba(255, 51, 51, 0.1); box-shadow: none; text-shadow: none; }
+      90% {
+        background-color: rgba(255, 51, 51, 0.5);
+        box-shadow: 0 0 10px rgba(255, 51, 51, 0.4);
+        opacity: 0.7;
+      }
+      100% { background-color: transparent; box-shadow: none; text-shadow: none; opacity: 0.5; }
     }
 
     .tree-flash-created {
