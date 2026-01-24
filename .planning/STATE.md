@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 19 complete
+**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 20 in progress
 
 ## Current Position
 
-Phase: 19 of 25 (Enhanced Flash Effects)
-Plan: 2/2
-Status: Phase complete
-Last activity: 2026-01-24 - Completed 19-02-PLAN.md
+Phase: 20 of 25 (Activity Trails)
+Plan: 1/2
+Status: In progress
+Last activity: 2026-01-24 - Completed 20-01-PLAN.md
 
 Progress: [███████████████████████████████░] 19/25 phases complete (76%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 44 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 7)
+- Total plans completed: 45 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 8)
 - Average duration: 5min
-- Total execution time: 2 days + 42m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 25m)
+- Total execution time: 2 days + 50m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 33m)
 
 **By Milestone:**
 
@@ -39,7 +39,7 @@ Progress: [███████████████████████
 
 *v1.3 (Active):*
 - 8 phases planned
-- Status: Phase 19 complete (plans 02 of 2 complete)
+- Status: Phase 20 in progress (plan 01 of 2 complete)
 
 ## Accumulated Context
 
@@ -156,6 +156,12 @@ Recent decisions affecting current work:
 - Flash intensity slider range: 0.5x to 2x, default 1x (19-02)
 - CSS custom property --flash-duration for dynamic tree animation duration (19-02)
 - Persist flash settings via electron-store (flashDuration, flashIntensity keys) (19-02)
+- Activity trails connect recently changed files with THREE.Line objects (20-01)
+- Trail max age 60000ms (1 minute) before automatic removal (20-01)
+- Maximum 20 trails shown at once to limit visual clutter (20-01)
+- Trail color fades from bright cyan (#4ECDC4) to dim teal over lifetime (20-01)
+- Trail opacity fades from 0.8 to 0.1 based on age ratio (20-01)
+- Trails enabled by default, toggle persisted via electron-store (20-01)
 
 ### Pending Todos
 
@@ -183,7 +189,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-24T23:25:00Z
-Stopped at: Completed 19-02-PLAN.md (Flash Settings Controls) - Phase 19 complete
+Last session: 2026-01-24T23:43:00Z
+Stopped at: Completed 20-01-PLAN.md (Activity Trail Foundation)
 Resume file: None
-Next action: Phase 19 complete. Proceed to Phase 20 or next milestone.
+Next action: Continue to 20-02-PLAN.md or next phase.
