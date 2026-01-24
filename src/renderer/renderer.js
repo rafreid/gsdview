@@ -595,6 +595,103 @@ function clearAllTrails() {
   console.log('[Trail] Cleared all trails');
 }
 
+// Update trail line positions to follow moving nodes
+function updateTrailPositions() {
+  activityTrails.forEach(trail => {
+    const fromNode = currentGraphData.nodes.find(n => n.id === trail.fromNodeId);
+    const toNode = currentGraphData.nodes.find(n => n.id === trail.toNodeId);
+
+    // If either node is gone, mark for removal
+    if (!fromNode || !toNode || fromNode.x === undefined || toNode.x === undefined) {
+      return;
+    }
+
+    // Update the line geometry positions
+    if (trail.lineObject && trail.lineObject.geometry) {
+      const positions = trail.lineObject.geometry.attributes.position;
+      if (positions) {
+        // Update from node position
+        positions.array[0] = fromNode.x;
+        positions.array[1] = fromNode.y;
+        positions.array[2] = fromNode.z || 0;
+
+        // Update to node position
+        positions.array[3] = toNode.x;
+        positions.array[4] = toNode.y;
+        positions.array[5] = toNode.z || 0;
+
+        positions.needsUpdate = true;
+      }
+    }
+  });
+}
+
+// Update trail opacities based on age (newer = more opaque)
+function updateTrailOpacities() {
+  const now = Date.now();
+
+  activityTrails.forEach(trail => {
+    if (!trail.lineObject || !trail.lineObject.material) return;
+
+    const age = now - trail.timestamp;
+    const ageRatio = Math.min(age / TRAIL_MAX_AGE, 1.0);
+
+    // Opacity fades from 0.8 (new) to 0.1 (old)
+    const opacity = 0.8 - (ageRatio * 0.7);
+    trail.lineObject.material.opacity = Math.max(0.1, opacity);
+
+    // Color transitions from bright cyan to dim teal
+    // New: 0x4ECDC4 (bright cyan), Old: 0x2a6b67 (dim teal)
+    const r = Math.round(0x4E - (ageRatio * 0x24));
+    const g = Math.round(0xCD - (ageRatio * 0x62));
+    const b = Math.round(0xC4 - (ageRatio * 0x5D));
+
+    const fadedColor = (r << 16) | (g << 8) | b;
+    trail.lineObject.material.color.setHex(fadedColor);
+  });
+}
+
+// Animation loop for trail updates
+let trailLoopRunning = false;
+let trailLoopRafId = null;
+
+function startTrailAnimationLoop() {
+  if (trailLoopRunning) return;
+  trailLoopRunning = true;
+
+  function trailLoop() {
+    if (!trailLoopRunning) return;
+
+    // Update positions as nodes move
+    updateTrailPositions();
+
+    // Update opacities based on age
+    updateTrailOpacities();
+
+    // Clean up old trails
+    cleanupOldTrails();
+
+    // Continue loop if there are still trails
+    if (activityTrails.length > 0) {
+      trailLoopRafId = requestAnimationFrame(trailLoop);
+    } else {
+      trailLoopRunning = false;
+      trailLoopRafId = null;
+    }
+  }
+
+  trailLoopRafId = requestAnimationFrame(trailLoop);
+}
+
+// Stop trail animation loop
+function stopTrailAnimationLoop() {
+  trailLoopRunning = false;
+  if (trailLoopRafId) {
+    cancelAnimationFrame(trailLoopRafId);
+    trailLoopRafId = null;
+  }
+}
+
 // =====================================================
 // TIMELINE REPLAY HELPER FUNCTIONS
 // =====================================================
