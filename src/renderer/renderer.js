@@ -119,12 +119,16 @@ let inspectorNode = null; // Currently inspected file node
 let inspectorDiffMode = 'git'; // 'git' or 'session'
 const sessionFileSnapshots = new Map(); // filePath -> { content: string, timestamp: number }
 
-// Change type colors for type-specific animations
+// Change type colors for type-specific animations (brighter, more saturated)
 const changeTypeColors = {
-  created: 0x2ECC71,  // Green
-  modified: 0xF39C12, // Orange
-  deleted: 0xE74C3C   // Red
+  created: 0x00FF88,  // Bright neon green (was 0x2ECC71)
+  modified: 0xFFAA00, // Bright amber/orange (was 0xF39C12)
+  deleted: 0xFF3333   // Bright red (was 0xE74C3C)
 };
+
+// Flash animation configuration
+let flashDuration = 2000;  // Default flash duration in ms
+let flashIntensity = 1.0;  // Intensity multiplier for glow and scale effects
 
 // Git status colors for node indicators
 const gitStatusColors = {
@@ -772,7 +776,7 @@ function findNodeIdFromPath(changedPath) {
   return null;
 }
 
-// Flash a node with change-type-specific color
+// Flash a node with change-type-specific color, emissive glow, and scale pulsing
 function flashNodeWithType(nodeId, changeType) {
   const node = currentGraphData.nodes.find(n => n.id === nodeId);
   if (!node) {
@@ -808,9 +812,42 @@ function flashNodeWithType(nodeId, changeType) {
   const originalColors = materials.map(m => m.color.getHex());
   const flashColor = changeTypeColors[changeType] || 0xFFFFFF;
 
-  // Animation parameters
-  const duration = 2000;
-  const pulseCount = 3;
+  // Store original emissive colors and intensities for restoration
+  const originalEmissives = materials.map(m => {
+    if (m.emissive) {
+      return { color: m.emissive.getHex(), intensity: m.emissiveIntensity || 0 };
+    }
+    return null;
+  });
+
+  // Store original scale for restoration
+  const originalScale = threeObj.scale.clone();
+
+  // Animation parameters - different patterns per change type
+  const duration = flashDuration;
+  let pulseCount;
+  let pulsePattern; // Function to customize pulse intensity over time
+
+  if (changeType === 'created') {
+    // Created: 4 quick pulses with increasing intensity (celebration effect)
+    pulseCount = 4;
+    pulsePattern = (progress, basePulse) => {
+      const intensityRamp = 0.5 + progress * 0.5; // Start at 50%, ramp to 100%
+      return basePulse * intensityRamp;
+    };
+  } else if (changeType === 'deleted') {
+    // Deleted: 2 slow pulses then fade (warning effect)
+    pulseCount = 2;
+    pulsePattern = (progress, basePulse) => {
+      // Slower, more ominous pulses
+      return basePulse * (1 - progress * 0.3);
+    };
+  } else {
+    // Modified: 3 steady pulses (attention-getting)
+    pulseCount = 3;
+    pulsePattern = (progress, basePulse) => basePulse;
+  }
+
   const startTime = Date.now();
 
   // For deleted nodes, we'll fade out at the end
@@ -821,15 +858,25 @@ function flashNodeWithType(nodeId, changeType) {
     const elapsed = Date.now() - startTime;
     const progress = Math.min(elapsed / duration, 1);
 
-    // Pulsing effect
+    // Pulsing effect with smoother ease-in-out curve (sin squared)
     const pulsePhase = progress * pulseCount * Math.PI * 2;
-    const pulse = Math.max(0, Math.sin(pulsePhase));
+    const rawPulse = Math.sin(pulsePhase);
+    const pulse = rawPulse * rawPulse * Math.sign(rawPulse); // Squared for smoother peaks
+    const basePulse = Math.max(0, pulse);
     const decay = 1 - progress;
-    const intensity = pulse * decay;
+    const patternedPulse = pulsePattern(progress, basePulse);
+    const intensity = patternedPulse * decay;
 
     materials.forEach((material, i) => {
       // Color pulse
       material.color.setHex(lerpColor(originalColors[i], flashColor, intensity));
+
+      // Emissive glow effect
+      if (material.emissive) {
+        const emissiveIntensity = intensity * flashIntensity * 2.0;
+        material.emissive.setHex(flashColor);
+        material.emissiveIntensity = emissiveIntensity;
+      }
 
       // For delete: fade out opacity in last 50% of animation
       if (isDelete && progress > 0.5) {
@@ -838,9 +885,17 @@ function flashNodeWithType(nodeId, changeType) {
       }
     });
 
+    // Scale pulse effect
+    const scaleMultiplier = 1 + (intensity * 0.5 * flashIntensity);
+    threeObj.scale.set(
+      originalScale.x * scaleMultiplier,
+      originalScale.y * scaleMultiplier,
+      originalScale.z * scaleMultiplier
+    );
+
     if (progress < 1) {
       const rafId = requestAnimationFrame(animate);
-      flashingNodes.set(nodeId, { rafId, startTime, changeType });
+      flashingNodes.set(nodeId, { rafId, startTime, changeType, originalScale, originalEmissives });
     } else {
       // Restore original state (or leave faded for deleted)
       materials.forEach((material, i) => {
@@ -854,14 +909,26 @@ function flashNodeWithType(nodeId, changeType) {
         if (!isDelete) {
           material.opacity = originalOpacities[i];
         }
-        // For deleted nodes, leave them faded as visual indicator
+
+        // Restore original emissive
+        if (material.emissive && originalEmissives[i]) {
+          material.emissive.setHex(originalEmissives[i].color);
+          material.emissiveIntensity = originalEmissives[i].intensity;
+        } else if (material.emissive) {
+          material.emissive.setHex(0x000000);
+          material.emissiveIntensity = 0;
+        }
       });
+
+      // Restore original scale
+      threeObj.scale.copy(originalScale);
+
       flashingNodes.delete(nodeId);
     }
   }
 
   const rafId = requestAnimationFrame(animate);
-  flashingNodes.set(nodeId, { rafId, startTime, changeType });
+  flashingNodes.set(nodeId, { rafId, startTime, changeType, originalScale, originalEmissives });
   console.log('[Flash] Started', changeType, 'flash for:', nodeId);
 }
 

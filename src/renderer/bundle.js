@@ -81849,13 +81849,15 @@ var<${access}> ${name} : ${structName};`;
   var inspectorDiffMode = "git";
   var sessionFileSnapshots = /* @__PURE__ */ new Map();
   var changeTypeColors = {
-    created: 3066993,
-    // Green
-    modified: 15965202,
-    // Orange
-    deleted: 15158332
-    // Red
+    created: 65416,
+    // Bright neon green (was 0x2ECC71)
+    modified: 16755200,
+    // Bright amber/orange (was 0xF39C12)
+    deleted: 16724787
+    // Bright red (was 0xE74C3C)
   };
+  var flashDuration = 2e3;
+  var flashIntensity = 1;
   var gitStatusColors = {
     staged: 3066993,
     // Green - ready to commit
@@ -82285,8 +82287,31 @@ var<${access}> ${name} : ${structName};`;
     }
     const originalColors = materials.map((m3) => m3.color.getHex());
     const flashColor = changeTypeColors[changeType] || 16777215;
-    const duration = 2e3;
-    const pulseCount = 3;
+    const originalEmissives = materials.map((m3) => {
+      if (m3.emissive) {
+        return { color: m3.emissive.getHex(), intensity: m3.emissiveIntensity || 0 };
+      }
+      return null;
+    });
+    const originalScale = threeObj.scale.clone();
+    const duration = flashDuration;
+    let pulseCount;
+    let pulsePattern;
+    if (changeType === "created") {
+      pulseCount = 4;
+      pulsePattern = (progress, basePulse) => {
+        const intensityRamp = 0.5 + progress * 0.5;
+        return basePulse * intensityRamp;
+      };
+    } else if (changeType === "deleted") {
+      pulseCount = 2;
+      pulsePattern = (progress, basePulse) => {
+        return basePulse * (1 - progress * 0.3);
+      };
+    } else {
+      pulseCount = 3;
+      pulsePattern = (progress, basePulse) => basePulse;
+    }
     const startTime = Date.now();
     const isDelete = changeType === "deleted";
     const originalOpacities = materials.map((m3) => m3.opacity || 1);
@@ -82294,19 +82319,33 @@ var<${access}> ${name} : ${structName};`;
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const pulsePhase = progress * pulseCount * Math.PI * 2;
-      const pulse = Math.max(0, Math.sin(pulsePhase));
+      const rawPulse = Math.sin(pulsePhase);
+      const pulse = rawPulse * rawPulse * Math.sign(rawPulse);
+      const basePulse = Math.max(0, pulse);
       const decay = 1 - progress;
-      const intensity = pulse * decay;
+      const patternedPulse = pulsePattern(progress, basePulse);
+      const intensity = patternedPulse * decay;
       materials.forEach((material, i2) => {
         material.color.setHex(lerpColor(originalColors[i2], flashColor, intensity));
+        if (material.emissive) {
+          const emissiveIntensity = intensity * flashIntensity * 2;
+          material.emissive.setHex(flashColor);
+          material.emissiveIntensity = emissiveIntensity;
+        }
         if (isDelete && progress > 0.5) {
           const fadeProgress = (progress - 0.5) * 2;
           material.opacity = originalOpacities[i2] * (1 - fadeProgress * 0.7);
         }
       });
+      const scaleMultiplier = 1 + intensity * 0.5 * flashIntensity;
+      threeObj.scale.set(
+        originalScale.x * scaleMultiplier,
+        originalScale.y * scaleMultiplier,
+        originalScale.z * scaleMultiplier
+      );
       if (progress < 1) {
         const rafId2 = requestAnimationFrame(animate);
-        flashingNodes.set(nodeId, { rafId: rafId2, startTime, changeType });
+        flashingNodes.set(nodeId, { rafId: rafId2, startTime, changeType, originalScale, originalEmissives });
       } else {
         materials.forEach((material, i2) => {
           const heatState = nodeHeatMap.get(nodeId);
@@ -82318,12 +82357,20 @@ var<${access}> ${name} : ${structName};`;
           if (!isDelete) {
             material.opacity = originalOpacities[i2];
           }
+          if (material.emissive && originalEmissives[i2]) {
+            material.emissive.setHex(originalEmissives[i2].color);
+            material.emissiveIntensity = originalEmissives[i2].intensity;
+          } else if (material.emissive) {
+            material.emissive.setHex(0);
+            material.emissiveIntensity = 0;
+          }
         });
+        threeObj.scale.copy(originalScale);
         flashingNodes.delete(nodeId);
       }
     }
     const rafId = requestAnimationFrame(animate);
-    flashingNodes.set(nodeId, { rafId, startTime, changeType });
+    flashingNodes.set(nodeId, { rafId, startTime, changeType, originalScale, originalEmissives });
     console.log("[Flash] Started", changeType, "flash for:", nodeId);
   }
   function flashNode(nodeId) {
