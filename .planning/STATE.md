@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-24)
 ## Current Position
 
 Phase: 18 of 25 (Smooth Activity Updates)
-Plan: 02 of 3
+Plan: 01 of 3
 Status: In progress
-Last activity: 2026-01-24 — Completed 18-02-PLAN.md (Position fixing for graph stability)
+Last activity: 2026-01-24 — Completed 18-01-PLAN.md (Incremental graph updates)
 
 Progress: [█████████████████████████████░░░] 17/25 phases complete (68%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 38 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 1)
-- Average duration: 3min
-- Total execution time: 2 days + 20m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 3m)
+- Total plans completed: 39 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 2)
+- Average duration: 5min
+- Total execution time: 2 days + 26m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 9m)
 
 **By Milestone:**
 
@@ -39,7 +39,7 @@ Progress: [███████████████████████
 
 *v1.3 (Active):*
 - 8 phases planned
-- Status: Phase 18 in progress (plan 02 of 3 complete)
+- Status: Phase 18 in progress (plan 01 of 3 complete)
 
 ## Accumulated Context
 
@@ -131,6 +131,11 @@ Recent decisions affecting current work:
 - Current match uses teal highlight, other matches use orange (17-01)
 - Escape key priority updated: search → modal → details panel (17-01)
 - Ctrl+F/Cmd+F opens search only when modal is open (17-01)
+- applyIncrementalUpdate for surgical graph updates without rebuild (18-01)
+- Camera position save/restore with 0ms duration for instant positioning (18-01)
+- Reuse buildFileNode() for consistent node creation with parent positioning (18-01)
+- storedDirectoryData updated in sync with currentGraphData for tree panel (18-01)
+- Details panel closes gracefully when selected node is deleted (18-01)
 - Use fx/fy/fz properties to lock node positions during incremental updates (18-02)
 - 2-second delay before unfixing nodes to allow settling (18-02)
 - Position new nodes within 20 units of parent with random offset (18-02)
@@ -162,7 +167,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-24T22:56:14Z
-Stopped at: Completed 18-02-PLAN.md (Position fixing for graph stability)
+Last session: 2026-01-24T22:59:48Z
+Stopped at: Completed 18-01-PLAN.md (Incremental graph updates)
 Resume file: None
-Next action: Execute 18-01 or 18-03 (parallel plans in wave 1)
+Next action: Execute 18-02 or 18-03 (remaining wave 1 plans)
