@@ -1856,6 +1856,349 @@ function applySyntaxHighlighting(escapedLine, filename) {
   return prefix + highlighted;
 }
 
+// Parse file structure for navigation - returns array of structure items
+function parseFileStructure(content, filename) {
+  if (!content || !filename) return [];
+
+  const ext = filename.substring(filename.lastIndexOf('.')).toLowerCase();
+
+  // Route to appropriate parser based on file extension
+  if (['.md', '.markdown'].includes(ext)) {
+    return parseMarkdownStructure(content);
+  }
+
+  if (['.js', '.ts', '.jsx', '.tsx', '.mjs', '.cjs'].includes(ext)) {
+    return parseCodeStructure(content);
+  }
+
+  if (['.json'].includes(ext)) {
+    return parseConfigStructure(content, 'json');
+  }
+
+  if (['.yaml', '.yml'].includes(ext)) {
+    return parseConfigStructure(content, 'yaml');
+  }
+
+  // Unknown file type - return empty array
+  return [];
+}
+
+// Parse markdown files for headers, lists, and code blocks
+function parseMarkdownStructure(content) {
+  if (!content) return [];
+
+  const items = [];
+  const lines = content.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const lineNum = i + 1;
+
+    // Match headers (# to ######)
+    const headerMatch = line.match(/^(#{1,6})\s+(.+)$/);
+    if (headerMatch) {
+      const depth = headerMatch[1].length;
+      const name = headerMatch[2].trim();
+      items.push({
+        type: 'header',
+        name: name,
+        line: lineNum,
+        depth: depth
+      });
+      continue;
+    }
+
+    // Match list items (-, *, or numbered 1.)
+    const listMatch = line.match(/^(\s*)([-*]|\d+\.)\s+(.+)$/);
+    if (listMatch) {
+      const indent = listMatch[1].length;
+      const depth = Math.floor(indent / 2) + 1;
+      const name = listMatch[3].trim();
+      items.push({
+        type: 'list',
+        name: name.substring(0, 50) + (name.length > 50 ? '...' : ''),
+        line: lineNum,
+        depth: depth
+      });
+      continue;
+    }
+
+    // Match code block boundaries (``` with optional language)
+    const codeBlockMatch = line.match(/^```(\w*)$/);
+    if (codeBlockMatch) {
+      const language = codeBlockMatch[1] || 'code';
+      items.push({
+        type: 'codeblock',
+        name: language,
+        line: lineNum,
+        depth: 0
+      });
+      continue;
+    }
+  }
+
+  return items;
+}
+
+// Parse JavaScript/TypeScript files for functions, classes, imports, exports
+function parseCodeStructure(content) {
+  if (!content) return [];
+
+  const items = [];
+  const lines = content.split('\n');
+  let insideClass = false;
+  let braceDepth = 0;
+  let classStartBraces = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const lineNum = i + 1;
+    const trimmedLine = line.trim();
+
+    // Track brace depth for class scope detection
+    const openBraces = (line.match(/\{/g) || []).length;
+    const closeBraces = (line.match(/\}/g) || []).length;
+    braceDepth += openBraces - closeBraces;
+
+    // Check if we've exited the class
+    if (insideClass && braceDepth < classStartBraces) {
+      insideClass = false;
+    }
+
+    // Match import statements
+    const importMatch = trimmedLine.match(/^import\s+(?:(\{[^}]+\})|(\*\s+as\s+\w+)|(\w+)).*from\s+['"]([^'"]+)['"]/);
+    if (importMatch) {
+      const imported = importMatch[1] || importMatch[2] || importMatch[3];
+      const source = importMatch[4];
+      items.push({
+        type: 'import',
+        name: `${imported} from '${source}'`,
+        line: lineNum,
+        depth: 0
+      });
+      continue;
+    }
+
+    // Simple import match (import 'module')
+    const simpleImportMatch = trimmedLine.match(/^import\s+['"]([^'"]+)['"]/);
+    if (simpleImportMatch) {
+      items.push({
+        type: 'import',
+        name: simpleImportMatch[1],
+        line: lineNum,
+        depth: 0
+      });
+      continue;
+    }
+
+    // Match class declarations
+    const classMatch = trimmedLine.match(/^(?:export\s+)?(?:default\s+)?class\s+(\w+)/);
+    if (classMatch) {
+      items.push({
+        type: 'class',
+        name: classMatch[1],
+        line: lineNum,
+        depth: 0
+      });
+      insideClass = true;
+      classStartBraces = braceDepth;
+      continue;
+    }
+
+    // Match function declarations
+    const funcMatch = trimmedLine.match(/^(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\(/);
+    if (funcMatch) {
+      items.push({
+        type: 'function',
+        name: funcMatch[1],
+        line: lineNum,
+        depth: insideClass ? 1 : 0
+      });
+      continue;
+    }
+
+    // Match arrow functions with const/let/var
+    const arrowMatch = trimmedLine.match(/^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(/);
+    if (arrowMatch) {
+      items.push({
+        type: 'function',
+        name: arrowMatch[1],
+        line: lineNum,
+        depth: insideClass ? 1 : 0
+      });
+      continue;
+    }
+
+    // Match arrow functions with => after parameters
+    const arrowFuncMatch = trimmedLine.match(/^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\w*\s*=>/);
+    if (arrowFuncMatch) {
+      items.push({
+        type: 'function',
+        name: arrowFuncMatch[1],
+        line: lineNum,
+        depth: insideClass ? 1 : 0
+      });
+      continue;
+    }
+
+    // Match export default (standalone)
+    const exportDefaultMatch = trimmedLine.match(/^export\s+default\s+(\w+)/);
+    if (exportDefaultMatch && !classMatch && !funcMatch) {
+      items.push({
+        type: 'export',
+        name: `default ${exportDefaultMatch[1]}`,
+        line: lineNum,
+        depth: 0
+      });
+      continue;
+    }
+
+    // Match export const/let/var (but not already captured as function)
+    const exportVarMatch = trimmedLine.match(/^export\s+(?:const|let|var)\s+(\w+)\s*=/);
+    if (exportVarMatch && !arrowMatch && !arrowFuncMatch) {
+      // Check if it's not a function (no parentheses following)
+      if (!trimmedLine.match(/=\s*(?:async\s*)?\(/)) {
+        items.push({
+          type: 'export',
+          name: exportVarMatch[1],
+          line: lineNum,
+          depth: 0
+        });
+        continue;
+      }
+    }
+
+    // Match class methods (inside class body)
+    if (insideClass) {
+      const methodMatch = trimmedLine.match(/^(?:async\s+)?(\w+)\s*\([^)]*\)\s*\{/);
+      if (methodMatch && methodMatch[1] !== 'if' && methodMatch[1] !== 'for' && methodMatch[1] !== 'while') {
+        items.push({
+          type: 'function',
+          name: methodMatch[1],
+          line: lineNum,
+          depth: 1
+        });
+        continue;
+      }
+    }
+  }
+
+  return items;
+}
+
+// Parse config files (JSON/YAML) for nested key structure
+function parseConfigStructure(content, format) {
+  if (!content) return [];
+
+  if (format === 'json') {
+    return parseJSONStructure(content);
+  }
+
+  if (format === 'yaml') {
+    return parseYAMLStructure(content);
+  }
+
+  return [];
+}
+
+// Parse JSON structure with key paths and estimated line numbers
+function parseJSONStructure(content) {
+  const items = [];
+
+  try {
+    const parsed = JSON.parse(content);
+    const lines = content.split('\n');
+
+    // Build a map of key positions for line number lookup
+    function findKeyLine(key, startLine = 0) {
+      const keyPattern = new RegExp(`"${key}"\\s*:`);
+      for (let i = startLine; i < lines.length; i++) {
+        if (keyPattern.test(lines[i])) {
+          return i + 1; // 1-indexed
+        }
+      }
+      return startLine + 1;
+    }
+
+    // Recursively extract keys with their paths
+    function extractKeys(obj, path = '', depth = 0, lastLine = 0) {
+      if (typeof obj !== 'object' || obj === null) return;
+
+      const keys = Array.isArray(obj) ? [] : Object.keys(obj);
+
+      for (const key of keys) {
+        const lineNum = findKeyLine(key, lastLine);
+        const fullPath = path ? `${path}.${key}` : key;
+
+        items.push({
+          type: 'key',
+          name: key,
+          line: lineNum,
+          depth: depth
+        });
+
+        // Recurse into nested objects (limit depth to 5 for performance)
+        if (typeof obj[key] === 'object' && obj[key] !== null && depth < 5) {
+          extractKeys(obj[key], fullPath, depth + 1, lineNum);
+        }
+      }
+    }
+
+    extractKeys(parsed);
+  } catch (e) {
+    // Invalid JSON - return empty array
+    return [];
+  }
+
+  return items;
+}
+
+// Parse YAML structure by detecting key: patterns and indentation
+function parseYAMLStructure(content) {
+  const items = [];
+  const lines = content.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const lineNum = i + 1;
+
+    // Skip empty lines and comments
+    if (!line.trim() || line.trim().startsWith('#')) continue;
+
+    // Match key: pattern (key followed by colon)
+    const keyMatch = line.match(/^(\s*)([a-zA-Z_][a-zA-Z0-9_-]*):\s*/);
+    if (keyMatch) {
+      const indent = keyMatch[1].length;
+      const depth = Math.floor(indent / 2);
+      const name = keyMatch[2];
+
+      items.push({
+        type: 'key',
+        name: name,
+        line: lineNum,
+        depth: depth
+      });
+    }
+
+    // Match array items with key (- key:)
+    const arrayKeyMatch = line.match(/^(\s*)-\s+([a-zA-Z_][a-zA-Z0-9_-]*):\s*/);
+    if (arrayKeyMatch) {
+      const indent = arrayKeyMatch[1].length;
+      const depth = Math.floor(indent / 2) + 1;
+      const name = arrayKeyMatch[2];
+
+      items.push({
+        type: 'key',
+        name: name,
+        line: lineNum,
+        depth: depth
+      });
+    }
+  }
+
+  return items;
+}
+
 // Render diff view with line numbers and syntax highlighting for diff lines
 function renderDiffView(diffResult, filename) {
   if (!diffResult) return '<div class="diff-status">Unable to load diff</div>';
