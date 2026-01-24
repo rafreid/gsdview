@@ -288,10 +288,11 @@ Plans:
   4. Quick actions bar has "Copy Content" button that copies file content to clipboard
   5. Recent activity section shows all changes to this file from the activity log
   6. Related files section shows other files that import or reference this file (for code files)
-**Plans**: 0 plans (pending)
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD
+- [ ] 16-01-PLAN.md — Metadata header and quick actions (CTX-01-04)
+- [ ] 16-02-PLAN.md — Recent activity and related files (CTX-06-07)
 
 ### Phase 17: Search & Polish
 **Goal**: User can search within modal content and use keyboard shortcuts for efficient navigation
@@ -342,9 +343,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 13. Modal Foundation | 1/1 | Complete | MOD-01, MOD-02 |
 | 14. Diff Editor | 1/1 | Complete | DFE-01-05 |
 | 15. Structure Tree | 2/2 | Complete | TRE-01-05 |
-| 16. File Context & Metadata | 0/? | Pending | CTX-01-04, CTX-06-07 |
+| 16. File Context & Metadata | 0/2 | Pending | CTX-01-04, CTX-06-07 |
 | 17. Search & Polish | 0/? | Pending | MOD-03-04, CTX-05 |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-24 (Phase 15 complete)*
+*Last updated: 2026-01-24 (Phase 16 plans created)*
