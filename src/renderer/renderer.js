@@ -92,6 +92,13 @@ let activityEntries = []; // Array of {id, path, relativePath, event, timestamp,
 let activityUnreadCount = 0; // Badge counter
 const MAX_ACTIVITY_ENTRIES = 100; // Limit to prevent memory issues
 
+// Activity trail state
+let activityTrailsEnabled = true; // User toggle (default on)
+let activityTrails = []; // Array of { fromNodeId, toNodeId, timestamp, lineObject }
+const TRAIL_MAX_AGE = 60000; // 1 minute - trails older than this are removed
+const MAX_TRAILS = 20; // Maximum number of trail connections to show
+let trailAnimationLoop = null; // Reference to animation loop
+
 // Timeline replay state
 let timelinePosition = null; // null = live mode (tracking latest), number = historical timestamp
 let isTimelinePlaying = false;
@@ -453,6 +460,142 @@ function stopHeatDecayLoop() {
 }
 
 // =====================================================
+// ACTIVITY TRAIL FUNCTIONS
+// =====================================================
+
+// Create a trail line between two nodes
+function createActivityTrail(fromNodeId, toNodeId) {
+  // Find both nodes in the graph
+  const fromNode = currentGraphData.nodes.find(n => n.id === fromNodeId);
+  const toNode = currentGraphData.nodes.find(n => n.id === toNodeId);
+
+  // If either node is missing (deleted file), skip trail creation
+  if (!fromNode || !toNode) {
+    console.log('[Trail] Skipping - missing node:', !fromNode ? fromNodeId : toNodeId);
+    return null;
+  }
+
+  // Need positions to draw the line - check if nodes have settled
+  if (fromNode.x === undefined || toNode.x === undefined) {
+    console.log('[Trail] Skipping - nodes not yet positioned');
+    return null;
+  }
+
+  // Create geometry with two points
+  const geometry = new THREE.BufferGeometry();
+  const positions = new Float32Array([
+    fromNode.x, fromNode.y, fromNode.z || 0,
+    toNode.x, toNode.y, toNode.z || 0
+  ]);
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+  // Create material with bright cyan color (will fade based on age)
+  const material = new THREE.LineBasicMaterial({
+    color: 0x4ECDC4, // Bright cyan to match UI theme
+    transparent: true,
+    opacity: 0.8,
+    linewidth: 2 // Note: linewidth only works on some platforms
+  });
+
+  // Create the line object
+  const line = new THREE.Line(geometry, material);
+  line.name = `trail-${fromNodeId}-${toNodeId}`;
+
+  // Add to the graph's scene
+  if (typeof Graph !== 'undefined' && Graph.scene) {
+    Graph.scene().add(line);
+  }
+
+  // Store trail info
+  const trail = {
+    fromNodeId,
+    toNodeId,
+    timestamp: Date.now(),
+    lineObject: line
+  };
+
+  activityTrails.push(trail);
+
+  console.log('[Trail] Created trail from', fromNodeId, 'to', toNodeId);
+
+  return trail;
+}
+
+// Clean up trails older than TRAIL_MAX_AGE
+function cleanupOldTrails() {
+  const now = Date.now();
+  const trailsToRemove = [];
+
+  activityTrails.forEach((trail, index) => {
+    const age = now - trail.timestamp;
+    if (age > TRAIL_MAX_AGE) {
+      trailsToRemove.push(index);
+
+      // Remove from scene
+      if (trail.lineObject && typeof Graph !== 'undefined' && Graph.scene) {
+        Graph.scene().remove(trail.lineObject);
+
+        // Dispose geometry and material to prevent memory leaks
+        if (trail.lineObject.geometry) {
+          trail.lineObject.geometry.dispose();
+        }
+        if (trail.lineObject.material) {
+          trail.lineObject.material.dispose();
+        }
+      }
+    }
+  });
+
+  // Remove old trails from array (reverse order to maintain indices)
+  for (let i = trailsToRemove.length - 1; i >= 0; i--) {
+    activityTrails.splice(trailsToRemove[i], 1);
+  }
+
+  if (trailsToRemove.length > 0) {
+    console.log('[Trail] Cleaned up', trailsToRemove.length, 'old trails');
+  }
+}
+
+// Trim trails if exceeding MAX_TRAILS (remove oldest)
+function trimExcessTrails() {
+  while (activityTrails.length > MAX_TRAILS) {
+    const oldest = activityTrails.shift();
+
+    if (oldest.lineObject && typeof Graph !== 'undefined' && Graph.scene) {
+      Graph.scene().remove(oldest.lineObject);
+
+      if (oldest.lineObject.geometry) {
+        oldest.lineObject.geometry.dispose();
+      }
+      if (oldest.lineObject.material) {
+        oldest.lineObject.material.dispose();
+      }
+    }
+
+    console.log('[Trail] Trimmed excess trail');
+  }
+}
+
+// Clear all activity trails
+function clearAllTrails() {
+  activityTrails.forEach(trail => {
+    if (trail.lineObject && typeof Graph !== 'undefined' && Graph.scene) {
+      Graph.scene().remove(trail.lineObject);
+
+      if (trail.lineObject.geometry) {
+        trail.lineObject.geometry.dispose();
+      }
+      if (trail.lineObject.material) {
+        trail.lineObject.material.dispose();
+      }
+    }
+  });
+
+  activityTrails = [];
+  console.log('[Trail] Cleared all trails');
+}
+
+// =====================================================
 // TIMELINE REPLAY HELPER FUNCTIONS
 // =====================================================
 
@@ -754,6 +897,25 @@ function addActivityEntry(event, filePath, sourceType) {
   const statsPanel = document.getElementById('statistics-panel');
   if (statsPanel && statsPanel.classList.contains('visible')) {
     updateStatisticsPanel();
+  }
+
+  // Create activity trail if enabled and there's a previous entry
+  if (activityTrailsEnabled && entry.nodeId && activityEntries.length > 1) {
+    // Get the previous entry (second in array since we just unshifted new entry)
+    const previousEntry = activityEntries[1];
+    if (previousEntry && previousEntry.nodeId && previousEntry.nodeId !== entry.nodeId) {
+      // Create trail from previous to current
+      createActivityTrail(previousEntry.nodeId, entry.nodeId);
+
+      // Cleanup old trails
+      cleanupOldTrails();
+
+      // Trim if exceeding max
+      trimExcessTrails();
+
+      // Start trail animation loop if not running
+      startTrailAnimationLoop();
+    }
   }
 
   return entry;
