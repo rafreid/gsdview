@@ -30,13 +30,13 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 11: Statistics & Diff Preview** - Activity analytics and file diffs
 - [x] **Phase 12: Timeline Replay** - Scrub through activity history with playback controls
 
-### v1.2 (Active)
+### v1.2 (Complete)
 
 - [x] **Phase 13: Modal Foundation** - Double-click file nodes to open inspector modal with collapsible sections
 - [x] **Phase 14: Diff Editor** - Syntax-highlighted diff view with git/session toggle and line navigation
 - [x] **Phase 15: Structure Tree** - Parse file structure (headers, functions, classes) with click-to-jump
 - [x] **Phase 16: File Context & Metadata** - Metadata header, quick actions, activity history, related files
-- [ ] **Phase 17: Search & Polish** - Keyboard shortcuts (Esc, Ctrl+F) and content search/highlighting
+- [x] **Phase 17: Search & Polish** - Keyboard shortcuts (Esc, Ctrl+F) and content search/highlighting
 
 ## Phase Details
 
@@ -307,7 +307,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 17-01-PLAN.md — Keyboard shortcuts (Esc, Ctrl+F) and search with real-time highlighting
+- [x] 17-01-PLAN.md — Keyboard shortcuts (Esc, Ctrl+F) and search with real-time highlighting
 
 ## Progress
 
@@ -344,7 +344,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 14. Diff Editor | 1/1 | Complete | DFE-01-05 |
 | 15. Structure Tree | 2/2 | Complete | TRE-01-05 |
 | 16. File Context & Metadata | 2/2 | Complete | CTX-01-04, CTX-06-07 |
-| 17. Search & Polish | 0/1 | Pending | MOD-03-04, CTX-05 |
+| 17. Search & Polish | 1/1 | Complete | MOD-03-04, CTX-05 |
 
 ---
 *Roadmap created: 2026-01-22*

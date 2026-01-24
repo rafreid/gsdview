@@ -110,7 +110,7 @@ Requirements for milestone v1.1: Real-time Activity Visualization.
 
 ---
 
-## v1.2 Requirements (Active)
+## v1.2 Requirements (Complete)
 
 Requirements for milestone v1.2: File Deep Dive.
 
@@ -118,8 +118,8 @@ Requirements for milestone v1.2: File Deep Dive.
 
 - [x] **MOD-01**: Double-clicking a file node opens the file inspector modal
 - [x] **MOD-02**: Modal has collapsible sections for diff, structure, and context
-- [ ] **MOD-03**: Esc key closes the modal
-- [ ] **MOD-04**: Ctrl+F opens search within modal
+- [x] **MOD-03**: Esc key closes the modal
+- [x] **MOD-04**: Ctrl+F opens search within modal
 
 ### Diff Editor
 
@@ -139,13 +139,13 @@ Requirements for milestone v1.2: File Deep Dive.
 
 ### File Context
 
-- [ ] **CTX-01**: Metadata header shows file path, size, last modified date, and git status
-- [ ] **CTX-02**: Quick actions bar with "Open in Editor" button
-- [ ] **CTX-03**: Quick actions bar with "Copy Path" button
-- [ ] **CTX-04**: Quick actions bar with "Copy Content" button
-- [ ] **CTX-05**: Search input filters/highlights content in diff view
-- [ ] **CTX-06**: Recent activity section shows this file's changes from activity log
-- [ ] **CTX-07**: Related files section shows files that import/reference this file
+- [x] **CTX-01**: Metadata header shows file path, size, last modified date, and git status
+- [x] **CTX-02**: Quick actions bar with "Open in Editor" button
+- [x] **CTX-03**: Quick actions bar with "Copy Path" button
+- [x] **CTX-04**: Quick actions bar with "Copy Content" button
+- [x] **CTX-05**: Search input filters/highlights content in diff view
+- [x] **CTX-06**: Recent activity section shows this file's changes from activity log
+- [x] **CTX-07**: Related files section shows files that import/reference this file
 
 ---
 
@@ -242,8 +242,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | MOD-01 | Phase 13 | Complete |
 | MOD-02 | Phase 13 | Complete |
-| MOD-03 | Phase 17 | Pending |
-| MOD-04 | Phase 17 | Pending |
+| MOD-03 | Phase 17 | Complete |
+| MOD-04 | Phase 17 | Complete |
 | DFE-01 | Phase 14 | Complete |
 | DFE-02 | Phase 14 | Complete |
 | DFE-03 | Phase 14 | Complete |
@@ -254,13 +254,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRE-03 | Phase 15 | Complete |
 | TRE-04 | Phase 15 | Complete |
 | TRE-05 | Phase 15 | Complete |
-| CTX-01 | Phase 16 | Pending |
-| CTX-02 | Phase 16 | Pending |
-| CTX-03 | Phase 16 | Pending |
-| CTX-04 | Phase 16 | Pending |
-| CTX-05 | Phase 17 | Pending |
-| CTX-06 | Phase 16 | Pending |
-| CTX-07 | Phase 16 | Pending |
+| CTX-01 | Phase 16 | Complete |
+| CTX-02 | Phase 16 | Complete |
+| CTX-03 | Phase 16 | Complete |
+| CTX-04 | Phase 16 | Complete |
+| CTX-05 | Phase 17 | Complete |
+| CTX-06 | Phase 16 | Complete |
+| CTX-07 | Phase 16 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 18 total
