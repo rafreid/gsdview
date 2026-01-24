@@ -83079,6 +83079,267 @@ ${node.goal}`;
     }
     return prefix + highlighted;
   }
+  function parseFileStructure(content, filename) {
+    if (!content || !filename) return [];
+    const ext = filename.substring(filename.lastIndexOf(".")).toLowerCase();
+    if ([".md", ".markdown"].includes(ext)) {
+      return parseMarkdownStructure(content);
+    }
+    if ([".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs"].includes(ext)) {
+      return parseCodeStructure(content);
+    }
+    if ([".json"].includes(ext)) {
+      return parseConfigStructure(content, "json");
+    }
+    if ([".yaml", ".yml"].includes(ext)) {
+      return parseConfigStructure(content, "yaml");
+    }
+    return [];
+  }
+  function parseMarkdownStructure(content) {
+    if (!content) return [];
+    const items = [];
+    const lines = content.split("\n");
+    for (let i2 = 0; i2 < lines.length; i2++) {
+      const line = lines[i2];
+      const lineNum = i2 + 1;
+      const headerMatch = line.match(/^(#{1,6})\s+(.+)$/);
+      if (headerMatch) {
+        const depth2 = headerMatch[1].length;
+        const name = headerMatch[2].trim();
+        items.push({
+          type: "header",
+          name,
+          line: lineNum,
+          depth: depth2
+        });
+        continue;
+      }
+      const listMatch = line.match(/^(\s*)([-*]|\d+\.)\s+(.+)$/);
+      if (listMatch) {
+        const indent = listMatch[1].length;
+        const depth2 = Math.floor(indent / 2) + 1;
+        const name = listMatch[3].trim();
+        items.push({
+          type: "list",
+          name: name.substring(0, 50) + (name.length > 50 ? "..." : ""),
+          line: lineNum,
+          depth: depth2
+        });
+        continue;
+      }
+      const codeBlockMatch = line.match(/^```(\w*)$/);
+      if (codeBlockMatch) {
+        const language = codeBlockMatch[1] || "code";
+        items.push({
+          type: "codeblock",
+          name: language,
+          line: lineNum,
+          depth: 0
+        });
+        continue;
+      }
+    }
+    return items;
+  }
+  function parseCodeStructure(content) {
+    if (!content) return [];
+    const items = [];
+    const lines = content.split("\n");
+    let insideClass = false;
+    let braceDepth = 0;
+    let classStartBraces = 0;
+    for (let i2 = 0; i2 < lines.length; i2++) {
+      const line = lines[i2];
+      const lineNum = i2 + 1;
+      const trimmedLine = line.trim();
+      const openBraces = (line.match(/\{/g) || []).length;
+      const closeBraces = (line.match(/\}/g) || []).length;
+      braceDepth += openBraces - closeBraces;
+      if (insideClass && braceDepth < classStartBraces) {
+        insideClass = false;
+      }
+      const importMatch = trimmedLine.match(/^import\s+(?:(\{[^}]+\})|(\*\s+as\s+\w+)|(\w+)).*from\s+['"]([^'"]+)['"]/);
+      if (importMatch) {
+        const imported = importMatch[1] || importMatch[2] || importMatch[3];
+        const source = importMatch[4];
+        items.push({
+          type: "import",
+          name: `${imported} from '${source}'`,
+          line: lineNum,
+          depth: 0
+        });
+        continue;
+      }
+      const simpleImportMatch = trimmedLine.match(/^import\s+['"]([^'"]+)['"]/);
+      if (simpleImportMatch) {
+        items.push({
+          type: "import",
+          name: simpleImportMatch[1],
+          line: lineNum,
+          depth: 0
+        });
+        continue;
+      }
+      const classMatch = trimmedLine.match(/^(?:export\s+)?(?:default\s+)?class\s+(\w+)/);
+      if (classMatch) {
+        items.push({
+          type: "class",
+          name: classMatch[1],
+          line: lineNum,
+          depth: 0
+        });
+        insideClass = true;
+        classStartBraces = braceDepth;
+        continue;
+      }
+      const funcMatch = trimmedLine.match(/^(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\(/);
+      if (funcMatch) {
+        items.push({
+          type: "function",
+          name: funcMatch[1],
+          line: lineNum,
+          depth: insideClass ? 1 : 0
+        });
+        continue;
+      }
+      const arrowMatch = trimmedLine.match(/^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(/);
+      if (arrowMatch) {
+        items.push({
+          type: "function",
+          name: arrowMatch[1],
+          line: lineNum,
+          depth: insideClass ? 1 : 0
+        });
+        continue;
+      }
+      const arrowFuncMatch = trimmedLine.match(/^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\w*\s*=>/);
+      if (arrowFuncMatch) {
+        items.push({
+          type: "function",
+          name: arrowFuncMatch[1],
+          line: lineNum,
+          depth: insideClass ? 1 : 0
+        });
+        continue;
+      }
+      const exportDefaultMatch = trimmedLine.match(/^export\s+default\s+(\w+)/);
+      if (exportDefaultMatch && !classMatch && !funcMatch) {
+        items.push({
+          type: "export",
+          name: `default ${exportDefaultMatch[1]}`,
+          line: lineNum,
+          depth: 0
+        });
+        continue;
+      }
+      const exportVarMatch = trimmedLine.match(/^export\s+(?:const|let|var)\s+(\w+)\s*=/);
+      if (exportVarMatch && !arrowMatch && !arrowFuncMatch) {
+        if (!trimmedLine.match(/=\s*(?:async\s*)?\(/)) {
+          items.push({
+            type: "export",
+            name: exportVarMatch[1],
+            line: lineNum,
+            depth: 0
+          });
+          continue;
+        }
+      }
+      if (insideClass) {
+        const methodMatch = trimmedLine.match(/^(?:async\s+)?(\w+)\s*\([^)]*\)\s*\{/);
+        if (methodMatch && methodMatch[1] !== "if" && methodMatch[1] !== "for" && methodMatch[1] !== "while") {
+          items.push({
+            type: "function",
+            name: methodMatch[1],
+            line: lineNum,
+            depth: 1
+          });
+          continue;
+        }
+      }
+    }
+    return items;
+  }
+  function parseConfigStructure(content, format2) {
+    if (!content) return [];
+    if (format2 === "json") {
+      return parseJSONStructure(content);
+    }
+    if (format2 === "yaml") {
+      return parseYAMLStructure(content);
+    }
+    return [];
+  }
+  function parseJSONStructure(content) {
+    const items = [];
+    try {
+      let findKeyLine = function(key, startLine = 0) {
+        const keyPattern = new RegExp(`"${key}"\\s*:`);
+        for (let i2 = startLine; i2 < lines.length; i2++) {
+          if (keyPattern.test(lines[i2])) {
+            return i2 + 1;
+          }
+        }
+        return startLine + 1;
+      }, extractKeys = function(obj, path = "", depth2 = 0, lastLine = 0) {
+        if (typeof obj !== "object" || obj === null) return;
+        const keys = Array.isArray(obj) ? [] : Object.keys(obj);
+        for (const key of keys) {
+          const lineNum = findKeyLine(key, lastLine);
+          const fullPath = path ? `${path}.${key}` : key;
+          items.push({
+            type: "key",
+            name: key,
+            line: lineNum,
+            depth: depth2
+          });
+          if (typeof obj[key] === "object" && obj[key] !== null && depth2 < 5) {
+            extractKeys(obj[key], fullPath, depth2 + 1, lineNum);
+          }
+        }
+      };
+      const parsed = JSON.parse(content);
+      const lines = content.split("\n");
+      extractKeys(parsed);
+    } catch (e2) {
+      return [];
+    }
+    return items;
+  }
+  function parseYAMLStructure(content) {
+    const items = [];
+    const lines = content.split("\n");
+    for (let i2 = 0; i2 < lines.length; i2++) {
+      const line = lines[i2];
+      const lineNum = i2 + 1;
+      if (!line.trim() || line.trim().startsWith("#")) continue;
+      const keyMatch = line.match(/^(\s*)([a-zA-Z_][a-zA-Z0-9_-]*):\s*/);
+      if (keyMatch) {
+        const indent = keyMatch[1].length;
+        const depth2 = Math.floor(indent / 2);
+        const name = keyMatch[2];
+        items.push({
+          type: "key",
+          name,
+          line: lineNum,
+          depth: depth2
+        });
+      }
+      const arrayKeyMatch = line.match(/^(\s*)-\s+([a-zA-Z_][a-zA-Z0-9_-]*):\s*/);
+      if (arrayKeyMatch) {
+        const indent = arrayKeyMatch[1].length;
+        const depth2 = Math.floor(indent / 2) + 1;
+        const name = arrayKeyMatch[2];
+        items.push({
+          type: "key",
+          name,
+          line: lineNum,
+          depth: depth2
+        });
+      }
+    }
+    return items;
+  }
   function renderDiffView(diffResult, filename) {
     if (!diffResult) return '<div class="diff-status">Unable to load diff</div>';
     if (diffResult.error) {
@@ -83308,6 +83569,8 @@ ${node.goal}`;
       }
     }
     await populateInspectorDiff();
+    await populateInspectorStructure();
+    await populateInspectorContext();
     console.log("[Inspector] Opened for:", node.name, node.path);
   }
   function getInspectorFilePath(node) {
@@ -83385,6 +83648,205 @@ ${node.goal}`;
         diffSection.innerHTML = '<div class="diff-status">Error loading session diff</div>';
       }
     }
+  }
+  async function populateInspectorStructure() {
+    if (!inspectorNode || inspectorNode.type !== "file") return;
+    const structureSection = document.querySelector("#section-structure .section-content");
+    if (!structureSection) return;
+    const filePath = getInspectorFilePath(inspectorNode);
+    if (!filePath) {
+      structureSection.innerHTML = '<p class="structure-empty">Could not determine file path</p>';
+      return;
+    }
+    try {
+      const content = await window.electronAPI.readFileContent(filePath);
+      const items = parseFileStructure(content, inspectorNode.name);
+      if (items.length === 0) {
+        structureSection.innerHTML = '<p class="structure-empty">No structure found in this file</p>';
+        return;
+      }
+      structureSection.innerHTML = `<div class="structure-tree">${renderStructureTree(items)}</div>`;
+    } catch (err) {
+      console.error("[Structure] Error loading:", err);
+      structureSection.innerHTML = `<p class="structure-empty">Error loading file structure</p>`;
+    }
+  }
+  function renderStructureTree(items, parentDepth = -1) {
+    const iconMap = {
+      header: "H",
+      function: "f",
+      class: "C",
+      import: "i",
+      export: "e",
+      key: "k",
+      list: "-",
+      codeblock: "<>"
+    };
+    let html = "";
+    let i2 = 0;
+    while (i2 < items.length) {
+      const item = items[i2];
+      const hasChildren = i2 + 1 < items.length && items[i2 + 1].depth > item.depth;
+      const children2 = [];
+      if (hasChildren) {
+        let j2 = i2 + 1;
+        while (j2 < items.length && items[j2].depth > item.depth) {
+          children2.push(items[j2]);
+          j2++;
+        }
+      }
+      const icon = iconMap[item.type] || "?";
+      const toggleClass = hasChildren ? "" : "no-children";
+      const indentStyle = `padding-left: ${item.depth * 12}px`;
+      html += `<div class="structure-item" data-line="${item.line}" style="${indentStyle}">
+      <span class="structure-toggle ${toggleClass}">&#9654;</span>
+      <span class="structure-icon ${item.type}">${icon}</span>
+      <span class="structure-name">${escapeHtml(item.name)}</span>
+      <span class="structure-line">:${item.line}</span>
+    </div>`;
+      if (children2.length > 0) {
+        html += `<div class="structure-children">${renderStructureTree(children2, item.depth)}</div>`;
+      }
+      i2 += 1 + children2.length;
+    }
+    return html;
+  }
+  async function populateInspectorContext() {
+    if (!inspectorNode || inspectorNode.type !== "file") return;
+    const contextSection = document.querySelector("#section-context .section-content");
+    if (!contextSection) return;
+    contextSection.innerHTML = '<div class="context-loading">Loading file metadata...</div>';
+    const fullPath = getInspectorFilePath(inspectorNode);
+    if (!fullPath) {
+      contextSection.innerHTML = '<div class="context-error">Unable to determine file path</div>';
+      return;
+    }
+    try {
+      let fileStats = null;
+      if (window.electronAPI && window.electronAPI.getFileStats) {
+        fileStats = await window.electronAPI.getFileStats(fullPath);
+      }
+      let gitStatus = "clean";
+      if (gitStatusData && inspectorNode.path) {
+        const normalizedPath = inspectorNode.path.replace(/\\/g, "/");
+        let fullRelativePath;
+        if (inspectorNode.sourceType === "planning") {
+          fullRelativePath = ".planning/" + normalizedPath;
+        } else if (inspectorNode.sourceType === "src") {
+          fullRelativePath = "src/" + normalizedPath;
+        } else {
+          fullRelativePath = normalizedPath;
+        }
+        if (gitStatusData.staged && gitStatusData.staged.some((p2) => p2.endsWith(normalizedPath) || p2 === fullRelativePath)) {
+          gitStatus = "staged";
+        } else if (gitStatusData.modified && gitStatusData.modified.some((p2) => p2.endsWith(normalizedPath) || p2 === fullRelativePath)) {
+          gitStatus = "modified";
+        } else if (gitStatusData.untracked && gitStatusData.untracked.some((p2) => p2.endsWith(normalizedPath) || p2 === fullRelativePath)) {
+          gitStatus = "untracked";
+        }
+      }
+      let html = `
+      <div class="metadata-header">
+        <span class="metadata-label">File Path</span>
+        <span class="metadata-value">${escapeHtml(fullPath)}</span>
+
+        <span class="metadata-label">File Size</span>
+        <span class="metadata-value">${fileStats ? formatFileSize(fileStats.size) : "Unknown"}</span>
+
+        <span class="metadata-label">Last Modified</span>
+        <span class="metadata-value">${fileStats ? new Date(fileStats.mtime).toLocaleString() : "Unknown"}</span>
+
+        <span class="metadata-label">Git Status</span>
+        <span class="metadata-value">
+          <span class="git-status-badge ${gitStatus}">${gitStatus.charAt(0).toUpperCase() + gitStatus.slice(1)}</span>
+        </span>
+      </div>
+    `;
+      html += `
+      <div class="quick-actions">
+        <button class="quick-action-btn primary" id="action-open-editor">
+          <span class="icon">\u25B6</span>
+          <span>Open in Editor</span>
+        </button>
+        <button class="quick-action-btn secondary" id="action-copy-path">
+          <span class="icon">\u{1F4CB}</span>
+          <span>Copy Path</span>
+        </button>
+        <button class="quick-action-btn secondary" id="action-copy-content">
+          <span class="icon">\u{1F4C4}</span>
+          <span>Copy Content</span>
+        </button>
+      </div>
+    `;
+      contextSection.innerHTML = html;
+      const openEditorBtn = document.getElementById("action-open-editor");
+      const copyPathBtn = document.getElementById("action-copy-path");
+      const copyContentBtn = document.getElementById("action-copy-content");
+      if (openEditorBtn) {
+        openEditorBtn.addEventListener("click", async () => {
+          if (window.electronAPI && window.electronAPI.openFile) {
+            const result = await window.electronAPI.openFile(fullPath);
+            if (result.error) {
+              showToast("Error opening file", true);
+              console.error("Error opening file:", result.error);
+            } else {
+              showToast("File opened in editor");
+            }
+          } else {
+            showToast("Open file not available", true);
+          }
+        });
+      }
+      if (copyPathBtn) {
+        copyPathBtn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(fullPath);
+            showToast("Path copied to clipboard");
+          } catch (err) {
+            showToast("Failed to copy path", true);
+            console.error("Clipboard error:", err);
+          }
+        });
+      }
+      if (copyContentBtn) {
+        copyContentBtn.addEventListener("click", async () => {
+          try {
+            if (window.electronAPI && window.electronAPI.readFileContent) {
+              const content = await window.electronAPI.readFileContent(fullPath);
+              await navigator.clipboard.writeText(content || "");
+              showToast("Content copied to clipboard");
+            } else {
+              showToast("Read file not available", true);
+            }
+          } catch (err) {
+            showToast("Failed to copy content", true);
+            console.error("Error copying content:", err);
+          }
+        });
+      }
+    } catch (err) {
+      console.error("[Context] Error loading metadata:", err);
+      contextSection.innerHTML = '<div class="context-error">Error loading file metadata</div>';
+    }
+  }
+  function showToast(message, isError = false) {
+    const existingToast = document.querySelector(".toast");
+    if (existingToast) {
+      existingToast.remove();
+    }
+    const toast = document.createElement("div");
+    toast.className = `toast ${isError ? "error" : ""}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add("visible");
+    }, 10);
+    setTimeout(() => {
+      toast.classList.remove("visible");
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
+    }, 3e3);
   }
   function computeSessionDiff(oldContent, newContent) {
     const oldLines = (oldContent || "").split("\n");
@@ -83474,6 +83936,39 @@ ${node.goal}`;
       const container2 = e2.target.closest(".diff-line-container");
       if (container2) {
         container2.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  });
+  document.querySelector("#section-structure .section-content").addEventListener("click", (e2) => {
+    const structureItem = e2.target.closest(".structure-item");
+    if (!structureItem) return;
+    const lineNum = parseInt(structureItem.dataset.line, 10);
+    if (e2.target.classList.contains("structure-toggle")) {
+      const toggle = e2.target;
+      const childrenContainer = structureItem.nextElementSibling;
+      if (childrenContainer && childrenContainer.classList.contains("structure-children")) {
+        toggle.classList.toggle("expanded");
+        childrenContainer.classList.toggle("expanded");
+      }
+      return;
+    }
+    const diffContent = document.querySelector("#section-diff .section-content .diff-content");
+    if (diffContent && lineNum) {
+      const lineNumEl = diffContent.querySelector(`.diff-line-number[data-line="${lineNum}"]`);
+      if (lineNumEl) {
+        document.querySelectorAll(".structure-item.active").forEach((item) => {
+          item.classList.remove("active");
+        });
+        structureItem.classList.add("active");
+        const container2 = lineNumEl.closest(".diff-line-container");
+        if (container2) {
+          container2.scrollIntoView({ behavior: "smooth", block: "center" });
+          container2.style.transition = "background 0.15s";
+          container2.style.background = "rgba(78, 205, 196, 0.3)";
+          setTimeout(() => {
+            container2.style.background = "";
+          }, 1500);
+        }
       }
     }
   });

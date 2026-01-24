@@ -1636,6 +1636,150 @@
       color: #666;
       font-style: italic;
     }
+
+    /* Context Section - Metadata Header and Quick Actions */
+    .metadata-header {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px 16px;
+      padding: 12px;
+      border-bottom: 1px solid #333;
+      background: rgba(42, 42, 78, 0.3);
+    }
+
+    .metadata-label {
+      color: #888;
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .metadata-value {
+      color: #ccc;
+      font-size: 13px;
+    }
+
+    .git-status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .git-status-badge.staged {
+      background: rgba(46, 204, 113, 0.2);
+      color: #2ECC71;
+    }
+
+    .git-status-badge.modified {
+      background: rgba(243, 156, 18, 0.2);
+      color: #F39C12;
+    }
+
+    .git-status-badge.untracked {
+      background: rgba(155, 89, 182, 0.2);
+      color: #9B59B6;
+    }
+
+    .git-status-badge.clean {
+      background: rgba(136, 136, 136, 0.2);
+      color: #888;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      border-bottom: 1px solid #333;
+      background: rgba(26, 26, 46, 0.3);
+    }
+
+    .quick-action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+
+    .quick-action-btn.primary {
+      background: #4ECDC4;
+      color: #1a1a2e;
+      font-weight: 600;
+    }
+
+    .quick-action-btn.primary:hover {
+      background: #5ddfd6;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
+    }
+
+    .quick-action-btn.secondary {
+      background: rgba(136, 136, 136, 0.2);
+      color: #ccc;
+      border: 1px solid #555;
+    }
+
+    .quick-action-btn.secondary:hover {
+      background: rgba(136, 136, 136, 0.3);
+      border-color: #888;
+      color: #fff;
+    }
+
+    .quick-action-btn .icon {
+      font-size: 14px;
+    }
+
+    .context-loading {
+      padding: 20px;
+      text-align: center;
+      color: #666;
+      font-style: italic;
+    }
+
+    .context-error {
+      padding: 20px;
+      text-align: center;
+      color: #E74C3C;
+      font-style: italic;
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(78, 205, 196, 0.95);
+      color: #1a1a2e;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 1002;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .toast.visible {
+      opacity: 1;
+    }
+
+    .toast.error {
+      background: rgba(231, 76, 60, 0.95);
+      color: #fff;
+    }
   </style>
 </head>
 <body>

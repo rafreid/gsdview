@@ -2516,6 +2516,9 @@ async function openFileInspector(node) {
   // Populate structure tree section
   await populateInspectorStructure();
 
+  // Populate context section
+  await populateInspectorContext();
+
   console.log('[Inspector] Opened for:', node.name, node.path);
 }
 
@@ -2696,6 +2699,173 @@ function renderStructureTree(items, parentDepth = -1) {
   }
 
   return html;
+}
+
+// Populate the context section with metadata, quick actions, activity, and related files
+async function populateInspectorContext() {
+  if (!inspectorNode || inspectorNode.type !== 'file') return;
+
+  const contextSection = document.querySelector('#section-context .section-content');
+  if (!contextSection) return;
+
+  contextSection.innerHTML = '<div class="context-loading">Loading file metadata...</div>';
+
+  const fullPath = getInspectorFilePath(inspectorNode);
+  if (!fullPath) {
+    contextSection.innerHTML = '<div class="context-error">Unable to determine file path</div>';
+    return;
+  }
+
+  try {
+    // Fetch file stats
+    let fileStats = null;
+    if (window.electronAPI && window.electronAPI.getFileStats) {
+      fileStats = await window.electronAPI.getFileStats(fullPath);
+    }
+
+    // Determine git status for this file
+    let gitStatus = 'clean';
+    if (gitStatusData && inspectorNode.path) {
+      const normalizedPath = inspectorNode.path.replace(/\\/g, '/');
+      let fullRelativePath;
+      if (inspectorNode.sourceType === 'planning') {
+        fullRelativePath = '.planning/' + normalizedPath;
+      } else if (inspectorNode.sourceType === 'src') {
+        fullRelativePath = 'src/' + normalizedPath;
+      } else {
+        fullRelativePath = normalizedPath;
+      }
+
+      if (gitStatusData.staged && gitStatusData.staged.some(p => p.endsWith(normalizedPath) || p === fullRelativePath)) {
+        gitStatus = 'staged';
+      } else if (gitStatusData.modified && gitStatusData.modified.some(p => p.endsWith(normalizedPath) || p === fullRelativePath)) {
+        gitStatus = 'modified';
+      } else if (gitStatusData.untracked && gitStatusData.untracked.some(p => p.endsWith(normalizedPath) || p === fullRelativePath)) {
+        gitStatus = 'untracked';
+      }
+    }
+
+    // Build metadata header HTML
+    let html = `
+      <div class="metadata-header">
+        <span class="metadata-label">File Path</span>
+        <span class="metadata-value">${escapeHtml(fullPath)}</span>
+
+        <span class="metadata-label">File Size</span>
+        <span class="metadata-value">${fileStats ? formatFileSize(fileStats.size) : 'Unknown'}</span>
+
+        <span class="metadata-label">Last Modified</span>
+        <span class="metadata-value">${fileStats ? new Date(fileStats.mtime).toLocaleString() : 'Unknown'}</span>
+
+        <span class="metadata-label">Git Status</span>
+        <span class="metadata-value">
+          <span class="git-status-badge ${gitStatus}">${gitStatus.charAt(0).toUpperCase() + gitStatus.slice(1)}</span>
+        </span>
+      </div>
+    `;
+
+    // Build quick actions bar HTML
+    html += `
+      <div class="quick-actions">
+        <button class="quick-action-btn primary" id="action-open-editor">
+          <span class="icon">▶</span>
+          <span>Open in Editor</span>
+        </button>
+        <button class="quick-action-btn secondary" id="action-copy-path">
+          <span class="icon">📋</span>
+          <span>Copy Path</span>
+        </button>
+        <button class="quick-action-btn secondary" id="action-copy-content">
+          <span class="icon">📄</span>
+          <span>Copy Content</span>
+        </button>
+      </div>
+    `;
+
+    contextSection.innerHTML = html;
+
+    // Attach event listeners for quick actions
+    const openEditorBtn = document.getElementById('action-open-editor');
+    const copyPathBtn = document.getElementById('action-copy-path');
+    const copyContentBtn = document.getElementById('action-copy-content');
+
+    if (openEditorBtn) {
+      openEditorBtn.addEventListener('click', async () => {
+        if (window.electronAPI && window.electronAPI.openFile) {
+          const result = await window.electronAPI.openFile(fullPath);
+          if (result.error) {
+            showToast('Error opening file', true);
+            console.error('Error opening file:', result.error);
+          } else {
+            showToast('File opened in editor');
+          }
+        } else {
+          showToast('Open file not available', true);
+        }
+      });
+    }
+
+    if (copyPathBtn) {
+      copyPathBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(fullPath);
+          showToast('Path copied to clipboard');
+        } catch (err) {
+          showToast('Failed to copy path', true);
+          console.error('Clipboard error:', err);
+        }
+      });
+    }
+
+    if (copyContentBtn) {
+      copyContentBtn.addEventListener('click', async () => {
+        try {
+          if (window.electronAPI && window.electronAPI.readFileContent) {
+            const content = await window.electronAPI.readFileContent(fullPath);
+            await navigator.clipboard.writeText(content || '');
+            showToast('Content copied to clipboard');
+          } else {
+            showToast('Read file not available', true);
+          }
+        } catch (err) {
+          showToast('Failed to copy content', true);
+          console.error('Error copying content:', err);
+        }
+      });
+    }
+
+  } catch (err) {
+    console.error('[Context] Error loading metadata:', err);
+    contextSection.innerHTML = '<div class="context-error">Error loading file metadata</div>';
+  }
+}
+
+// Show toast notification
+function showToast(message, isError = false) {
+  // Remove existing toast if any
+  const existingToast = document.querySelector('.toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+
+  // Create and show new toast
+  const toast = document.createElement('div');
+  toast.className = `toast ${isError ? 'error' : ''}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  // Trigger animation
+  setTimeout(() => {
+    toast.classList.add('visible');
+  }, 10);
+
+  // Auto-hide after 3 seconds
+  setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 3000);
 }
 
 // Compute a simple line-by-line session diff
