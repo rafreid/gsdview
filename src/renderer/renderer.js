@@ -287,6 +287,44 @@ async function loadHeatDecaySetting() {
   }
 }
 
+// Format flash duration in milliseconds to human-readable string
+function formatFlashDuration(ms) {
+  if (ms < 1000) return `${ms}ms`;
+  return `${(ms / 1000).toFixed(1)}s`.replace('.0s', 's');
+}
+
+// Format flash intensity multiplier to display string
+function formatFlashIntensity(value) {
+  return `${(value / 100).toFixed(1)}x`.replace('.0x', 'x');
+}
+
+// Load flash settings from store
+async function loadFlashSettings() {
+  try {
+    const savedDuration = await window.electronAPI.store.get('flashDuration');
+    if (savedDuration && typeof savedDuration === 'number') {
+      flashDuration = savedDuration;
+      const slider = document.getElementById('flash-duration-slider');
+      const valueDisplay = document.getElementById('flash-duration-value');
+      if (slider) slider.value = savedDuration;
+      if (valueDisplay) valueDisplay.textContent = formatFlashDuration(savedDuration);
+      // Update CSS custom property for tree flash animations
+      document.documentElement.style.setProperty('--flash-duration', `${savedDuration}ms`);
+    }
+
+    const savedIntensity = await window.electronAPI.store.get('flashIntensity');
+    if (savedIntensity && typeof savedIntensity === 'number') {
+      flashIntensity = savedIntensity / 100; // Convert from percentage to multiplier
+      const slider = document.getElementById('flash-intensity-slider');
+      const valueDisplay = document.getElementById('flash-intensity-value');
+      if (slider) slider.value = savedIntensity;
+      if (valueDisplay) valueDisplay.textContent = formatFlashIntensity(savedIntensity);
+    }
+  } catch (err) {
+    console.log('[Flash] Using default flash settings');
+  }
+}
+
 // Color interpolation helper for flash animation
 function lerpColor(color1, color2, t) {
   const r1 = (color1 >> 16) & 0xFF, g1 = (color1 >> 8) & 0xFF, b1 = color1 & 0xFF;
@@ -5133,6 +5171,46 @@ document.getElementById('heat-decay-slider')?.addEventListener('input', async (e
 
 // Load heat decay setting on startup
 loadHeatDecaySetting();
+
+// Flash duration slider handler
+document.getElementById('flash-duration-slider')?.addEventListener('input', async (e) => {
+  const ms = parseInt(e.target.value, 10);
+  flashDuration = ms;
+
+  // Update display
+  const valueDisplay = document.getElementById('flash-duration-value');
+  if (valueDisplay) valueDisplay.textContent = formatFlashDuration(ms);
+
+  // Update CSS custom property for tree flash animations
+  document.documentElement.style.setProperty('--flash-duration', `${ms}ms`);
+
+  // Save to store
+  try {
+    await window.electronAPI.store.set('flashDuration', ms);
+  } catch (err) {
+    console.log('[Flash] Could not save duration setting:', err);
+  }
+});
+
+// Flash intensity slider handler
+document.getElementById('flash-intensity-slider')?.addEventListener('input', async (e) => {
+  const value = parseInt(e.target.value, 10);
+  flashIntensity = value / 100; // Convert from percentage to multiplier
+
+  // Update display
+  const valueDisplay = document.getElementById('flash-intensity-value');
+  if (valueDisplay) valueDisplay.textContent = formatFlashIntensity(value);
+
+  // Save to store
+  try {
+    await window.electronAPI.store.set('flashIntensity', value);
+  } catch (err) {
+    console.log('[Flash] Could not save intensity setting:', err);
+  }
+});
+
+// Load flash settings on startup
+loadFlashSettings();
 
 // Modal search event listeners
 document.getElementById('modal-search-input')?.addEventListener('input', (e) => {

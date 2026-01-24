@@ -12,6 +12,10 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --flash-duration: 2000ms;
+    }
+
     html, body {
       width: 100%;
       height: 100%;
@@ -497,7 +501,7 @@
     }
 
     .tree-flash {
-      animation: tree-flash 2s ease-out;
+      animation: tree-flash var(--flash-duration) ease-out;
       color: #1a1a2e !important; /* Dark text during flash for contrast */
     }
 
@@ -582,17 +586,17 @@
     }
 
     .tree-flash-created {
-      animation: tree-flash-created 2s ease-out;
+      animation: tree-flash-created var(--flash-duration) ease-out;
       color: #1a1a2e !important;
     }
 
     .tree-flash-modified {
-      animation: tree-flash-modified 2s ease-out;
+      animation: tree-flash-modified var(--flash-duration) ease-out;
       color: #1a1a2e !important;
     }
 
     .tree-flash-deleted {
-      animation: tree-flash-deleted 2s ease-out;
+      animation: tree-flash-deleted var(--flash-duration) ease-out;
       color: #1a1a2e !important;
     }
 
