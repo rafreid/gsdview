@@ -104,7 +104,8 @@ function buildGraph(projectData) {
         name: dirNode.name,
         type: nodeType,
         path: dirNode.path,
-        extension: dirNode.extension
+        extension: dirNode.extension,
+        sourceType: dirNode.sourceType
       });
     }
 

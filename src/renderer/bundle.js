@@ -81837,6 +81837,9 @@ var<${access}> ${name} : ${structName};`;
   var isTimelinePlaying = false;
   var playbackInterval = null;
   var PLAYBACK_SPEED = 500;
+  var currentSearchQuery = "";
+  var searchMatches = [];
+  var currentMatchIndex = -1;
   var flashingNodes = /* @__PURE__ */ new Map();
   var highlightedNodeId = null;
   var lastClickTime = 0;
@@ -83592,8 +83595,134 @@ ${node.goal}`;
       overlay.classList.add("hidden");
     }, 200);
     modal.classList.add("hidden");
+    closeModalSearch();
     inspectorNode = null;
     console.log("[Inspector] Closed");
+  }
+  function openModalSearch() {
+    const searchContainer = document.getElementById("modal-search-container");
+    const searchInput = document.getElementById("modal-search-input");
+    if (!searchContainer || !searchInput) return;
+    searchContainer.classList.remove("hidden");
+    searchInput.focus();
+    searchInput.select();
+    if (searchInput.value) {
+      performSearch(searchInput.value);
+    }
+    console.log("[Search] Opened");
+  }
+  function closeModalSearch() {
+    const searchContainer = document.getElementById("modal-search-container");
+    const searchInput = document.getElementById("modal-search-input");
+    if (!searchContainer || !searchInput) return;
+    searchContainer.classList.add("hidden");
+    searchInput.value = "";
+    currentSearchQuery = "";
+    searchMatches = [];
+    currentMatchIndex = -1;
+    clearSearchHighlights();
+    console.log("[Search] Closed");
+  }
+  function performSearch(query) {
+    if (!query || query.trim().length === 0) {
+      clearSearchHighlights();
+      updateSearchInfo(0, 0);
+      return;
+    }
+    currentSearchQuery = query.trim();
+    const diffSection = document.querySelector("#section-diff .section-content");
+    if (!diffSection) {
+      console.log("[Search] No diff content to search");
+      return;
+    }
+    clearSearchHighlights();
+    const diffLines = diffSection.querySelectorAll(".diff-line-content");
+    searchMatches = [];
+    const lowerQuery = currentSearchQuery.toLowerCase();
+    diffLines.forEach((line, lineIndex) => {
+      const textContent = line.textContent;
+      const lowerText = textContent.toLowerCase();
+      let startIndex = 0;
+      while (true) {
+        const foundIndex = lowerText.indexOf(lowerQuery, startIndex);
+        if (foundIndex === -1) break;
+        searchMatches.push({
+          lineElement: line,
+          lineIndex,
+          startIndex: foundIndex,
+          length: currentSearchQuery.length
+        });
+        startIndex = foundIndex + 1;
+      }
+    });
+    const matchCount = searchMatches.length;
+    if (matchCount > 0) {
+      highlightSearchMatches();
+      currentMatchIndex = 0;
+      scrollToMatch(0);
+    }
+    updateSearchInfo(currentMatchIndex + 1, matchCount);
+    console.log(`[Search] Found ${matchCount} matches for "${currentSearchQuery}"`);
+  }
+  function highlightSearchMatches() {
+    searchMatches.forEach((match, index5) => {
+      const line = match.lineElement;
+      const textContent = line.textContent;
+      const before = textContent.substring(0, match.startIndex);
+      const matchText = textContent.substring(match.startIndex, match.startIndex + match.length);
+      const after = textContent.substring(match.startIndex + match.length);
+      const isCurrent = index5 === currentMatchIndex;
+      const markClass = isCurrent ? "search-match current" : "search-match";
+      const newHTML = `${escapeHtml(before)}<mark class="${markClass}" data-match-index="${index5}">${escapeHtml(matchText)}</mark>${escapeHtml(after)}`;
+      line.innerHTML = newHTML;
+    });
+  }
+  function clearSearchHighlights() {
+    const diffSection = document.querySelector("#section-diff .section-content");
+    if (!diffSection) return;
+    const marks = diffSection.querySelectorAll("mark.search-match");
+    marks.forEach((mark) => {
+      const parent = mark.parentElement;
+      if (parent) {
+        parent.textContent = parent.textContent;
+      }
+    });
+  }
+  function updateSearchInfo(current, total) {
+    const infoSpan = document.getElementById("modal-search-info");
+    const prevBtn = document.getElementById("search-prev");
+    const nextBtn = document.getElementById("search-next");
+    if (!infoSpan) return;
+    if (total === 0) {
+      infoSpan.textContent = "No matches";
+    } else {
+      infoSpan.textContent = `${current} of ${total}`;
+    }
+    if (prevBtn) prevBtn.disabled = total === 0;
+    if (nextBtn) nextBtn.disabled = total === 0;
+  }
+  function scrollToMatch(index5) {
+    if (index5 < 0 || index5 >= searchMatches.length) return;
+    currentMatchIndex = index5;
+    const allMarks = document.querySelectorAll("mark.search-match");
+    allMarks.forEach((mark, i2) => {
+      mark.classList.toggle("current", i2 === currentMatchIndex);
+    });
+    const match = searchMatches[currentMatchIndex];
+    if (match && match.lineElement) {
+      match.lineElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    updateSearchInfo(currentMatchIndex + 1, searchMatches.length);
+  }
+  function nextMatch() {
+    if (searchMatches.length === 0) return;
+    const nextIndex = (currentMatchIndex + 1) % searchMatches.length;
+    scrollToMatch(nextIndex);
+  }
+  function prevMatch() {
+    if (searchMatches.length === 0) return;
+    const prevIndex = currentMatchIndex === 0 ? searchMatches.length - 1 : currentMatchIndex - 1;
+    scrollToMatch(prevIndex);
   }
   async function populateInspectorDiff() {
     if (!inspectorNode || inspectorNode.type !== "file") return;
@@ -84097,10 +84226,24 @@ ${node.goal}`;
   document.addEventListener("keydown", (e2) => {
     if (e2.key === "Escape") {
       const modal = document.getElementById("file-inspector-modal");
+      const searchContainer = document.getElementById("modal-search-container");
+      if (searchContainer && !searchContainer.classList.contains("hidden")) {
+        closeModalSearch();
+        return;
+      }
       if (modal && !modal.classList.contains("hidden")) {
         closeFileInspector();
       } else {
         hideDetailsPanel();
+      }
+    }
+  });
+  document.addEventListener("keydown", (e2) => {
+    if ((e2.ctrlKey || e2.metaKey) && e2.key === "f") {
+      const modal = document.getElementById("file-inspector-modal");
+      if (modal && !modal.classList.contains("hidden")) {
+        e2.preventDefault();
+        openModalSearch();
       }
     }
   });
@@ -84992,6 +85135,22 @@ ${file.count} changes (${file.events.created} created, ${file.events.modified} m
     }
   });
   loadHeatDecaySetting();
+  document.getElementById("modal-search-input")?.addEventListener("input", (e2) => {
+    performSearch(e2.target.value);
+  });
+  document.getElementById("search-prev")?.addEventListener("click", prevMatch);
+  document.getElementById("search-next")?.addEventListener("click", nextMatch);
+  document.getElementById("search-close")?.addEventListener("click", closeModalSearch);
+  document.getElementById("modal-search-input")?.addEventListener("keydown", (e2) => {
+    if (e2.key === "Enter") {
+      e2.preventDefault();
+      if (e2.shiftKey) {
+        prevMatch();
+      } else {
+        nextMatch();
+      }
+    }
+  });
   console.log("GSD Viewer initialized - select a project folder to visualize");
 })();
 /*! Bundled license information:
