@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 
 ## Current Position
 
-Phase: 28 - Enhanced Flash Effects
+Phase: 29 - Performance Polish
 Plan: 01 of 01
 Status: Phase complete
-Last activity: 2026-01-25 — Executed 28-01-PLAN.md (Enhanced Flash Effects)
+Last activity: 2026-01-25 — Executed 29-01-PLAN.md (Performance Polish)
 
-Progress: [██████████████████████████░░░░░░░░░░░░░░] 3/4 phases (75%)
+Progress: [████████████████████████████████████████] 4/4 phases (100%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 64 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 3)
+- Total plans completed: 65 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 4)
 - Average duration: 5min
-- Total execution time: 2 days + 98m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 9m)
+- Total execution time: 2 days + 103m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 14m)
 
 **By Milestone:**
 
@@ -41,9 +41,9 @@ Progress: [███████████████████████
 - 8 phases, 17 plans
 - Status: Shipped 2026-01-25
 
-*v1.4 (In Progress):*
-- 4 phases, 3 plans complete
-- Status: Phase 28 complete (Enhanced Flash Effects) - 2026-01-25
+*v1.4 (Complete):*
+- 4 phases, 4 plans complete
+- Status: Shipped 2026-01-25 (All phases complete)
 
 ## Accumulated Context
 
@@ -238,6 +238,10 @@ Recent decisions affecting current work:
 - Claude write/edit operations map to 'modified' change type (amber flash) (28-01)
 - onClaudeOperation IPC listener wires Claude operations to flash animations (28-01)
 - Follow-active camera disabled for read operations (non-intrusive) (28-01)
+- MAX_CONCURRENT_FLASHES = 20 limits simultaneous animations for 60fps performance (29-01)
+- Animation batching with pendingFlashes queue for operation burst handling (29-01)
+- 50ms stagger delay prevents frame spikes during batch processing (29-01)
+- Console logging for batching activity (queued, processing, drained) (29-01)
 
 ### Pending Todos
 
@@ -266,6 +270,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Executed 28-01-PLAN.md (Enhanced Flash Effects)
+Stopped at: Executed 29-01-PLAN.md (Performance Polish)
 Resume file: None
-Next action: Plan Phase 29 (Comprehensive Testing & Refinement)
+Next action: v1.4 milestone complete - all phases shipped
