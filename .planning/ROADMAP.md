@@ -381,10 +381,11 @@ Plans:
   3. Overview zoom button instantly zooms out to show entire graph
   4. Focus zoom button centers on selected node at medium distance
   5. Detail zoom button zooms close to selected node for file inspection
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD
+- [ ] 21-01-PLAN.md — Follow-active mode toggle and camera auto-follow
+- [ ] 21-02-PLAN.md — Zoom preset buttons (overview/focus/detail)
 
 ### Phase 22: Bookmarks & History
 **Goal**: User can save important positions and navigate through recently visited nodes
@@ -489,7 +490,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 18. Smooth Activity Updates | 3/3 | Complete | UPD-01-03 |
 | 19. Enhanced Flash Effects | 2/2 | Complete | FLX-01-03 |
 | 20. Activity Trails | 2/2 | Complete | TRL-01-03 |
-| 21. Smart Camera Core | 0/TBD | Pending | CAM-01-02 |
+| 21. Smart Camera Core | 0/2 | Pending | CAM-01-02 |
 | 22. Bookmarks & History | 0/TBD | Pending | BKM-01-04 |
 | 23. Breadcrumb Trail | 0/TBD | Pending | BRD-01-02 |
 | 24. Minimap | 0/TBD | Pending | MAP-01-03 |
@@ -497,4 +498,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-24 (Phase 20 complete)*
+*Last updated: 2026-01-24 (Phase 21 planned)*
