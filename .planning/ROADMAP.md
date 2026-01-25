@@ -77,7 +77,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 28-01-PLAN.md — Add read operation color, enhance flash visibility, subscribe to Claude operation IPC
+- [x] 28-01-PLAN.md — Add read operation color, enhance flash visibility, subscribe to Claude operation IPC
 
 ### Phase 29: Performance & Polish
 
@@ -115,9 +115,9 @@ Plans:
 |-------|----------------|--------|-----------|
 | 26. Hook Infrastructure | 1/1 | Complete | 2026-01-25 |
 | 27. Chokidar Extension & IPC | 1/1 | Complete | 2026-01-25 |
-| 28. Enhanced Flash Effects | 0/1 | Not started | - |
+| 28. Enhanced Flash Effects | 1/1 | Complete | 2026-01-25 |
 | 29. Performance & Polish | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-25 (Phase 28 planned)*
+*Last updated: 2026-01-25 (Phase 28 complete)*

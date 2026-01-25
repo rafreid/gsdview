@@ -12,14 +12,14 @@ Requirements for milestone v1.4: Live Activity Sync.
 - [x] **CCI-01**: App configures Claude Code PostToolUse hooks to emit file operation events
 - [x] **CCI-02**: Bash observer script writes operation events to a watched file
 - [x] **CCI-03**: Chokidar watcher detects event file changes and parses operation data
-- [ ] **CCI-04**: Read operations from Claude Code trigger visual feedback (not possible with file watchers)
+- [x] **CCI-04**: Read operations from Claude Code trigger visual feedback (not possible with file watchers)
 - [x] **CCI-05**: Event deduplication handles duplicate hook fires without double-animating
 
 ### Enhanced Flash Effects
 
-- [ ] **FLX-04**: Read operations display distinct blue flash/glow animation
-- [ ] **FLX-05**: Flash glow radius is significantly larger (more visible from any zoom level)
-- [ ] **FLX-06**: Flash intensity is brighter by default with higher configurable max
+- [x] **FLX-04**: Read operations display distinct blue flash/glow animation
+- [x] **FLX-05**: Flash glow radius is significantly larger (more visible from any zoom level)
+- [x] **FLX-06**: Flash intensity is brighter by default with higher configurable max
 - [ ] **FLX-07**: Rapid successive operations are batched for smooth animation
 
 ### Event Processing
@@ -64,11 +64,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CCI-01 | Phase 26 | Complete |
 | CCI-02 | Phase 26 | Complete |
 | CCI-03 | Phase 27 | Complete |
-| CCI-04 | Phase 28 | Pending |
+| CCI-04 | Phase 28 | Complete |
 | CCI-05 | Phase 27 | Complete |
-| FLX-04 | Phase 28 | Pending |
-| FLX-05 | Phase 28 | Pending |
-| FLX-06 | Phase 28 | Pending |
+| FLX-04 | Phase 28 | Complete |
+| FLX-05 | Phase 28 | Complete |
+| FLX-06 | Phase 28 | Complete |
 | FLX-07 | Phase 29 | Pending |
 | EVT-01 | Phase 27 | Complete |
 | EVT-02 | Phase 27 | Complete |
@@ -83,4 +83,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-25*
-*Last updated: 2026-01-25 after Phase 27 completion*
+*Last updated: 2026-01-25 after Phase 28 completion*
