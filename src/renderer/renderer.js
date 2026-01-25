@@ -2667,6 +2667,11 @@ const Graph = ForceGraph3D()(container)
       stopPathPlayback();
     }
 
+    // Stop orbit mode when user clicks on graph
+    if (orbitModeEnabled) {
+      stopOrbitMode();
+    }
+
     // Double-click detection for file nodes
     const now = Date.now();
     if (node.type === 'file' && lastClickNode === node && (now - lastClickTime) < DOUBLE_CLICK_THRESHOLD) {
@@ -6686,6 +6691,26 @@ document.getElementById('zoom-detail')?.addEventListener('click', () => {
 
 // Initialize zoom button states (disabled on startup)
 updateZoomButtonStates();
+
+// Orbit mode toggle
+document.getElementById('orbit-toggle')?.addEventListener('click', toggleOrbitMode);
+
+// Orbit speed slider
+document.getElementById('orbit-speed-slider')?.addEventListener('input', (e) => {
+  updateOrbitSpeed(parseFloat(e.target.value));
+});
+
+// Persist orbit speed
+document.getElementById('orbit-speed-slider')?.addEventListener('change', async (e) => {
+  try {
+    await window.electronAPI.store.set('orbitSpeed', parseFloat(e.target.value));
+  } catch (err) {
+    console.log('[Orbit] Could not save speed setting:', err);
+  }
+});
+
+// Load orbit speed setting on startup
+loadOrbitSpeedSetting();
 
 // Navigation history controls
 document.getElementById('nav-back')?.addEventListener('click', () => {
