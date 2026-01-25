@@ -156,6 +156,7 @@ const sessionFileSnapshots = new Map(); // filePath -> { content: string, timest
 
 // Change type colors for type-specific animations (brighter, more saturated)
 const changeTypeColors = {
+  read: 0x4488FF,     // Bright blue - read operations (Claude only)
   created: 0x00FF88,  // Bright neon green (was 0x2ECC71)
   modified: 0xFFAA00, // Bright amber/orange (was 0xF39C12)
   deleted: 0xFF3333   // Bright red (was 0xE74C3C)
@@ -349,7 +350,8 @@ async function loadFlashSettings() {
 
     const savedIntensity = await window.electronAPI.store.get('flashIntensity');
     if (savedIntensity && typeof savedIntensity === 'number') {
-      flashIntensity = savedIntensity / 100; // Convert from percentage to multiplier
+      // Allow up to 3x intensity (slider still 50-200 range, but multiply by 1.5)
+      flashIntensity = (savedIntensity / 100) * 1.5; // Convert and boost: 50->0.75x, 100->1.5x, 200->3x
       const slider = document.getElementById('flash-intensity-slider');
       const valueDisplay = document.getElementById('flash-intensity-value');
       if (slider) slider.value = savedIntensity;
@@ -1419,6 +1421,10 @@ function flashNodeWithType(nodeId, changeType) {
       // Slower, more ominous pulses
       return basePulse * (1 - progress * 0.3);
     };
+  } else if (changeType === 'read') {
+    // Read: 2 quick pulses (acknowledgment effect - lighter than modify)
+    pulseCount = 2;
+    pulsePattern = (progress, basePulse) => basePulse * 0.8; // Slightly dimmer
   } else {
     // Modified: 3 steady pulses (attention-getting)
     pulseCount = 3;
@@ -1450,7 +1456,7 @@ function flashNodeWithType(nodeId, changeType) {
 
       // Emissive glow effect
       if (material.emissive) {
-        const emissiveIntensity = intensity * flashIntensity * 2.0;
+        const emissiveIntensity = intensity * flashIntensity * 3.5;
         material.emissive.setHex(flashColor);
         material.emissiveIntensity = emissiveIntensity;
       }
@@ -1463,7 +1469,7 @@ function flashNodeWithType(nodeId, changeType) {
     });
 
     // Scale pulse effect
-    const scaleMultiplier = 1 + (intensity * 0.5 * flashIntensity);
+    const scaleMultiplier = 1 + (intensity * 0.8 * flashIntensity);
     threeObj.scale.set(
       originalScale.x * scaleMultiplier,
       originalScale.y * scaleMultiplier,
@@ -6587,7 +6593,8 @@ document.getElementById('flash-duration-slider')?.addEventListener('input', asyn
 // Flash intensity slider handler
 document.getElementById('flash-intensity-slider')?.addEventListener('input', async (e) => {
   const value = parseInt(e.target.value, 10);
-  flashIntensity = value / 100; // Convert from percentage to multiplier
+  // Allow up to 3x intensity (slider still 50-200 range, but multiply by 1.5)
+  flashIntensity = (value / 100) * 1.5; // Convert and boost: 50->0.75x, 100->1.5x, 200->3x
 
   // Update display
   const valueDisplay = document.getElementById('flash-intensity-value');
