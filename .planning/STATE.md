@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 21 complete
+**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 22 in progress
 
 ## Current Position
 
-Phase: 21 of 25 (Smart Camera Core)
-Plan: 2/2
+Phase: 22 of 25 (Bookmarks & History)
+Plan: 1/1
 Status: Phase complete
-Last activity: 2026-01-25 - Completed 21-02-PLAN.md
+Last activity: 2026-01-25 - Completed 22-01-PLAN.md
 
-Progress: [████████████████████████████████░] 21/25 phases complete (84%)
+Progress: [█████████████████████████████████░] 22/25 phases complete (88%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 49 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 12)
+- Total plans completed: 50 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 13)
 - Average duration: 5min
-- Total execution time: 2 days + 68m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 51m)
+- Total execution time: 2 days + 76m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 59m)
 
 **By Milestone:**
 
@@ -39,7 +39,7 @@ Progress: [███████████████████████
 
 *v1.3 (Active):*
 - 8 phases planned
-- Status: Phase 21 complete (4 plans)
+- Status: Phase 22 complete (5 plans)
 
 ## Accumulated Context
 
@@ -176,6 +176,15 @@ Recent decisions affecting current work:
 - Focus zoom at 120 units for context, Detail zoom at 40 units for inspection (21-02)
 - Focus/Detail buttons disabled when no node selected (21-02)
 - updateZoomButtonStates() pattern for selection-based UI state (21-02)
+- Navigation history with browser-style back/forward buttons (22-01)
+- Max history size 50 entries to prevent memory bloat (22-01)
+- Recent nodes dropdown shows last 10 unique visited nodes (22-01)
+- isNavigating flag prevents duplicate entries during back/forward (22-01)
+- Truncate forward history when navigating back then selecting new node (22-01)
+- Cyan color theme (#4ECDC4) for navigation controls (22-01)
+- Alt+Left/Right keyboard shortcuts for navigation (22-01)
+- pushNavigationHistory called from showDetailsPanel (22-01)
+- Navigation history persists via electron-store (22-01)
 
 ### Pending Todos
 
@@ -203,8 +212,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-25T00:36:21Z
-Stopped at: Completed 21-02-PLAN.md (Zoom Presets)
+Last session: 2026-01-25T01:29:47Z
+Stopped at: Completed 22-01-PLAN.md (Navigation History)
 Resume file: None
-Next action: Continue to Phase 22.
-Next action: Continue to Phase 22.
+Next action: Continue to Phase 23
