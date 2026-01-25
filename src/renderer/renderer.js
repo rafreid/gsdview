@@ -7297,9 +7297,9 @@ async function showHookHelp() {
   dismissHookNotification();
 }
 
-// Expose functions globally for onclick handlers
-window.dismissHookNotification = dismissHookNotification;
-window.showHookHelp = showHookHelp;
+// Hook notification button event listeners (CSP blocks inline onclick)
+document.getElementById('hook-dismiss-btn')?.addEventListener('click', dismissHookNotification);
+document.getElementById('hook-help-btn')?.addEventListener('click', showHookHelp);
 
 // Debug mode toggle handler
 document.getElementById('debug-toggle')?.addEventListener('click', (e) => {
