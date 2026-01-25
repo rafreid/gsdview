@@ -113,8 +113,37 @@
 
 **Archive:** [v1.3-ROADMAP.md](./milestones/v1.3-ROADMAP.md), [v1.3-REQUIREMENTS.md](./milestones/v1.3-REQUIREMENTS.md)
 
+**Archive:** [v1.3-ROADMAP.md](./milestones/v1.3-ROADMAP.md), [v1.3-REQUIREMENTS.md](./milestones/v1.3-REQUIREMENTS.md)
+
+---
+
+### v1.4 - Live Activity Sync (2026-01-25)
+
+**Goal:** Make file activity animations highly visible and synchronized with real-time Claude Code operations, so users can see exactly what's happening as files are read, written, created, and deleted.
+
+**Phases:** 26-29 (5 plans total)
+26. Hook Infrastructure - Claude Code PostToolUse hooks emit file operation events
+27. Chokidar Extension & IPC - Event files detected and forwarded via IPC
+28. Enhanced Flash Effects - Distinct, highly visible flash animations per operation type
+29. Performance & Polish - Animation batching and hook configuration detection
+
+**Key Deliverables:**
+- Claude Code integration via PostToolUse hooks
+- Read operation detection (blue flash, distinct from write/create/delete)
+- Enhanced flash visibility (3.5x emissive, 1.8x scale pulse)
+- Animation batching for 60fps during rapid operations
+- Hook status notification and debug mode panel
+
+**Stats:**
+- 4 files changed, 495 insertions
+- 4 phases, 5 plans
+- Timeline: 2026-01-25 (same day)
+- Git range: `feat(26-01)` → `docs(29)`
+
+**Archive:** [v1.4-ROADMAP.md](./milestones/v1.4-ROADMAP.md), [v1.4-REQUIREMENTS.md](./milestones/v1.4-REQUIREMENTS.md)
+
 ---
 
 ## Current Milestone
 
-None active. Run `/gsd:new-milestone` to start v1.4.
+None active. Run `/gsd:new-milestone` to start v1.5.

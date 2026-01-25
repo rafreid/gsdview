@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.4 Live Activity Sync - Roadmap created
+**Current focus:** None active — run /gsd:new-milestone to start v1.5
 
 ## Current Position
 
-Phase: 29 - Performance Polish
-Plan: 02 of 02
-Status: Phase complete
-Last activity: 2026-01-25 — Executed 29-02-PLAN.md (Hook Status Detection & Debug Mode)
+Phase: —
+Plan: —
+Status: Ready for next milestone
+Last activity: 2026-01-25 — v1.4 milestone archived
 
-Progress: [████████████████████████████████████████] 4/4 phases (100%)
+Progress: No active milestone
 
 ## Performance Metrics
 
@@ -276,6 +276,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Executed 29-02-PLAN.md (Hook Status Detection & Debug Mode)
+Stopped at: v1.4 milestone archived
 Resume file: None
-Next action: v1.4 milestone complete - all phases shipped
+Next action: Run /gsd:new-milestone to define v1.5

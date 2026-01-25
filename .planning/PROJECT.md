@@ -8,16 +8,11 @@ A desktop application that visualizes GSD project structure as an interactive 3D
 
 Make the invisible structure of a GSD project visible and navigable — so users always know where they are, what's connected, and what's blocked.
 
-## Current Milestone: v1.4 Live Activity Sync
+## Current State
 
-**Goal:** Make file activity animations highly visible and synchronized with real-time Claude Code operations, so users can see exactly what's happening as files are read, written, created, and deleted.
+**Shipped:** v1.4 Live Activity Sync (2026-01-25)
 
-**Target features:**
-- Claude Code integration via hooks + WebSocket for real-time operation events
-- Read operation detection (beyond just write/create/delete)
-- Bigger, brighter flash effects with larger glow radius
-- Better synchronization between actual operations and visual feedback
-- Enhanced visual indicators for different operation types (read vs write vs create vs delete)
+Claude Code operations now trigger highly visible flash animations synchronized with real-time file operations. Read operations display distinct blue flash (0x4488FF), enhanced visibility (3.5x emissive, 1.8x scale), animation batching for 60fps during rapid operations, and hook status notification with debug mode.
 
 ## Requirements
 
@@ -88,15 +83,18 @@ Make the invisible structure of a GSD project visible and navigable — so users
 - [x] Orbit mode for presentations
 - [x] Path animation through bookmarks
 
+*Shipped in v1.4:*
+
+- [x] Claude Code integration via PostToolUse hooks
+- [x] Read operation detection with distinct blue flash
+- [x] Enhanced flash effects (3.5x emissive, 1.8x scale)
+- [x] Operation-specific visual indicators (blue=read, amber=write, green=create, red=delete)
+- [x] Animation batching for 60fps during rapid operations
+- [x] Hook status notification and debug mode panel
+
 ### Active
 
-*v1.4 scope:*
-
-- [ ] Claude Code integration for real-time operation events
-- [ ] Read operation detection and visualization
-- [ ] Enhanced flash effects (bigger, brighter, more visible)
-- [ ] Operation-specific visual indicators
-- [ ] WebSocket server for receiving Claude hooks
+*Next milestone scope — not yet defined*
 
 ### Out of Scope
 
@@ -146,4 +144,4 @@ Make the invisible structure of a GSD project visible and navigable — so users
 | Limit scope to .planning/ + src/ | Performance and relevance balance | — Pending |
 
 ---
-*Last updated: 2026-01-25 after v1.4 milestone start*
+*Last updated: 2026-01-25 after v1.4 milestone complete*
