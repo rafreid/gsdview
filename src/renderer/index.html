@@ -168,6 +168,71 @@
       border-radius: 3px;
     }
 
+    /* Minimap Panel */
+    #minimap-panel {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 8px;
+      border: 1px solid rgba(78, 205, 196, 0.3);
+      z-index: 100;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    #minimap-panel.collapsed {
+      max-height: 36px;
+    }
+
+    #minimap-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      user-select: none;
+    }
+
+    #minimap-header:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    #minimap-header .minimap-header-title {
+      font-weight: 600;
+      color: #4ECDC4;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    #minimap-header .minimap-toggle-icon {
+      color: #888;
+      font-size: 10px;
+      transition: transform 0.3s ease;
+    }
+
+    #minimap-panel.collapsed #minimap-header .minimap-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    #minimap-content {
+      padding: 8px;
+    }
+
+    #minimap-panel.collapsed #minimap-content {
+      display: none;
+    }
+
+    #minimap-canvas {
+      display: block;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      cursor: crosshair;
+      background: rgba(26, 26, 46, 0.5);
+    }
+
     /* Details Panel */
     #details-panel {
       position: fixed;
@@ -2932,6 +2997,15 @@
       <span class="legend-toggle-icon">▼</span>
     </div>
     <div id="legend-content"></div>
+  </div>
+  <div id="minimap-panel">
+    <div id="minimap-header">
+      <span class="minimap-header-title">Minimap</span>
+      <span class="minimap-toggle-icon">▼</span>
+    </div>
+    <div id="minimap-content">
+      <canvas id="minimap-canvas" width="200" height="150"></canvas>
+    </div>
   </div>
   <div id="tooltip"></div>
   <div id="details-panel" class="hidden">
