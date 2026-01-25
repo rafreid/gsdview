@@ -2886,9 +2886,17 @@ function buildGraphFromProject(projectData) {
       addLink(link.source, link.target, 'contains');
     }
 
-    // Link .planning root to project
-    if (nodeMap.has('dir-planning')) {
-      addLink(projectNode.id, 'dir-planning', 'contains');
+    // Link directory root to project (contains both .planning and src)
+    if (nodeMap.has('dir-root')) {
+      addLink(projectNode.id, 'dir-root', 'contains');
+    } else {
+      // Fallback for backward compatibility
+      if (nodeMap.has('planning-dir-root')) {
+        addLink(projectNode.id, 'planning-dir-root', 'contains');
+      }
+      if (nodeMap.has('src-dir-root')) {
+        addLink(projectNode.id, 'src-dir-root', 'contains');
+      }
     }
   }
 
