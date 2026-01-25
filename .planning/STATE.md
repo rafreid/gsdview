@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 21 in progress
+**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 21 complete
 
 ## Current Position
 
 Phase: 21 of 25 (Smart Camera Core)
-Plan: 1/1
+Plan: 2/2
 Status: Phase complete
-Last activity: 2026-01-25 - Completed 21-01-PLAN.md
+Last activity: 2026-01-25 - Completed 21-02-PLAN.md
 
 Progress: [████████████████████████████████░] 21/25 phases complete (84%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 48 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 11)
+- Total plans completed: 49 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 12)
 - Average duration: 5min
-- Total execution time: 2 days + 63m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 46m)
+- Total execution time: 2 days + 68m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 51m)
 
 **By Milestone:**
 
@@ -39,7 +39,7 @@ Progress: [███████████████████████
 
 *v1.3 (Active):*
 - 8 phases planned
-- Status: Phase 21 complete (3 plans)
+- Status: Phase 21 complete (4 plans)
 
 ## Accumulated Context
 
@@ -171,6 +171,11 @@ Recent decisions affecting current work:
 - 800ms transition for follow mode (faster than manual 1000ms) (21-01)
 - Orange color theme (#FFA500) for follow toggle to distinguish from trails (21-01)
 - flyToNodeSmooth() for reusable smooth camera transitions (21-01)
+- Cornflower blue (#6495ED) for camera/zoom controls (21-02)
+- Overview zoom calculates bounding box with 1.5x padding (21-02)
+- Focus zoom at 120 units for context, Detail zoom at 40 units for inspection (21-02)
+- Focus/Detail buttons disabled when no node selected (21-02)
+- updateZoomButtonStates() pattern for selection-based UI state (21-02)
 
 ### Pending Todos
 
@@ -198,7 +203,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-25T00:35:00Z
-Stopped at: Completed 21-01-PLAN.md (Follow-Active Camera Mode)
+Last session: 2026-01-25T00:36:21Z
+Stopped at: Completed 21-02-PLAN.md (Zoom Presets)
 Resume file: None
+Next action: Continue to Phase 22.
 Next action: Continue to Phase 22.
