@@ -123,6 +123,7 @@ let minimapCtx = null;
 let minimapBounds = { minX: 0, maxX: 0, minY: 0, maxY: 0 }; // World coordinate bounds
 const MINIMAP_PADDING = 10; // Pixels of padding around minimap content
 let minimapRafId = null; // RAF loop ID for continuous updates
+let minimapDragging = false; // Track drag state for continuous positioning
 
 // Modal search state
 let currentSearchQuery = '';
@@ -6693,11 +6694,91 @@ function navigateToMinimapPosition(canvasX, canvasY) {
  * Handle minimap click - navigate camera to clicked position
  */
 function handleMinimapClick(event) {
+  // Don't trigger click navigation if user was dragging
+  if (minimapDragging) return;
+
   const rect = minimapCanvas.getBoundingClientRect();
   const canvasX = event.clientX - rect.left;
   const canvasY = event.clientY - rect.top;
 
   navigateToMinimapPosition(canvasX, canvasY);
+}
+
+/**
+ * Navigate camera to a position on the minimap instantly (for drag)
+ */
+function navigateToMinimapPositionInstant(canvasX, canvasY) {
+  if (!Graph || !Graph.cameraPosition) return;
+
+  const worldPos = minimapToWorld(canvasX, canvasY);
+
+  // Calculate camera distance to maintain current zoom level
+  const currentPos = Graph.cameraPosition();
+  const currentDistance = Math.sqrt(
+    currentPos.x * currentPos.x +
+    currentPos.y * currentPos.y +
+    (currentPos.z || 0) * (currentPos.z || 0)
+  );
+
+  // Navigate instantly (0ms duration) for smooth dragging
+  if (is3D) {
+    const distRatio = currentDistance / Math.hypot(worldPos.x, worldPos.y, 0) || 1;
+    Graph.cameraPosition(
+      {
+        x: worldPos.x * distRatio,
+        y: worldPos.y * distRatio,
+        z: currentDistance * 0.5
+      },
+      { x: worldPos.x, y: worldPos.y, z: 0 },
+      0  // Instant, no animation
+    );
+  } else {
+    Graph.cameraPosition(
+      { x: worldPos.x, y: worldPos.y, z: currentDistance },
+      { x: worldPos.x, y: worldPos.y, z: 0 },
+      0
+    );
+  }
+}
+
+/**
+ * Handle minimap mouse down - start drag
+ */
+function handleMinimapMouseDown(event) {
+  minimapDragging = true;
+
+  const rect = minimapCanvas.getBoundingClientRect();
+  const canvasX = event.clientX - rect.left;
+  const canvasY = event.clientY - rect.top;
+
+  navigateToMinimapPositionInstant(canvasX, canvasY);
+}
+
+/**
+ * Handle minimap mouse move - continue drag
+ */
+function handleMinimapMouseMove(event) {
+  if (!minimapDragging) return;
+
+  const rect = minimapCanvas.getBoundingClientRect();
+  const canvasX = event.clientX - rect.left;
+  const canvasY = event.clientY - rect.top;
+
+  navigateToMinimapPositionInstant(canvasX, canvasY);
+}
+
+/**
+ * Handle minimap mouse up - end drag
+ */
+function handleMinimapMouseUp(event) {
+  minimapDragging = false;
+}
+
+/**
+ * Handle minimap mouse leave - end drag if active
+ */
+function handleMinimapMouseLeave(event) {
+  minimapDragging = false;
 }
 
 /**
@@ -6729,6 +6810,19 @@ function initMinimap() {
 
   // Add click listener for navigation
   minimapCanvas.addEventListener('click', handleMinimapClick);
+
+  // Add drag listeners for continuous positioning
+  minimapCanvas.addEventListener('mousedown', handleMinimapMouseDown);
+  minimapCanvas.addEventListener('mousemove', handleMinimapMouseMove);
+  minimapCanvas.addEventListener('mouseup', handleMinimapMouseUp);
+  minimapCanvas.addEventListener('mouseleave', handleMinimapMouseLeave);
+
+  // Add global mouseup listener to end drag even if released outside canvas
+  document.addEventListener('mouseup', () => {
+    if (minimapDragging) {
+      minimapDragging = false;
+    }
+  });
 
   // Start update loop
   startMinimapUpdateLoop();
