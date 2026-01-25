@@ -430,8 +430,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 24-01-PLAN.md — Minimap panel UI with canvas rendering nodes and viewport indicator
-- [ ] 24-02-PLAN.md — Click-to-navigate, drag navigation, and cursor styling
+- [x] 24-01-PLAN.md — Minimap panel UI with canvas rendering nodes and viewport indicator
+- [x] 24-02-PLAN.md — Click-to-navigate, drag navigation, and cursor styling
 
 ### Phase 25: Advanced Camera
 **Goal**: Camera provides presentation mode and guided tours through graph
@@ -495,9 +495,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 21. Smart Camera Core | 2/2 | Complete | CAM-01-02 |
 | 22. Bookmarks & History | 2/2 | Complete | BKM-01-04 |
 | 23. Breadcrumb Trail | 1/1 | Complete | BRD-01-02 |
-| 24. Minimap | 0/2 | Pending | MAP-01-03 |
+| 24. Minimap | 2/2 | Complete | MAP-01-03 |
 | 25. Advanced Camera | 0/TBD | Pending | CAM-03-04 |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-25 (Phase 24 planned)*
+*Last updated: 2026-01-25 (Phase 24 complete)*

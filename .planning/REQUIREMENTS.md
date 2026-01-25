@@ -344,9 +344,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BKM-04 | Phase 22 | Complete |
 | BRD-01 | Phase 23 | Complete |
 | BRD-02 | Phase 23 | Complete |
-| MAP-01 | Phase 24 | Pending |
-| MAP-02 | Phase 24 | Pending |
-| MAP-03 | Phase 24 | Pending |
+| MAP-01 | Phase 24 | Complete |
+| MAP-02 | Phase 24 | Complete |
+| MAP-03 | Phase 24 | Complete |
 | CAM-03 | Phase 25 | Pending |
 | CAM-04 | Phase 25 | Pending |
 
