@@ -3312,6 +3312,7 @@ function hideDetailsPanel() {
   panel.classList.remove('visible');
   panel.classList.add('hidden');
   selectedNode = null;
+  updateZoomButtonStates(); // Disable focus/detail zoom buttons
 }
 
 // Refresh details panel content (re-renders with current selectedNode)
@@ -5812,6 +5813,9 @@ document.getElementById('zoom-focus')?.addEventListener('click', () => {
 document.getElementById('zoom-detail')?.addEventListener('click', () => {
   zoomToDetail();
 });
+
+// Initialize zoom button states (disabled on startup)
+updateZoomButtonStates();
 
 // Modal search event listeners
 document.getElementById('modal-search-input')?.addEventListener('input', (e) => {

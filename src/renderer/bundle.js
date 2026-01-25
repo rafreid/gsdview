@@ -83930,6 +83930,7 @@ ${node.goal}`;
   }
   async function showDetailsPanel(node) {
     selectedNode = node;
+    updateZoomButtonStates();
     const panel = document.getElementById("details-panel");
     const title = document.getElementById("panel-title");
     const content = document.getElementById("panel-content");
@@ -84070,6 +84071,7 @@ ${node.goal}`;
     panel.classList.remove("visible");
     panel.classList.add("hidden");
     selectedNode = null;
+    updateZoomButtonStates();
   }
   async function openFileInspector(node) {
     if (node.type !== "file") return;
@@ -85332,6 +85334,17 @@ ${node.goal}`;
     }
     console.log("[Camera] Zoom to detail on:", selectedNode.id);
   }
+  function updateZoomButtonStates() {
+    const focusBtn = document.getElementById("zoom-focus");
+    const detailBtn = document.getElementById("zoom-detail");
+    if (selectedNode) {
+      focusBtn?.classList.remove("disabled");
+      detailBtn?.classList.remove("disabled");
+    } else {
+      focusBtn?.classList.add("disabled");
+      detailBtn?.classList.add("disabled");
+    }
+  }
   function handleActivityEntryClick(nodeId, eventType, entryElement) {
     if (eventType === "deleted") {
       showDeletedFileMessage(entryElement);
@@ -85858,6 +85871,7 @@ ${file.count} changes (${file.events.created} created, ${file.events.modified} m
   document.getElementById("zoom-detail")?.addEventListener("click", () => {
     zoomToDetail();
   });
+  updateZoomButtonStates();
   document.getElementById("modal-search-input")?.addEventListener("input", (e2) => {
     performSearch(e2.target.value);
   });
