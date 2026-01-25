@@ -2391,6 +2391,362 @@
       background: rgba(78, 205, 196, 0.6);
       box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.3);
     }
+
+    /* Bookmark Button */
+    #bookmark-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      margin-left: 12px;
+      background: rgba(255, 215, 0, 0.15);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      border-radius: 4px;
+      color: rgba(255, 215, 0, 0.8);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #bookmark-btn:hover {
+      background: rgba(255, 215, 0, 0.25);
+      border-color: rgba(255, 215, 0, 0.6);
+      color: #FFD700;
+    }
+
+    #bookmark-btn .bookmark-icon {
+      font-size: 14px;
+    }
+
+    #bookmark-btn .bookmark-count {
+      display: none;
+      background: rgba(255, 215, 0, 0.3);
+      color: #FFD700;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 1px 5px;
+      border-radius: 8px;
+      min-width: 16px;
+      text-align: center;
+    }
+
+    /* Bookmark Dialog */
+    #bookmark-dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 600;
+    }
+
+    #bookmark-dialog-overlay.hidden,
+    #bookmark-dialog.hidden {
+      display: none;
+    }
+
+    #bookmark-dialog-overlay.visible,
+    #bookmark-dialog.visible {
+      display: block;
+    }
+
+    #bookmark-dialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 360px;
+      background: #1e1e2e;
+      border: 1px solid #FFD700;
+      border-radius: 8px;
+      z-index: 601;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    #bookmark-dialog .dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid #333;
+      background: rgba(255, 215, 0, 0.1);
+      border-radius: 8px 8px 0 0;
+    }
+
+    #bookmark-dialog .dialog-header h3 {
+      margin: 0;
+      font-size: 14px;
+      color: #FFD700;
+    }
+
+    #bookmark-dialog-close {
+      background: none;
+      border: none;
+      color: #888;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+
+    #bookmark-dialog-close:hover {
+      color: #fff;
+    }
+
+    #bookmark-dialog .dialog-body {
+      padding: 16px;
+    }
+
+    #bookmark-dialog .dialog-field {
+      margin-bottom: 16px;
+    }
+
+    #bookmark-dialog .dialog-field label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    #bookmark-name {
+      width: 100%;
+      height: 32px;
+      padding: 0 10px;
+      background: #2a2a4e;
+      border: 1px solid #555;
+      border-radius: 4px;
+      color: #eee;
+      font-size: 13px;
+    }
+
+    #bookmark-name:focus {
+      outline: none;
+      border-color: #FFD700;
+    }
+
+    .bookmark-slots {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+
+    .bookmark-slot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 36px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid #444;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .bookmark-slot:hover {
+      background: rgba(255, 215, 0, 0.15);
+      border-color: rgba(255, 215, 0, 0.5);
+    }
+
+    .bookmark-slot.selected {
+      background: rgba(255, 215, 0, 0.25);
+      border-color: #FFD700;
+    }
+
+    .bookmark-slot.occupied {
+      background: rgba(78, 205, 196, 0.15);
+      border-color: rgba(78, 205, 196, 0.4);
+    }
+
+    .bookmark-slot.occupied:hover {
+      border-color: rgba(255, 215, 0, 0.5);
+    }
+
+    .bookmark-slot .slot-number {
+      font-size: 14px;
+      font-weight: bold;
+      color: #888;
+    }
+
+    .bookmark-slot.selected .slot-number,
+    .bookmark-slot.occupied .slot-number {
+      color: #FFD700;
+    }
+
+    .bookmark-slot .slot-indicator {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 6px;
+      height: 6px;
+      background: #4ECDC4;
+      border-radius: 50%;
+      display: none;
+    }
+
+    .bookmark-slot.occupied .slot-indicator {
+      display: block;
+    }
+
+    .dialog-info {
+      font-size: 11px;
+      color: #666;
+      font-style: italic;
+    }
+
+    #bookmark-dialog .dialog-footer {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid #333;
+      justify-content: flex-end;
+    }
+
+    #bookmark-dialog .dialog-footer button {
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #bookmark-dialog .dialog-footer button.primary {
+      background: #FFD700;
+      border: none;
+      color: #1a1a2e;
+      font-weight: 600;
+    }
+
+    #bookmark-dialog .dialog-footer button.primary:hover {
+      background: #FFED4A;
+    }
+
+    #bookmark-dialog .dialog-footer button.secondary {
+      background: transparent;
+      border: 1px solid #555;
+      color: #888;
+    }
+
+    #bookmark-dialog .dialog-footer button.secondary:hover {
+      border-color: #888;
+      color: #ccc;
+    }
+
+    /* Bookmark List */
+    .bookmark-list-section {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #333;
+    }
+
+    .bookmark-list-section label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    #bookmark-list {
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .bookmark-list-item {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      margin-bottom: 4px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+
+    .bookmark-list-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .bookmark-list-item .bm-slot {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 215, 0, 0.2);
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #FFD700;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .bookmark-list-item .bm-name {
+      flex: 1;
+      font-size: 12px;
+      color: #ccc;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bookmark-list-item .bm-go {
+      padding: 4px 8px;
+      margin-right: 6px;
+      background: rgba(78, 205, 196, 0.2);
+      border: 1px solid rgba(78, 205, 196, 0.4);
+      border-radius: 3px;
+      color: #4ECDC4;
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .bookmark-list-item .bm-go:hover {
+      background: rgba(78, 205, 196, 0.4);
+      color: #fff;
+    }
+
+    .bookmark-list-item .bm-delete {
+      padding: 4px 8px;
+      background: transparent;
+      border: 1px solid rgba(231, 76, 60, 0.4);
+      border-radius: 3px;
+      color: rgba(231, 76, 60, 0.7);
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .bookmark-list-item .bm-delete:hover {
+      background: rgba(231, 76, 60, 0.2);
+      border-color: #E74C3C;
+      color: #E74C3C;
+    }
+
+    .bookmark-empty {
+      color: #555;
+      font-size: 11px;
+      font-style: italic;
+      text-align: center;
+      padding: 12px;
+    }
+
+    /* Scrollbar for bookmark list */
+    #bookmark-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #bookmark-list::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    #bookmark-list::-webkit-scrollbar-thumb {
+      background: #FFD700;
+      border-radius: 3px;
+    }
   </style>
 </head>
 <body>
@@ -2449,6 +2805,10 @@
       <input type="range" id="trail-duration-slider" min="10" max="300" value="60" step="5">
       <span id="trail-duration-value">60s</span>
     </div>
+    <button id="bookmark-btn" title="Save bookmark (Ctrl+1-9)">
+      <span class="bookmark-icon">&#9733;</span>
+      <span class="bookmark-count"></span>
+    </button>
     <div id="branch-display" title="Current git branch">
       <span class="branch-icon">&#9095;</span>
       <span id="branch-name">&#8212;</span>
@@ -2563,6 +2923,35 @@
           <p class="section-placeholder">File context and metadata will appear here (Phase 16)</p>
         </div>
       </div>
+    </div>
+  </div>
+  <!-- Bookmark Save Dialog -->
+  <div id="bookmark-dialog-overlay" class="hidden"></div>
+  <div id="bookmark-dialog" class="hidden">
+    <div class="dialog-header">
+      <h3>Save Bookmark</h3>
+      <button id="bookmark-dialog-close">&times;</button>
+    </div>
+    <div class="dialog-body">
+      <div class="dialog-field">
+        <label for="bookmark-name">Name:</label>
+        <input type="text" id="bookmark-name" placeholder="Enter bookmark name..." maxlength="30">
+      </div>
+      <div class="dialog-field">
+        <label>Slot:</label>
+        <div id="bookmark-slots" class="bookmark-slots"></div>
+      </div>
+      <div class="dialog-info">
+        <p id="bookmark-current-info"></p>
+      </div>
+      <div class="bookmark-list-section">
+        <label>Saved Bookmarks:</label>
+        <div id="bookmark-list"></div>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button id="bookmark-save-btn" class="primary">Save</button>
+      <button id="bookmark-cancel-btn" class="secondary">Cancel</button>
     </div>
   </div>
   <script src="./bundle.js"></script>

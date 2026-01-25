@@ -1732,6 +1732,268 @@ function flyToNodeSmooth(nodeId, distance = 80) {
   }
 }
 
+// ============================================================
+// BOOKMARK MANAGEMENT
+// ============================================================
+
+// Save bookmark at slot (0-8 for keys 1-9)
+function saveBookmark(slot, name) {
+  if (slot < 0 || slot > 8) return;
+
+  // Get current camera position
+  let cameraPos = null;
+  if (Graph && Graph.cameraPosition) {
+    const pos = Graph.cameraPosition();
+    cameraPos = { x: pos.x, y: pos.y, z: pos.z };
+  }
+
+  // Create bookmark entry
+  bookmarks[slot] = {
+    name: name || `Bookmark ${slot + 1}`,
+    nodeId: selectedNode ? selectedNode.id : null,
+    cameraPosition: cameraPos,
+    timestamp: Date.now()
+  };
+
+  // Persist to store
+  persistBookmarks();
+
+  console.log('[Bookmark] Saved slot', slot + 1, ':', bookmarks[slot].name);
+
+  // Update UI
+  updateBookmarkIndicator();
+}
+
+// Delete bookmark at slot
+function deleteBookmark(slot) {
+  if (slot < 0 || slot > 8) return;
+  bookmarks[slot] = null;
+  persistBookmarks();
+  updateBookmarkIndicator();
+  console.log('[Bookmark] Deleted slot', slot + 1);
+
+  // Update dialog if open
+  if (document.getElementById('bookmark-dialog')?.classList.contains('visible')) {
+    updateBookmarkList();
+    updateBookmarkDialogSlots();
+  }
+}
+
+// Navigate to bookmark at slot
+function goToBookmark(slot) {
+  if (slot < 0 || slot > 8) return;
+
+  const bookmark = bookmarks[slot];
+  if (!bookmark) {
+    showToast(`Bookmark ${slot + 1} is empty`, false);
+    return;
+  }
+
+  // Restore camera position
+  if (bookmark.cameraPosition && Graph && Graph.cameraPosition) {
+    Graph.cameraPosition(
+      bookmark.cameraPosition,
+      bookmark.nodeId ? currentGraphData?.nodes?.find(n => n.id === bookmark.nodeId) : null,
+      800
+    );
+  }
+
+  // Select and show node if it exists
+  if (bookmark.nodeId) {
+    const node = currentGraphData?.nodes?.find(n => n.id === bookmark.nodeId);
+    if (node) {
+      showDetailsPanel(node);
+    } else {
+      showToast(`Node no longer exists`, false);
+    }
+  }
+
+  showToast(`Jumped to: ${bookmark.name}`, false);
+  console.log('[Bookmark] Go to slot', slot + 1, ':', bookmark.name);
+}
+
+// Persist bookmarks to electron-store
+async function persistBookmarks() {
+  try {
+    await window.electronAPI.store.set('bookmarks', bookmarks);
+  } catch (err) {
+    console.log('[Bookmark] Could not save:', err);
+  }
+}
+
+// Load bookmarks from electron-store
+async function loadBookmarks() {
+  try {
+    const saved = await window.electronAPI.store.get('bookmarks');
+    if (saved && Array.isArray(saved)) {
+      bookmarks = saved;
+      // Ensure array is exactly 9 slots
+      while (bookmarks.length < 9) bookmarks.push(null);
+      if (bookmarks.length > 9) bookmarks.length = 9;
+      updateBookmarkIndicator();
+      console.log('[Bookmark] Loaded', bookmarks.filter(b => b !== null).length, 'bookmarks');
+    }
+  } catch (err) {
+    console.log('[Bookmark] Could not load:', err);
+  }
+}
+
+// Update bookmark button to show count of saved bookmarks
+function updateBookmarkIndicator() {
+  const btn = document.getElementById('bookmark-btn');
+  if (!btn) return;
+
+  const count = bookmarks.filter(b => b !== null).length;
+  const badge = btn.querySelector('.bookmark-count');
+  if (badge) {
+    badge.textContent = count > 0 ? count : '';
+    badge.style.display = count > 0 ? 'inline-block' : 'none';
+  }
+}
+
+// Show bookmark save dialog
+function showBookmarkSaveDialog(slot = null) {
+  currentBookmarkSlot = slot !== null ? slot : 0;
+
+  // Show dialog
+  const overlay = document.getElementById('bookmark-dialog-overlay');
+  const dialog = document.getElementById('bookmark-dialog');
+  overlay?.classList.remove('hidden');
+  overlay?.classList.add('visible');
+  dialog?.classList.remove('hidden');
+  dialog?.classList.add('visible');
+
+  // Populate slot buttons
+  const slotsContainer = document.getElementById('bookmark-slots');
+  if (slotsContainer) {
+    let html = '';
+    for (let i = 0; i < 9; i++) {
+      const occupied = bookmarks[i] !== null;
+      const selected = i === currentBookmarkSlot;
+      html += `<div class="bookmark-slot ${occupied ? 'occupied' : ''} ${selected ? 'selected' : ''}" data-slot="${i}">
+        <span class="slot-number">${i + 1}</span>
+        <span class="slot-indicator"></span>
+      </div>`;
+    }
+    slotsContainer.innerHTML = html;
+
+    // Add click handlers for slots
+    slotsContainer.querySelectorAll('.bookmark-slot').forEach(slotEl => {
+      slotEl.addEventListener('click', () => {
+        currentBookmarkSlot = parseInt(slotEl.dataset.slot, 10);
+        slotsContainer.querySelectorAll('.bookmark-slot').forEach(s => s.classList.remove('selected'));
+        slotEl.classList.add('selected');
+        updateBookmarkDialogInfo();
+      });
+    });
+  }
+
+  // Set default name
+  const nameInput = document.getElementById('bookmark-name');
+  if (nameInput) {
+    const existingName = bookmarks[currentBookmarkSlot]?.name;
+    const nodeName = selectedNode?.name || selectedNode?.id?.split('/').pop() || '';
+    nameInput.value = existingName || nodeName || `Bookmark ${currentBookmarkSlot + 1}`;
+    nameInput.select();
+    nameInput.focus();
+  }
+
+  updateBookmarkDialogInfo();
+  updateBookmarkList();
+}
+
+// Update dialog info text
+function updateBookmarkDialogInfo() {
+  const info = document.getElementById('bookmark-current-info');
+  if (!info) return;
+
+  const existing = bookmarks[currentBookmarkSlot];
+  if (existing) {
+    info.textContent = `Slot ${currentBookmarkSlot + 1} contains: "${existing.name}" (will be replaced)`;
+  } else {
+    info.textContent = `Slot ${currentBookmarkSlot + 1} is empty. Press ${currentBookmarkSlot + 1} key to jump here.`;
+  }
+}
+
+// Hide bookmark dialog
+function hideBookmarkDialog() {
+  const overlay = document.getElementById('bookmark-dialog-overlay');
+  const dialog = document.getElementById('bookmark-dialog');
+  overlay?.classList.remove('visible');
+  overlay?.classList.add('hidden');
+  dialog?.classList.remove('visible');
+  dialog?.classList.add('hidden');
+}
+
+// Handle save button
+function handleBookmarkSave() {
+  const nameInput = document.getElementById('bookmark-name');
+  const name = nameInput?.value?.trim() || `Bookmark ${currentBookmarkSlot + 1}`;
+  saveBookmark(currentBookmarkSlot, name);
+  hideBookmarkDialog();
+  showToast(`Saved bookmark ${currentBookmarkSlot + 1}: ${name}`, false);
+}
+
+// Update bookmark list in dialog
+function updateBookmarkList() {
+  const listContainer = document.getElementById('bookmark-list');
+  if (!listContainer) return;
+
+  const savedBookmarks = bookmarks
+    .map((b, i) => b ? { ...b, slot: i } : null)
+    .filter(b => b !== null);
+
+  if (savedBookmarks.length === 0) {
+    listContainer.innerHTML = '<div class="bookmark-empty">No bookmarks saved. Press Ctrl+1-9 to save.</div>';
+    return;
+  }
+
+  let html = '';
+  savedBookmarks.forEach(b => {
+    html += `<div class="bookmark-list-item" data-slot="${b.slot}">
+      <span class="bm-slot">${b.slot + 1}</span>
+      <span class="bm-name">${b.name}</span>
+      <button class="bm-go" data-slot="${b.slot}">Go</button>
+      <button class="bm-delete" data-slot="${b.slot}">Delete</button>
+    </div>`;
+  });
+
+  listContainer.innerHTML = html;
+
+  // Add event listeners
+  listContainer.querySelectorAll('.bm-go').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const slot = parseInt(btn.dataset.slot, 10);
+      hideBookmarkDialog();
+      goToBookmark(slot);
+    });
+  });
+
+  listContainer.querySelectorAll('.bm-delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const slot = parseInt(btn.dataset.slot, 10);
+      deleteBookmark(slot);
+    });
+  });
+}
+
+// Update slot indicators after delete
+function updateBookmarkDialogSlots() {
+  const slotsContainer = document.getElementById('bookmark-slots');
+  if (!slotsContainer) return;
+
+  slotsContainer.querySelectorAll('.bookmark-slot').forEach(slotEl => {
+    const slot = parseInt(slotEl.dataset.slot, 10);
+    if (bookmarks[slot]) {
+      slotEl.classList.add('occupied');
+    } else {
+      slotEl.classList.remove('occupied');
+    }
+  });
+}
+
 // Flash a tree item with change-type-specific color
 function flashTreeItem(nodeId, changeType = 'modified') {
   const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);
@@ -4484,6 +4746,30 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// Bookmark keyboard shortcuts (1-9 keys)
+document.addEventListener('keydown', (e) => {
+  // Ignore if typing in input or if modal is open
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (document.getElementById('file-inspector-modal')?.classList.contains('visible')) return;
+  if (document.getElementById('bookmark-dialog')?.classList.contains('visible')) return;
+
+  // Number keys 1-9 for bookmarks
+  const digit = parseInt(e.key, 10);
+  if (digit >= 1 && digit <= 9) {
+    const slot = digit - 1;  // Convert to 0-indexed
+
+    if (e.ctrlKey || e.metaKey) {
+      // Ctrl/Cmd + 1-9 = Save bookmark
+      e.preventDefault();
+      showBookmarkSaveDialog(slot);
+    } else {
+      // Just 1-9 = Go to bookmark
+      e.preventDefault();
+      goToBookmark(slot);
+    }
+  }
+});
+
 // Refresh button handler
 document.getElementById('refresh-btn').addEventListener('click', async () => {
   if (selectedProjectPath) {
@@ -5985,6 +6271,12 @@ loadTrailSettings();
 // Load follow-active setting on startup
 loadFollowActiveSetting();
 
+// Load bookmarks on startup
+loadBookmarks();
+
+// Update bookmark indicator on startup
+updateBookmarkIndicator();
+
 // Load navigation history on startup
 loadNavigationHistory();
 
@@ -6031,6 +6323,35 @@ document.getElementById('recent-nodes')?.addEventListener('change', (e) => {
 
 // Initialize navigation controls
 updateNavigationButtonStates();
+
+// Bookmark button click - show dialog
+document.getElementById('bookmark-btn')?.addEventListener('click', () => {
+  showBookmarkSaveDialog();
+});
+
+// Bookmark dialog close button
+document.getElementById('bookmark-dialog-close')?.addEventListener('click', hideBookmarkDialog);
+
+// Bookmark cancel button
+document.getElementById('bookmark-cancel-btn')?.addEventListener('click', hideBookmarkDialog);
+
+// Bookmark save button
+document.getElementById('bookmark-save-btn')?.addEventListener('click', handleBookmarkSave);
+
+// Close dialog on overlay click
+document.getElementById('bookmark-dialog-overlay')?.addEventListener('click', hideBookmarkDialog);
+
+// Enter key in name input saves bookmark
+document.getElementById('bookmark-name')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    handleBookmarkSave();
+  }
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    hideBookmarkDialog();
+  }
+});
 
 // Modal search event listeners
 document.getElementById('modal-search-input')?.addEventListener('input', (e) => {

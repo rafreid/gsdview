@@ -81838,10 +81838,16 @@ var<${access}> ${name} : ${structName};`;
   var TRAIL_FADE_DURATION_DEFAULT = 6e4;
   var trailFadeDuration = TRAIL_FADE_DURATION_DEFAULT;
   var MAX_TRAILS = 20;
+  var navigationHistory = [];
+  var navigationIndex = -1;
+  var MAX_HISTORY_SIZE = 50;
+  var isNavigating = false;
   var timelinePosition = null;
   var isTimelinePlaying = false;
   var playbackInterval = null;
   var PLAYBACK_SPEED = 500;
+  var bookmarks = new Array(9).fill(null);
+  var currentBookmarkSlot = 0;
   var currentSearchQuery = "";
   var searchMatches = [];
   var currentMatchIndex = -1;
@@ -82016,6 +82022,115 @@ var<${access}> ${name} : ${structName};`;
       }
     } catch (err) {
       console.log("[Camera] Could not load follow-active setting:", err);
+    }
+  }
+  function pushNavigationHistory(nodeId) {
+    if (isNavigating) return;
+    if (navigationHistory[navigationIndex] === nodeId) return;
+    if (navigationIndex < navigationHistory.length - 1) {
+      navigationHistory = navigationHistory.slice(0, navigationIndex + 1);
+    }
+    navigationHistory.push(nodeId);
+    navigationIndex = navigationHistory.length - 1;
+    if (navigationHistory.length > MAX_HISTORY_SIZE) {
+      navigationHistory.shift();
+      navigationIndex--;
+    }
+    updateNavigationButtonStates();
+    updateRecentNodesDropdown();
+    saveNavigationHistory();
+  }
+  function navigateBack() {
+    if (navigationIndex <= 0) return;
+    isNavigating = true;
+    navigationIndex--;
+    const nodeId = navigationHistory[navigationIndex];
+    const node = currentGraphData?.nodes?.find((n2) => n2.id === nodeId);
+    if (node) {
+      flyToNodeSmooth(nodeId, 80);
+      showDetailsPanel(node);
+    }
+    updateNavigationButtonStates();
+    updateRecentNodesDropdown();
+    isNavigating = false;
+    console.log("[Nav] Back to:", nodeId, "index:", navigationIndex);
+  }
+  function navigateForward() {
+    if (navigationIndex >= navigationHistory.length - 1) return;
+    isNavigating = true;
+    navigationIndex++;
+    const nodeId = navigationHistory[navigationIndex];
+    const node = currentGraphData?.nodes?.find((n2) => n2.id === nodeId);
+    if (node) {
+      flyToNodeSmooth(nodeId, 80);
+      showDetailsPanel(node);
+    }
+    updateNavigationButtonStates();
+    updateRecentNodesDropdown();
+    isNavigating = false;
+    console.log("[Nav] Forward to:", nodeId, "index:", navigationIndex);
+  }
+  function updateNavigationButtonStates() {
+    const backBtn = document.getElementById("nav-back");
+    const forwardBtn = document.getElementById("nav-forward");
+    if (backBtn) {
+      if (navigationIndex > 0) {
+        backBtn.classList.remove("disabled");
+      } else {
+        backBtn.classList.add("disabled");
+      }
+    }
+    if (forwardBtn) {
+      if (navigationIndex < navigationHistory.length - 1) {
+        forwardBtn.classList.remove("disabled");
+      } else {
+        forwardBtn.classList.add("disabled");
+      }
+    }
+  }
+  function updateRecentNodesDropdown() {
+    const dropdown = document.getElementById("recent-nodes");
+    if (!dropdown) return;
+    const recentIds = [];
+    for (let i2 = navigationHistory.length - 1; i2 >= 0 && recentIds.length < 10; i2--) {
+      const nodeId = navigationHistory[i2];
+      if (!recentIds.includes(nodeId)) {
+        recentIds.push(nodeId);
+      }
+    }
+    let html = '<option value="">Recent nodes...</option>';
+    recentIds.forEach((nodeId) => {
+      const node = currentGraphData?.nodes?.find((n2) => n2.id === nodeId);
+      if (node) {
+        const displayName = node.name || nodeId.split("/").pop() || nodeId;
+        const truncated = displayName.length > 25 ? displayName.substring(0, 22) + "..." : displayName;
+        html += `<option value="${nodeId}">${truncated}</option>`;
+      }
+    });
+    dropdown.innerHTML = html;
+  }
+  async function saveNavigationHistory() {
+    try {
+      await window.electronAPI.store.set("navigationHistory", {
+        history: navigationHistory,
+        index: navigationIndex
+      });
+    } catch (err) {
+      console.log("[Nav] Could not save history:", err);
+    }
+  }
+  async function loadNavigationHistory() {
+    try {
+      const saved = await window.electronAPI.store.get("navigationHistory");
+      if (saved && Array.isArray(saved.history)) {
+        navigationHistory = saved.history;
+        navigationIndex = typeof saved.index === "number" ? saved.index : saved.history.length - 1;
+        updateNavigationButtonStates();
+        updateRecentNodesDropdown();
+        console.log("[Nav] Loaded history:", navigationHistory.length, "entries, index:", navigationIndex);
+      }
+    } catch (err) {
+      console.log("[Nav] Could not load history:", err);
     }
   }
   function lerpColor(color1, color2, t2) {
@@ -82807,6 +82922,201 @@ var<${access}> ${name} : ${structName};`;
         800
       );
     }
+  }
+  function saveBookmark(slot, name) {
+    if (slot < 0 || slot > 8) return;
+    let cameraPos = null;
+    if (Graph && Graph.cameraPosition) {
+      const pos = Graph.cameraPosition();
+      cameraPos = { x: pos.x, y: pos.y, z: pos.z };
+    }
+    bookmarks[slot] = {
+      name: name || `Bookmark ${slot + 1}`,
+      nodeId: selectedNode ? selectedNode.id : null,
+      cameraPosition: cameraPos,
+      timestamp: Date.now()
+    };
+    persistBookmarks();
+    console.log("[Bookmark] Saved slot", slot + 1, ":", bookmarks[slot].name);
+    updateBookmarkIndicator();
+  }
+  function deleteBookmark(slot) {
+    if (slot < 0 || slot > 8) return;
+    bookmarks[slot] = null;
+    persistBookmarks();
+    updateBookmarkIndicator();
+    console.log("[Bookmark] Deleted slot", slot + 1);
+    if (document.getElementById("bookmark-dialog")?.classList.contains("visible")) {
+      updateBookmarkList();
+      updateBookmarkDialogSlots();
+    }
+  }
+  function goToBookmark(slot) {
+    if (slot < 0 || slot > 8) return;
+    const bookmark = bookmarks[slot];
+    if (!bookmark) {
+      showToast(`Bookmark ${slot + 1} is empty`, false);
+      return;
+    }
+    if (bookmark.cameraPosition && Graph && Graph.cameraPosition) {
+      Graph.cameraPosition(
+        bookmark.cameraPosition,
+        bookmark.nodeId ? currentGraphData?.nodes?.find((n2) => n2.id === bookmark.nodeId) : null,
+        800
+      );
+    }
+    if (bookmark.nodeId) {
+      const node = currentGraphData?.nodes?.find((n2) => n2.id === bookmark.nodeId);
+      if (node) {
+        showDetailsPanel(node);
+      } else {
+        showToast(`Node no longer exists`, false);
+      }
+    }
+    showToast(`Jumped to: ${bookmark.name}`, false);
+    console.log("[Bookmark] Go to slot", slot + 1, ":", bookmark.name);
+  }
+  async function persistBookmarks() {
+    try {
+      await window.electronAPI.store.set("bookmarks", bookmarks);
+    } catch (err) {
+      console.log("[Bookmark] Could not save:", err);
+    }
+  }
+  async function loadBookmarks() {
+    try {
+      const saved = await window.electronAPI.store.get("bookmarks");
+      if (saved && Array.isArray(saved)) {
+        bookmarks = saved;
+        while (bookmarks.length < 9) bookmarks.push(null);
+        if (bookmarks.length > 9) bookmarks.length = 9;
+        updateBookmarkIndicator();
+        console.log("[Bookmark] Loaded", bookmarks.filter((b) => b !== null).length, "bookmarks");
+      }
+    } catch (err) {
+      console.log("[Bookmark] Could not load:", err);
+    }
+  }
+  function updateBookmarkIndicator() {
+    const btn = document.getElementById("bookmark-btn");
+    if (!btn) return;
+    const count = bookmarks.filter((b) => b !== null).length;
+    const badge = btn.querySelector(".bookmark-count");
+    if (badge) {
+      badge.textContent = count > 0 ? count : "";
+      badge.style.display = count > 0 ? "inline-block" : "none";
+    }
+  }
+  function showBookmarkSaveDialog(slot = null) {
+    currentBookmarkSlot = slot !== null ? slot : 0;
+    const overlay = document.getElementById("bookmark-dialog-overlay");
+    const dialog = document.getElementById("bookmark-dialog");
+    overlay?.classList.remove("hidden");
+    overlay?.classList.add("visible");
+    dialog?.classList.remove("hidden");
+    dialog?.classList.add("visible");
+    const slotsContainer = document.getElementById("bookmark-slots");
+    if (slotsContainer) {
+      let html = "";
+      for (let i2 = 0; i2 < 9; i2++) {
+        const occupied = bookmarks[i2] !== null;
+        const selected = i2 === currentBookmarkSlot;
+        html += `<div class="bookmark-slot ${occupied ? "occupied" : ""} ${selected ? "selected" : ""}" data-slot="${i2}">
+        <span class="slot-number">${i2 + 1}</span>
+        <span class="slot-indicator"></span>
+      </div>`;
+      }
+      slotsContainer.innerHTML = html;
+      slotsContainer.querySelectorAll(".bookmark-slot").forEach((slotEl) => {
+        slotEl.addEventListener("click", () => {
+          currentBookmarkSlot = parseInt(slotEl.dataset.slot, 10);
+          slotsContainer.querySelectorAll(".bookmark-slot").forEach((s2) => s2.classList.remove("selected"));
+          slotEl.classList.add("selected");
+          updateBookmarkDialogInfo();
+        });
+      });
+    }
+    const nameInput = document.getElementById("bookmark-name");
+    if (nameInput) {
+      const existingName = bookmarks[currentBookmarkSlot]?.name;
+      const nodeName = selectedNode?.name || selectedNode?.id?.split("/").pop() || "";
+      nameInput.value = existingName || nodeName || `Bookmark ${currentBookmarkSlot + 1}`;
+      nameInput.select();
+      nameInput.focus();
+    }
+    updateBookmarkDialogInfo();
+    updateBookmarkList();
+  }
+  function updateBookmarkDialogInfo() {
+    const info = document.getElementById("bookmark-current-info");
+    if (!info) return;
+    const existing = bookmarks[currentBookmarkSlot];
+    if (existing) {
+      info.textContent = `Slot ${currentBookmarkSlot + 1} contains: "${existing.name}" (will be replaced)`;
+    } else {
+      info.textContent = `Slot ${currentBookmarkSlot + 1} is empty. Press ${currentBookmarkSlot + 1} key to jump here.`;
+    }
+  }
+  function hideBookmarkDialog() {
+    const overlay = document.getElementById("bookmark-dialog-overlay");
+    const dialog = document.getElementById("bookmark-dialog");
+    overlay?.classList.remove("visible");
+    overlay?.classList.add("hidden");
+    dialog?.classList.remove("visible");
+    dialog?.classList.add("hidden");
+  }
+  function handleBookmarkSave() {
+    const nameInput = document.getElementById("bookmark-name");
+    const name = nameInput?.value?.trim() || `Bookmark ${currentBookmarkSlot + 1}`;
+    saveBookmark(currentBookmarkSlot, name);
+    hideBookmarkDialog();
+    showToast(`Saved bookmark ${currentBookmarkSlot + 1}: ${name}`, false);
+  }
+  function updateBookmarkList() {
+    const listContainer = document.getElementById("bookmark-list");
+    if (!listContainer) return;
+    const savedBookmarks = bookmarks.map((b, i2) => b ? { ...b, slot: i2 } : null).filter((b) => b !== null);
+    if (savedBookmarks.length === 0) {
+      listContainer.innerHTML = '<div class="bookmark-empty">No bookmarks saved. Press Ctrl+1-9 to save.</div>';
+      return;
+    }
+    let html = "";
+    savedBookmarks.forEach((b) => {
+      html += `<div class="bookmark-list-item" data-slot="${b.slot}">
+      <span class="bm-slot">${b.slot + 1}</span>
+      <span class="bm-name">${b.name}</span>
+      <button class="bm-go" data-slot="${b.slot}">Go</button>
+      <button class="bm-delete" data-slot="${b.slot}">Delete</button>
+    </div>`;
+    });
+    listContainer.innerHTML = html;
+    listContainer.querySelectorAll(".bm-go").forEach((btn) => {
+      btn.addEventListener("click", (e2) => {
+        e2.stopPropagation();
+        const slot = parseInt(btn.dataset.slot, 10);
+        hideBookmarkDialog();
+        goToBookmark(slot);
+      });
+    });
+    listContainer.querySelectorAll(".bm-delete").forEach((btn) => {
+      btn.addEventListener("click", (e2) => {
+        e2.stopPropagation();
+        const slot = parseInt(btn.dataset.slot, 10);
+        deleteBookmark(slot);
+      });
+    });
+  }
+  function updateBookmarkDialogSlots() {
+    const slotsContainer = document.getElementById("bookmark-slots");
+    if (!slotsContainer) return;
+    slotsContainer.querySelectorAll(".bookmark-slot").forEach((slotEl) => {
+      const slot = parseInt(slotEl.dataset.slot, 10);
+      if (bookmarks[slot]) {
+        slotEl.classList.add("occupied");
+      } else {
+        slotEl.classList.remove("occupied");
+      }
+    });
   }
   function flashTreeItem(nodeId, changeType = "modified") {
     const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);
@@ -83931,6 +84241,7 @@ ${node.goal}`;
   async function showDetailsPanel(node) {
     selectedNode = node;
     updateZoomButtonStates();
+    pushNavigationHistory(node.id);
     const panel = document.getElementById("details-panel");
     const title = document.getElementById("panel-title");
     const content = document.getElementById("panel-content");
@@ -84783,6 +85094,32 @@ ${node.goal}`;
       if (modal && !modal.classList.contains("hidden")) {
         e2.preventDefault();
         openModalSearch();
+      }
+    }
+  });
+  document.addEventListener("keydown", (e2) => {
+    if (e2.altKey && e2.key === "ArrowLeft") {
+      e2.preventDefault();
+      navigateBack();
+    }
+    if (e2.altKey && e2.key === "ArrowRight") {
+      e2.preventDefault();
+      navigateForward();
+    }
+  });
+  document.addEventListener("keydown", (e2) => {
+    if (e2.target.tagName === "INPUT" || e2.target.tagName === "TEXTAREA") return;
+    if (document.getElementById("file-inspector-modal")?.classList.contains("visible")) return;
+    if (document.getElementById("bookmark-dialog")?.classList.contains("visible")) return;
+    const digit = parseInt(e2.key, 10);
+    if (digit >= 1 && digit <= 9) {
+      const slot = digit - 1;
+      if (e2.ctrlKey || e2.metaKey) {
+        e2.preventDefault();
+        showBookmarkSaveDialog(slot);
+      } else {
+        e2.preventDefault();
+        goToBookmark(slot);
       }
     }
   });
@@ -85862,6 +86199,9 @@ ${file.count} changes (${file.events.created} created, ${file.events.modified} m
   });
   loadTrailSettings();
   loadFollowActiveSetting();
+  loadBookmarks();
+  updateBookmarkIndicator();
+  loadNavigationHistory();
   document.getElementById("zoom-overview")?.addEventListener("click", () => {
     zoomToOverview();
   });
@@ -85872,6 +86212,40 @@ ${file.count} changes (${file.events.created} created, ${file.events.modified} m
     zoomToDetail();
   });
   updateZoomButtonStates();
+  document.getElementById("nav-back")?.addEventListener("click", () => {
+    navigateBack();
+  });
+  document.getElementById("nav-forward")?.addEventListener("click", () => {
+    navigateForward();
+  });
+  document.getElementById("recent-nodes")?.addEventListener("change", (e2) => {
+    const nodeId = e2.target.value;
+    if (!nodeId) return;
+    e2.target.value = "";
+    const node = currentGraphData?.nodes?.find((n2) => n2.id === nodeId);
+    if (node) {
+      flyToNodeSmooth(nodeId, 80);
+      showDetailsPanel(node);
+    }
+  });
+  updateNavigationButtonStates();
+  document.getElementById("bookmark-btn")?.addEventListener("click", () => {
+    showBookmarkSaveDialog();
+  });
+  document.getElementById("bookmark-dialog-close")?.addEventListener("click", hideBookmarkDialog);
+  document.getElementById("bookmark-cancel-btn")?.addEventListener("click", hideBookmarkDialog);
+  document.getElementById("bookmark-save-btn")?.addEventListener("click", handleBookmarkSave);
+  document.getElementById("bookmark-dialog-overlay")?.addEventListener("click", hideBookmarkDialog);
+  document.getElementById("bookmark-name")?.addEventListener("keydown", (e2) => {
+    if (e2.key === "Enter") {
+      e2.preventDefault();
+      handleBookmarkSave();
+    }
+    if (e2.key === "Escape") {
+      e2.preventDefault();
+      hideBookmarkDialog();
+    }
+  });
   document.getElementById("modal-search-input")?.addEventListener("input", (e2) => {
     performSearch(e2.target.value);
   });
