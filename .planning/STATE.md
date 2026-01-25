@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 24 planning complete
+**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 25 in progress
 
 ## Current Position
 
-Phase: 24 of 25 (Minimap)
-Plan: 2/2 (complete)
-Status: Phase 24 complete
-Last activity: 2026-01-25 - Completed 24-02-PLAN.md
+Phase: 25 of 25 (Advanced Camera)
+Plan: 1/2 (25-02 complete)
+Status: Phase 25 in progress
+Last activity: 2026-01-25 - Completed 25-02-PLAN.md
 
-Progress: [████████████████████████████████████] 24/25 phases complete (96%)
+Progress: [█████████████████████████████████████] 25/25 phases (98%)
 
 ## Performance Metrics
 
@@ -39,7 +39,7 @@ Progress: [███████████████████████
 
 *v1.3 (Active):*
 - 8 phases planned
-- Status: Phase 24 in progress (8 plans complete)
+- Status: Phase 25 in progress (9 plans complete)
 
 ## Accumulated Context
 
@@ -206,6 +206,12 @@ Recent decisions affecting current work:
 - Pointer cursor on minimap canvas with teal hover effects (24-02)
 - minimapDragging flag prevents click navigation after drag (24-02)
 - Global mouseup listener ensures drag ends outside canvas (24-02)
+- PATH_DWELL_TIME=2000ms for 2 seconds at each waypoint (25-02)
+- PATH_TRANSITION_TIME=1500ms for smooth camera transitions (25-02)
+- Path loops continuously until user stops (25-02)
+- Cornflower blue (#6495ED) for path button theme (25-02)
+- Stop path playback on any graph click for user control (25-02)
+- P key toggles path playback (25-02)
 
 ### Pending Todos
 
@@ -234,6 +240,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed 24-02-PLAN.md (Phase 24 complete)
+Stopped at: Completed 25-02-PLAN.md (path animation)
 Resume file: None
-Next action: Begin Phase 25 or conclude v1.3 milestone
+Next action: Execute 25-01-PLAN.md (orbit mode) to complete Phase 25
