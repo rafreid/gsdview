@@ -342,8 +342,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BKM-02 | Phase 22 | Complete |
 | BKM-03 | Phase 22 | Complete |
 | BKM-04 | Phase 22 | Complete |
-| BRD-01 | Phase 23 | Pending |
-| BRD-02 | Phase 23 | Pending |
+| BRD-01 | Phase 23 | Complete |
+| BRD-02 | Phase 23 | Complete |
 | MAP-01 | Phase 24 | Pending |
 | MAP-02 | Phase 24 | Pending |
 | MAP-03 | Phase 24 | Pending |
@@ -367,4 +367,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-22 (v1.0), 2026-01-23 (v1.1), 2026-01-24 (v1.2, v1.3)*
-*Last updated: 2026-01-25 (Phase 22 requirements complete)*
+*Last updated: 2026-01-25 (Phase 23 requirements complete)*
