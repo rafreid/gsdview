@@ -81833,6 +81833,11 @@ var<${access}> ${name} : ${structName};`;
   var activityEntries = [];
   var activityUnreadCount = 0;
   var MAX_ACTIVITY_ENTRIES = 100;
+  var activityTrailsEnabled = true;
+  var activityTrails = [];
+  var TRAIL_FADE_DURATION_DEFAULT = 6e4;
+  var trailFadeDuration = TRAIL_FADE_DURATION_DEFAULT;
+  var MAX_TRAILS = 20;
   var timelinePosition = null;
   var isTimelinePlaying = false;
   var playbackInterval = null;
@@ -81932,6 +81937,87 @@ var<${access}> ${name} : ${structName};`;
       console.log("[Heat] Using default decay duration:", HEAT_MAX_DURATION / 1e3, "seconds");
     }
   }
+  function formatFlashDuration(ms) {
+    if (ms < 1e3) return `${ms}ms`;
+    return `${(ms / 1e3).toFixed(1)}s`.replace(".0s", "s");
+  }
+  function formatFlashIntensity(value) {
+    return `${(value / 100).toFixed(1)}x`.replace(".0x", "x");
+  }
+  async function loadFlashSettings() {
+    try {
+      const savedDuration = await window.electronAPI.store.get("flashDuration");
+      if (savedDuration && typeof savedDuration === "number") {
+        flashDuration = savedDuration;
+        const slider = document.getElementById("flash-duration-slider");
+        const valueDisplay = document.getElementById("flash-duration-value");
+        if (slider) slider.value = savedDuration;
+        if (valueDisplay) valueDisplay.textContent = formatFlashDuration(savedDuration);
+        document.documentElement.style.setProperty("--flash-duration", `${savedDuration}ms`);
+      }
+      const savedIntensity = await window.electronAPI.store.get("flashIntensity");
+      if (savedIntensity && typeof savedIntensity === "number") {
+        flashIntensity = savedIntensity / 100;
+        const slider = document.getElementById("flash-intensity-slider");
+        const valueDisplay = document.getElementById("flash-intensity-value");
+        if (slider) slider.value = savedIntensity;
+        if (valueDisplay) valueDisplay.textContent = formatFlashIntensity(savedIntensity);
+      }
+    } catch (err) {
+      console.log("[Flash] Using default flash settings");
+    }
+  }
+  var followActiveEnabled = false;
+  function formatTrailDuration(ms) {
+    const seconds = Math.round(ms / 1e3);
+    if (seconds < 60) return `${seconds}s`;
+    return `${Math.round(seconds / 60)}m`;
+  }
+  async function loadTrailSettings() {
+    try {
+      const savedEnabled = await window.electronAPI.store.get("activityTrailsEnabled");
+      if (savedEnabled !== void 0 && savedEnabled !== null) {
+        activityTrailsEnabled = savedEnabled;
+        const toggle = document.getElementById("trails-toggle");
+        if (toggle) {
+          if (activityTrailsEnabled) {
+            toggle.classList.add("active");
+          } else {
+            toggle.classList.remove("active");
+          }
+        }
+      }
+      const savedDuration = await window.electronAPI.store.get("trailFadeDuration");
+      if (savedDuration && typeof savedDuration === "number") {
+        trailFadeDuration = savedDuration;
+        const slider = document.getElementById("trail-duration-slider");
+        const valueDisplay = document.getElementById("trail-duration-value");
+        if (slider) slider.value = savedDuration / 1e3;
+        if (valueDisplay) valueDisplay.textContent = formatTrailDuration(savedDuration);
+      }
+      console.log("[Trail] Loaded settings, enabled:", activityTrailsEnabled, "duration:", trailFadeDuration);
+    } catch (err) {
+      console.log("[Trail] Using default trail settings");
+    }
+  }
+  async function loadFollowActiveSetting() {
+    try {
+      const saved = await window.electronAPI.store.get("followActiveEnabled");
+      if (typeof saved === "boolean") {
+        followActiveEnabled = saved;
+        const toggle = document.getElementById("follow-toggle");
+        if (toggle) {
+          if (followActiveEnabled) {
+            toggle.classList.add("active");
+          } else {
+            toggle.classList.remove("active");
+          }
+        }
+      }
+    } catch (err) {
+      console.log("[Camera] Could not load follow-active setting:", err);
+    }
+  }
   function lerpColor(color1, color2, t2) {
     const r1 = color1 >> 16 & 255, g12 = color1 >> 8 & 255, b1 = color1 & 255;
     const r2 = color2 >> 16 & 255, g2 = color2 >> 8 & 255, b2 = color2 & 255;
@@ -82015,6 +82101,177 @@ var<${access}> ${name} : ${structName};`;
       }
     }
     heatLoopRafId = requestAnimationFrame(heatLoop);
+  }
+  function createActivityTrail(fromNodeId, toNodeId) {
+    const fromNode = currentGraphData.nodes.find((n2) => n2.id === fromNodeId);
+    const toNode = currentGraphData.nodes.find((n2) => n2.id === toNodeId);
+    if (!fromNode || !toNode) {
+      console.log("[Trail] Skipping - missing node:", !fromNode ? fromNodeId : toNodeId);
+      return null;
+    }
+    if (fromNode.x === void 0 || toNode.x === void 0) {
+      console.log("[Trail] Skipping - nodes not yet positioned");
+      return null;
+    }
+    const geometry = new BufferGeometry();
+    const positions = new Float32Array([
+      fromNode.x,
+      fromNode.y,
+      fromNode.z || 0,
+      toNode.x,
+      toNode.y,
+      toNode.z || 0
+    ]);
+    geometry.setAttribute("position", new BufferAttribute(positions, 3));
+    const material = new LineDashedMaterial({
+      color: 5164484,
+      // Bright cyan to match UI theme
+      transparent: true,
+      opacity: 0.8,
+      dashSize: 8,
+      gapSize: 4,
+      linewidth: 2
+      // Note: linewidth only works on some platforms
+    });
+    const line = new Line(geometry, material);
+    line.name = `trail-${fromNodeId}-${toNodeId}`;
+    line.computeLineDistances();
+    if (typeof Graph !== "undefined" && Graph.scene) {
+      Graph.scene().add(line);
+    }
+    const trail = {
+      fromNodeId,
+      toNodeId,
+      timestamp: Date.now(),
+      lineObject: line
+    };
+    activityTrails.push(trail);
+    console.log("[Trail] Created trail from", fromNodeId, "to", toNodeId);
+    return trail;
+  }
+  function cleanupOldTrails() {
+    const now4 = Date.now();
+    const trailsToRemove = [];
+    activityTrails.forEach((trail, index5) => {
+      const age = now4 - trail.timestamp;
+      if (age > trailFadeDuration) {
+        trailsToRemove.push(index5);
+        if (trail.lineObject && typeof Graph !== "undefined" && Graph.scene) {
+          Graph.scene().remove(trail.lineObject);
+          if (trail.lineObject.geometry) {
+            trail.lineObject.geometry.dispose();
+          }
+          if (trail.lineObject.material) {
+            trail.lineObject.material.dispose();
+          }
+        }
+      }
+    });
+    for (let i2 = trailsToRemove.length - 1; i2 >= 0; i2--) {
+      activityTrails.splice(trailsToRemove[i2], 1);
+    }
+    if (trailsToRemove.length > 0) {
+      console.log("[Trail] Cleaned up", trailsToRemove.length, "old trails");
+    }
+  }
+  function trimExcessTrails() {
+    while (activityTrails.length > MAX_TRAILS) {
+      const oldest = activityTrails.shift();
+      if (oldest.lineObject && typeof Graph !== "undefined" && Graph.scene) {
+        Graph.scene().remove(oldest.lineObject);
+        if (oldest.lineObject.geometry) {
+          oldest.lineObject.geometry.dispose();
+        }
+        if (oldest.lineObject.material) {
+          oldest.lineObject.material.dispose();
+        }
+      }
+      console.log("[Trail] Trimmed excess trail");
+    }
+  }
+  function clearAllTrails() {
+    activityTrails.forEach((trail) => {
+      if (trail.lineObject && typeof Graph !== "undefined" && Graph.scene) {
+        Graph.scene().remove(trail.lineObject);
+        if (trail.lineObject.geometry) {
+          trail.lineObject.geometry.dispose();
+        }
+        if (trail.lineObject.material) {
+          trail.lineObject.material.dispose();
+        }
+      }
+    });
+    activityTrails = [];
+    console.log("[Trail] Cleared all trails");
+  }
+  function updateTrailPositions() {
+    activityTrails.forEach((trail) => {
+      const fromNode = currentGraphData.nodes.find((n2) => n2.id === trail.fromNodeId);
+      const toNode = currentGraphData.nodes.find((n2) => n2.id === trail.toNodeId);
+      if (!fromNode || !toNode || fromNode.x === void 0 || toNode.x === void 0) {
+        return;
+      }
+      if (trail.lineObject && trail.lineObject.geometry) {
+        const positions = trail.lineObject.geometry.attributes.position;
+        if (positions) {
+          positions.array[0] = fromNode.x;
+          positions.array[1] = fromNode.y;
+          positions.array[2] = fromNode.z || 0;
+          positions.array[3] = toNode.x;
+          positions.array[4] = toNode.y;
+          positions.array[5] = toNode.z || 0;
+          positions.needsUpdate = true;
+          trail.lineObject.computeLineDistances();
+        }
+      }
+    });
+  }
+  function updateTrailOpacities() {
+    const now4 = Date.now();
+    activityTrails.forEach((trail) => {
+      if (!trail.lineObject || !trail.lineObject.material) return;
+      const age = now4 - trail.timestamp;
+      const ageRatio = Math.min(age / trailFadeDuration, 1);
+      const opacity = 0.9 - ageRatio * 0.75;
+      trail.lineObject.material.opacity = Math.max(0.15, opacity);
+      let r2, g2, b;
+      if (ageRatio < 0.3) {
+        r2 = 78;
+        g2 = 205;
+        b = 196;
+      } else if (ageRatio < 0.7) {
+        const phase = (ageRatio - 0.3) / 0.4;
+        r2 = Math.round(78 - phase * 33);
+        g2 = Math.round(205 - phase * 66);
+        b = Math.round(196 - phase * 64);
+      } else {
+        const phase = (ageRatio - 0.7) / 0.3;
+        r2 = Math.round(45 - phase * 19);
+        g2 = Math.round(139 - phase * 65);
+        b = Math.round(132 - phase * 58);
+      }
+      const fadedColor = r2 << 16 | g2 << 8 | b;
+      trail.lineObject.material.color.setHex(fadedColor);
+    });
+  }
+  var trailLoopRunning = false;
+  var trailLoopRafId = null;
+  function startTrailAnimationLoop() {
+    if (trailLoopRunning) return;
+    trailLoopRunning = true;
+    function trailLoop() {
+      if (!trailLoopRunning) return;
+      updateTrailPositions();
+      updateTrailOpacities();
+      cleanupOldTrails();
+      if (activityTrails.length > 0) {
+        trailLoopRafId = requestAnimationFrame(trailLoop);
+      } else {
+        trailLoopRunning = false;
+        trailLoopRafId = null;
+      }
+    }
+    trailLoopRafId = requestAnimationFrame(trailLoop);
   }
   function getTimelineRange() {
     if (activityEntries.length === 0) {
@@ -82222,6 +82479,15 @@ var<${access}> ${name} : ${structName};`;
     const statsPanel = document.getElementById("statistics-panel");
     if (statsPanel && statsPanel.classList.contains("visible")) {
       updateStatisticsPanel();
+    }
+    if (activityTrailsEnabled && entry.nodeId && activityEntries.length > 1) {
+      const previousEntry = activityEntries[1];
+      if (previousEntry && previousEntry.nodeId && previousEntry.nodeId !== entry.nodeId) {
+        createActivityTrail(previousEntry.nodeId, entry.nodeId);
+        cleanupOldTrails();
+        trimExcessTrails();
+        startTrailAnimationLoop();
+      }
     }
     return entry;
   }
@@ -82517,6 +82783,30 @@ var<${access}> ${name} : ${structName};`;
     }
     Graph.graphData(currentGraphData);
     console.log("[Fade] Removed node from graph:", nodeId);
+  }
+  function flyToNodeSmooth(nodeId, distance3 = 80) {
+    if (!Graph || !currentGraphData) return;
+    const node = currentGraphData.nodes.find((n2) => n2.id === nodeId);
+    if (!node || node.x === void 0) return;
+    if (is3D) {
+      const distRatio = 1 + distance3 / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
+      Graph.cameraPosition(
+        {
+          x: (node.x || 0) * distRatio,
+          y: (node.y || 0) * distRatio,
+          z: (node.z || 0) * distRatio
+        },
+        node,
+        800
+        // Slightly faster transition for follow mode
+      );
+    } else {
+      Graph.cameraPosition(
+        { x: node.x || 0, y: node.y || 0, z: distance3 + 100 },
+        node,
+        800
+      );
+    }
   }
   function flashTreeItem(nodeId, changeType = "modified") {
     const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);
@@ -84545,6 +84835,9 @@ ${node.goal}`;
         if (entry.nodeId) {
           flashNodeWithType(entry.nodeId, entry.event);
           flashTreeItem(entry.nodeId, entry.event);
+          if (followActiveEnabled && entry.event !== "deleted") {
+            flyToNodeSmooth(entry.nodeId);
+          }
         }
         if (selectedNode && selectedNode.type === "file" && entry.nodeId === selectedNode.id) {
           refreshDiffSection();
@@ -84945,6 +85238,100 @@ ${node.goal}`;
       }, 100);
     }
   });
+  function zoomToOverview() {
+    if (!Graph || !currentGraphData || currentGraphData.nodes.length === 0) return;
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
+    currentGraphData.nodes.forEach((node) => {
+      if (node.x !== void 0) {
+        minX = Math.min(minX, node.x);
+        maxX = Math.max(maxX, node.x);
+        minY = Math.min(minY, node.y);
+        maxY = Math.max(maxY, node.y);
+        minZ = Math.min(minZ, node.z || 0);
+        maxZ = Math.max(maxZ, node.z || 0);
+      }
+    });
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    const centerZ = (minZ + maxZ) / 2;
+    const spanX = maxX - minX;
+    const spanY = maxY - minY;
+    const spanZ = maxZ - minZ;
+    const maxSpan = Math.max(spanX, spanY, spanZ, 100);
+    const distance3 = maxSpan * 1.5;
+    if (is3D) {
+      Graph.cameraPosition(
+        { x: centerX + distance3 * 0.5, y: centerY + distance3 * 0.5, z: centerZ + distance3 },
+        { x: centerX, y: centerY, z: centerZ },
+        1e3
+      );
+    } else {
+      Graph.cameraPosition(
+        { x: centerX, y: centerY, z: distance3 + 200 },
+        { x: centerX, y: centerY, z: 0 },
+        1e3
+      );
+    }
+    console.log("[Camera] Zoom to overview");
+  }
+  function zoomToFocus() {
+    if (!Graph || !selectedNode) {
+      console.log("[Camera] No node selected for focus zoom");
+      return;
+    }
+    const node = currentGraphData.nodes.find((n2) => n2.id === selectedNode.id);
+    if (!node || node.x === void 0) return;
+    const distance3 = 120;
+    if (is3D) {
+      const distRatio = 1 + distance3 / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
+      Graph.cameraPosition(
+        {
+          x: (node.x || 0) * distRatio,
+          y: (node.y || 0) * distRatio,
+          z: (node.z || 0) * distRatio
+        },
+        node,
+        1e3
+      );
+    } else {
+      Graph.cameraPosition(
+        { x: node.x || 0, y: node.y || 0, z: distance3 + 100 },
+        node,
+        1e3
+      );
+    }
+    console.log("[Camera] Zoom to focus on:", selectedNode.id);
+  }
+  function zoomToDetail() {
+    if (!Graph || !selectedNode) {
+      console.log("[Camera] No node selected for detail zoom");
+      return;
+    }
+    const node = currentGraphData.nodes.find((n2) => n2.id === selectedNode.id);
+    if (!node || node.x === void 0) return;
+    const distance3 = 40;
+    if (is3D) {
+      const distRatio = 1 + distance3 / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
+      Graph.cameraPosition(
+        {
+          x: (node.x || 0) * distRatio,
+          y: (node.y || 0) * distRatio,
+          z: (node.z || 0) * distRatio
+        },
+        node,
+        1e3
+      );
+    } else {
+      Graph.cameraPosition(
+        { x: node.x || 0, y: node.y || 0, z: distance3 + 50 },
+        node,
+        1e3
+      );
+    }
+    console.log("[Camera] Zoom to detail on:", selectedNode.id);
+  }
   function handleActivityEntryClick(nodeId, eventType, entryElement) {
     if (eventType === "deleted") {
       showDeletedFileMessage(entryElement);
@@ -85388,6 +85775,89 @@ ${file.count} changes (${file.events.created} created, ${file.events.modified} m
     }
   });
   loadHeatDecaySetting();
+  document.getElementById("flash-duration-slider")?.addEventListener("input", async (e2) => {
+    const ms = parseInt(e2.target.value, 10);
+    flashDuration = ms;
+    const valueDisplay = document.getElementById("flash-duration-value");
+    if (valueDisplay) valueDisplay.textContent = formatFlashDuration(ms);
+    document.documentElement.style.setProperty("--flash-duration", `${ms}ms`);
+    try {
+      await window.electronAPI.store.set("flashDuration", ms);
+    } catch (err) {
+      console.log("[Flash] Could not save duration setting:", err);
+    }
+  });
+  document.getElementById("flash-intensity-slider")?.addEventListener("input", async (e2) => {
+    const value = parseInt(e2.target.value, 10);
+    flashIntensity = value / 100;
+    const valueDisplay = document.getElementById("flash-intensity-value");
+    if (valueDisplay) valueDisplay.textContent = formatFlashIntensity(value);
+    try {
+      await window.electronAPI.store.set("flashIntensity", value);
+    } catch (err) {
+      console.log("[Flash] Could not save intensity setting:", err);
+    }
+  });
+  loadFlashSettings();
+  document.getElementById("trails-toggle")?.addEventListener("click", async () => {
+    activityTrailsEnabled = !activityTrailsEnabled;
+    const toggle = document.getElementById("trails-toggle");
+    if (toggle) {
+      if (activityTrailsEnabled) {
+        toggle.classList.add("active");
+        console.log("[Trail] Activity trails enabled");
+      } else {
+        toggle.classList.remove("active");
+        clearAllTrails();
+        console.log("[Trail] Activity trails disabled");
+      }
+    }
+    try {
+      await window.electronAPI.store.set("activityTrailsEnabled", activityTrailsEnabled);
+    } catch (err) {
+      console.log("[Trail] Could not save setting:", err);
+    }
+  });
+  document.getElementById("follow-toggle")?.addEventListener("click", async () => {
+    followActiveEnabled = !followActiveEnabled;
+    const toggle = document.getElementById("follow-toggle");
+    if (toggle) {
+      if (followActiveEnabled) {
+        toggle.classList.add("active");
+        console.log("[Camera] Follow-active mode enabled");
+      } else {
+        toggle.classList.remove("active");
+        console.log("[Camera] Follow-active mode disabled");
+      }
+    }
+    try {
+      await window.electronAPI.store.set("followActiveEnabled", followActiveEnabled);
+    } catch (err) {
+      console.log("[Camera] Could not save follow-active setting:", err);
+    }
+  });
+  document.getElementById("trail-duration-slider")?.addEventListener("input", async (e2) => {
+    const seconds = parseInt(e2.target.value, 10);
+    trailFadeDuration = seconds * 1e3;
+    const valueDisplay = document.getElementById("trail-duration-value");
+    if (valueDisplay) valueDisplay.textContent = formatTrailDuration(trailFadeDuration);
+    try {
+      await window.electronAPI.store.set("trailFadeDuration", trailFadeDuration);
+    } catch (err) {
+      console.log("[Trail] Could not save duration setting:", err);
+    }
+  });
+  loadTrailSettings();
+  loadFollowActiveSetting();
+  document.getElementById("zoom-overview")?.addEventListener("click", () => {
+    zoomToOverview();
+  });
+  document.getElementById("zoom-focus")?.addEventListener("click", () => {
+    zoomToFocus();
+  });
+  document.getElementById("zoom-detail")?.addEventListener("click", () => {
+    zoomToDetail();
+  });
   document.getElementById("modal-search-input")?.addEventListener("input", (e2) => {
     performSearch(e2.target.value);
   });

@@ -3132,6 +3132,7 @@ function renderDiffView(diffResult, filename) {
 // Details panel functions
 async function showDetailsPanel(node) {
   selectedNode = node;
+  updateZoomButtonStates(); // Enable focus/detail zoom buttons
   const panel = document.getElementById('details-panel');
   const title = document.getElementById('panel-title');
   const content = document.getElementById('panel-content');
@@ -5059,6 +5060,20 @@ function zoomToDetail() {
   console.log('[Camera] Zoom to detail on:', selectedNode.id);
 }
 
+// Update zoom button states based on selection
+function updateZoomButtonStates() {
+  const focusBtn = document.getElementById('zoom-focus');
+  const detailBtn = document.getElementById('zoom-detail');
+
+  if (selectedNode) {
+    focusBtn?.classList.remove('disabled');
+    detailBtn?.classList.remove('disabled');
+  } else {
+    focusBtn?.classList.add('disabled');
+    detailBtn?.classList.add('disabled');
+  }
+}
+
 // =====================================================
 // ACTIVITY ENTRY INTERACTIONS
 // =====================================================
@@ -5739,6 +5754,29 @@ document.getElementById('trails-toggle')?.addEventListener('click', async () => 
   }
 });
 
+// Follow-active toggle
+document.getElementById('follow-toggle')?.addEventListener('click', async () => {
+  followActiveEnabled = !followActiveEnabled;
+
+  const toggle = document.getElementById('follow-toggle');
+  if (toggle) {
+    if (followActiveEnabled) {
+      toggle.classList.add('active');
+      console.log('[Camera] Follow-active mode enabled');
+    } else {
+      toggle.classList.remove('active');
+      console.log('[Camera] Follow-active mode disabled');
+    }
+  }
+
+  // Persist setting
+  try {
+    await window.electronAPI.store.set('followActiveEnabled', followActiveEnabled);
+  } catch (err) {
+    console.log('[Camera] Could not save follow-active setting:', err);
+  }
+});
+
 // Trail duration slider handler
 document.getElementById('trail-duration-slider')?.addEventListener('input', async (e) => {
   const seconds = parseInt(e.target.value, 10);
@@ -5761,6 +5799,19 @@ loadTrailSettings();
 
 // Load follow-active setting on startup
 loadFollowActiveSetting();
+
+// Zoom preset buttons
+document.getElementById('zoom-overview')?.addEventListener('click', () => {
+  zoomToOverview();
+});
+
+document.getElementById('zoom-focus')?.addEventListener('click', () => {
+  zoomToFocus();
+});
+
+document.getElementById('zoom-detail')?.addEventListener('click', () => {
+  zoomToDetail();
+});
 
 // Modal search event listeners
 document.getElementById('modal-search-input')?.addEventListener('input', (e) => {

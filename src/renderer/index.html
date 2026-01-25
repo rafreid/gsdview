@@ -1038,6 +1038,54 @@
       font-style: italic;
     }
 
+    /* Zoom Preset Buttons */
+    #zoom-presets {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-left: 10px;
+      padding: 2px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+
+    .zoom-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 24px;
+      background: rgba(100, 149, 237, 0.15);
+      border: 1px solid rgba(100, 149, 237, 0.3);
+      border-radius: 3px;
+      color: rgba(100, 149, 237, 0.8);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .zoom-btn:hover {
+      background: rgba(100, 149, 237, 0.3);
+      border-color: rgba(100, 149, 237, 0.6);
+      color: #6495ED;
+    }
+
+    .zoom-btn:active {
+      background: rgba(100, 149, 237, 0.4);
+      transform: scale(0.95);
+    }
+
+    .zoom-btn span {
+      font-size: 14px;
+    }
+
+    /* Disable state for focus/detail when no node selected */
+    .zoom-btn.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
     /* Heat Decay Slider */
     #heat-decay-container {
       display: flex;
@@ -1172,6 +1220,38 @@
       font-size: 11px;
       color: rgba(255,255,255,0.6);
       min-width: 25px;
+    }
+
+    /* Follow-Active Toggle */
+    #follow-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      margin-left: 10px;
+      background: rgba(255, 165, 0, 0.15);
+      border: 1px solid rgba(255, 165, 0, 0.4);
+      border-radius: 4px;
+      color: rgba(255, 165, 0, 0.7);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #follow-toggle:hover {
+      background: rgba(255, 165, 0, 0.25);
+      border-color: rgba(255, 165, 0, 0.6);
+      color: #FFA500;
+    }
+
+    #follow-toggle.active {
+      background: rgba(255, 165, 0, 0.3);
+      border-color: #FFA500;
+      color: #FFA500;
+    }
+
+    #follow-toggle .follow-icon {
+      font-size: 14px;
     }
 
     /* Trails Toggle Button */
@@ -2248,6 +2328,17 @@
     </select>
     <button id="refresh-btn" title="Refresh graph">↻ Refresh</button>
     <button id="dimension-toggle" title="Toggle between 2D and 3D view">3D</button>
+    <div id="zoom-presets" title="Quick zoom presets">
+      <button id="zoom-overview" class="zoom-btn" title="Zoom out to see entire graph">
+        <span>&#128269;-</span>
+      </button>
+      <button id="zoom-focus" class="zoom-btn" title="Focus on selected node (medium distance)">
+        <span>&#9678;</span>
+      </button>
+      <button id="zoom-detail" class="zoom-btn" title="Detail view of selected node (close-up)">
+        <span>&#128269;+</span>
+      </button>
+    </div>
     <div id="heat-decay-container">
       <span id="heat-decay-label">Heat:</span>
       <input type="range" id="heat-decay-slider" min="30" max="600" value="300" title="Heat decay duration (seconds)">
@@ -2263,6 +2354,9 @@
       <input type="range" id="flash-intensity-slider" min="50" max="200" value="100" step="10">
       <span id="flash-intensity-value">1x</span>
     </div>
+    <button id="follow-toggle" title="Auto-follow camera to changed files">
+      <span class="follow-icon">&#9678;</span> Follow
+    </button>
     <button id="trails-toggle" class="active" title="Toggle activity trails connecting changed files">
       <span class="trails-icon">&#9872;</span> Trails
     </button>
