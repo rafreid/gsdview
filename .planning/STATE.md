@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Phase: 29 - Performance Polish
-Plan: 01 of 01
+Plan: 02 of 02
 Status: Phase complete
-Last activity: 2026-01-25 — Executed 29-01-PLAN.md (Performance Polish)
+Last activity: 2026-01-25 — Executed 29-02-PLAN.md (Hook Status Detection & Debug Mode)
 
 Progress: [████████████████████████████████████████] 4/4 phases (100%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 65 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 4)
+- Total plans completed: 66 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5)
 - Average duration: 5min
-- Total execution time: 2 days + 103m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 14m)
+- Total execution time: 2 days + 108m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m)
 
 **By Milestone:**
 
@@ -42,7 +42,7 @@ Progress: [███████████████████████
 - Status: Shipped 2026-01-25
 
 *v1.4 (Complete):*
-- 4 phases, 4 plans complete
+- 4 phases, 5 plans complete
 - Status: Shipped 2026-01-25 (All phases complete)
 
 ## Accumulated Context
@@ -242,6 +242,12 @@ Recent decisions affecting current work:
 - Animation batching with pendingFlashes queue for operation burst handling (29-01)
 - 50ms stagger delay prevents frame spikes during batch processing (29-01)
 - Console logging for batching activity (queued, processing, drained) (29-01)
+- 30-second hook detection timeout balances false positives vs. timely notification (29-02)
+- Debug mode off by default to avoid UI clutter, user opts in for troubleshooting (29-02)
+- 50 debug entry limit prevents memory bloat from unbounded growth (29-02)
+- Color-coded debug operations match flash animation colors (29-02)
+- hookStatusTimeout cleared on first Claude event (hooks working) (29-02)
+- IPC handler 'open-external' enables Setup Guide documentation access (29-02)
 
 ### Pending Todos
 
@@ -270,6 +276,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Executed 29-01-PLAN.md (Performance Polish)
+Stopped at: Executed 29-02-PLAN.md (Hook Status Detection & Debug Mode)
 Resume file: None
 Next action: v1.4 milestone complete - all phases shipped
