@@ -116,6 +116,14 @@ const PLAYBACK_SPEED = 500; // ms between steps during playback
 let bookmarks = new Array(9).fill(null);  // 9 bookmark slots (accessed via keys 1-9)
 let currentBookmarkSlot = 0;  // Track selected slot in dialog
 
+// Path playback state
+let pathPlaybackEnabled = false;
+let pathWaypoints = []; // Array of { nodeId, cameraPosition, name, slot }
+let currentWaypointIndex = 0;
+let pathPlaybackTimeoutId = null;
+const PATH_DWELL_TIME = 2000; // Time to pause at each waypoint (ms)
+const PATH_TRANSITION_TIME = 1500; // Time to fly between waypoints (ms)
+
 // Minimap state
 let minimapCollapsed = false;
 let minimapCanvas = null;
@@ -354,6 +362,14 @@ async function loadFlashSettings() {
 
 // Follow-active camera mode
 let followActiveEnabled = false; // Default off - user opts in
+
+// Orbit mode state
+let orbitModeEnabled = false;
+let orbitSpeed = 0.5; // Radians per second (configurable)
+let orbitAngle = 0; // Current orbit angle
+let orbitAnimationId = null; // RAF reference
+let orbitCenterNode = null; // Node being orbited
+const ORBIT_RADIUS_MULTIPLIER = 1.5; // Distance from node (multiplied by node's current camera distance)
 
 // Format trail duration for display (value in ms, display in seconds)
 function formatTrailDuration(ms) {
@@ -1742,6 +1758,136 @@ function flyToNodeSmooth(nodeId, distance = 80) {
 }
 
 // ============================================================
+// ORBIT MODE (Presentation Camera Rotation)
+// ============================================================
+
+// Start orbit mode around currently selected node
+function startOrbitMode() {
+  if (!selectedNode || !Graph) return;
+
+  orbitModeEnabled = true;
+  orbitCenterNode = selectedNode;
+
+  // Calculate initial orbit radius based on current camera distance
+  const cameraPos = Graph.cameraPosition();
+  const nodePos = { x: orbitCenterNode.x || 0, y: orbitCenterNode.y || 0, z: orbitCenterNode.z || 0 };
+  const currentDistance = Math.sqrt(
+    Math.pow(cameraPos.x - nodePos.x, 2) +
+    Math.pow(cameraPos.y - nodePos.y, 2) +
+    Math.pow(cameraPos.z - nodePos.z, 2)
+  );
+  const orbitRadius = currentDistance * ORBIT_RADIUS_MULTIPLIER;
+
+  // Calculate initial angle from current camera position
+  orbitAngle = Math.atan2(cameraPos.x - nodePos.x, cameraPos.z - nodePos.z);
+
+  let lastTime = performance.now();
+
+  function orbitLoop(currentTime) {
+    if (!orbitModeEnabled) {
+      orbitAnimationId = null;
+      return;
+    }
+
+    const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
+    lastTime = currentTime;
+
+    // Increment angle based on speed
+    orbitAngle += orbitSpeed * deltaTime;
+
+    // Calculate new camera position (orbit in XZ plane for 3D, XY for 2D)
+    const nodePos = {
+      x: orbitCenterNode.x || 0,
+      y: orbitCenterNode.y || 0,
+      z: orbitCenterNode.z || 0
+    };
+
+    if (is3D) {
+      // 3D orbit: camera moves in XZ plane, Y stays at node height + offset
+      const camX = nodePos.x + orbitRadius * Math.sin(orbitAngle);
+      const camY = nodePos.y + orbitRadius * 0.3; // Slight elevation
+      const camZ = nodePos.z + orbitRadius * Math.cos(orbitAngle);
+
+      Graph.cameraPosition(
+        { x: camX, y: camY, z: camZ },
+        nodePos,
+        0 // Instant positioning for smooth orbit
+      );
+    } else {
+      // 2D orbit: camera rotates around node's XY position at fixed Z
+      const camX = nodePos.x + orbitRadius * Math.sin(orbitAngle);
+      const camY = nodePos.y + orbitRadius * Math.cos(orbitAngle);
+      const camZ = 200; // Fixed Z height for 2D
+
+      Graph.cameraPosition(
+        { x: camX, y: camY, z: camZ },
+        { x: nodePos.x, y: nodePos.y, z: 0 },
+        0
+      );
+    }
+
+    orbitAnimationId = requestAnimationFrame(orbitLoop);
+  }
+
+  orbitAnimationId = requestAnimationFrame(orbitLoop);
+
+  // Update UI
+  const toggle = document.getElementById('orbit-toggle');
+  if (toggle) toggle.classList.add('active');
+}
+
+function stopOrbitMode() {
+  orbitModeEnabled = false;
+  if (orbitAnimationId) {
+    cancelAnimationFrame(orbitAnimationId);
+    orbitAnimationId = null;
+  }
+  orbitCenterNode = null;
+
+  // Update UI
+  const toggle = document.getElementById('orbit-toggle');
+  if (toggle) toggle.classList.remove('active');
+}
+
+function toggleOrbitMode() {
+  if (orbitModeEnabled) {
+    stopOrbitMode();
+  } else {
+    if (!selectedNode) {
+      showToast('Select a node first to orbit around', 'warning');
+      return;
+    }
+    startOrbitMode();
+  }
+}
+
+// Update orbit speed from slider
+function updateOrbitSpeed(value) {
+  // Slider value 1-10 maps to 0.1 - 1.0 radians/sec
+  orbitSpeed = value / 10;
+  const label = document.getElementById('orbit-speed-value');
+  if (label) label.textContent = value.toFixed(1);
+}
+
+// Load orbit speed setting from store
+async function loadOrbitSpeedSetting() {
+  try {
+    const saved = await window.electronAPI.store.get('orbitSpeed');
+    if (typeof saved === 'number') {
+      const slider = document.getElementById('orbit-speed-slider');
+      const label = document.getElementById('orbit-speed-value');
+      if (slider) {
+        slider.value = saved;
+        orbitSpeed = saved / 10;
+        if (label) label.textContent = saved.toFixed(1);
+      }
+    }
+  } catch (err) {
+    console.log('[Orbit] Could not load speed setting:', err);
+  }
+}
+
+// ============================================================
 // BOOKMARK MANAGEMENT
 // ============================================================
 
@@ -2001,6 +2147,137 @@ function updateBookmarkDialogSlots() {
       slotEl.classList.remove('occupied');
     }
   });
+}
+
+// ============================================================
+// PATH PLAYBACK (CAMERA TOUR THROUGH BOOKMARKS)
+// ============================================================
+
+// Start path playback through all saved bookmarks
+function startPathPlayback() {
+  // Get all non-empty bookmarks as waypoints
+  pathWaypoints = bookmarks
+    .map((bm, index) => bm ? { ...bm, slot: index + 1 } : null)
+    .filter(bm => bm !== null && bm.nodeId !== null);
+
+  if (pathWaypoints.length < 2) {
+    showToast('Save at least 2 bookmarks to create a path (Ctrl+1-9)', 'warning');
+    return;
+  }
+
+  pathPlaybackEnabled = true;
+  currentWaypointIndex = 0;
+
+  // Update UI
+  const playBtn = document.getElementById('path-play');
+  if (playBtn) {
+    playBtn.classList.add('active');
+    playBtn.innerHTML = '<span class="path-icon">&#9632;</span> Stop';
+  }
+  updatePathProgress();
+
+  // Start the journey
+  flyToWaypoint(0);
+}
+
+function stopPathPlayback() {
+  pathPlaybackEnabled = false;
+  if (pathPlaybackTimeoutId) {
+    clearTimeout(pathPlaybackTimeoutId);
+    pathPlaybackTimeoutId = null;
+  }
+  pathWaypoints = [];
+  currentWaypointIndex = 0;
+
+  // Update UI
+  const playBtn = document.getElementById('path-play');
+  if (playBtn) {
+    playBtn.classList.remove('active');
+    playBtn.innerHTML = '<span class="path-icon">&#9654;</span> Path';
+  }
+  updatePathProgress();
+}
+
+function flyToWaypoint(index) {
+  if (!pathPlaybackEnabled || index >= pathWaypoints.length) {
+    // Path complete - loop back to start
+    if (pathPlaybackEnabled && pathWaypoints.length > 0) {
+      // Loop the path
+      currentWaypointIndex = 0;
+      flyToWaypoint(0);
+    } else {
+      stopPathPlayback();
+    }
+    return;
+  }
+
+  currentWaypointIndex = index;
+  updatePathProgress();
+
+  const waypoint = pathWaypoints[index];
+
+  // Find the node in graph data
+  const node = currentGraphData?.nodes?.find(n => n.id === waypoint.nodeId);
+
+  if (node && Graph) {
+    // Fly to node position with smooth transition
+    if (is3D) {
+      const distance = 80;
+      const distRatio = 1 + distance / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
+      Graph.cameraPosition(
+        {
+          x: (node.x || 0) * distRatio,
+          y: (node.y || 0) * distRatio,
+          z: (node.z || 0) * distRatio
+        },
+        node,
+        PATH_TRANSITION_TIME
+      );
+    } else {
+      Graph.cameraPosition(
+        { x: node.x || 0, y: node.y || 0, z: 180 },
+        node,
+        PATH_TRANSITION_TIME
+      );
+    }
+
+    // Select the node
+    selectedNode = node;
+    showDetailsPanel(node);
+    updateBreadcrumb(node);
+
+    // Show toast with waypoint info
+    showToast(`${index + 1}/${pathWaypoints.length}: ${waypoint.name || 'Bookmark ' + waypoint.slot}`, 'info');
+  }
+
+  // Schedule next waypoint after transition + dwell time
+  pathPlaybackTimeoutId = setTimeout(() => {
+    if (pathPlaybackEnabled) {
+      flyToWaypoint(index + 1);
+    }
+  }, PATH_TRANSITION_TIME + PATH_DWELL_TIME);
+}
+
+function togglePathPlayback() {
+  if (pathPlaybackEnabled) {
+    stopPathPlayback();
+  } else {
+    startPathPlayback();
+  }
+}
+
+// Update path progress indicator
+function updatePathProgress() {
+  const indicator = document.getElementById('path-progress');
+  if (!indicator) return;
+
+  if (!pathPlaybackEnabled || pathWaypoints.length === 0) {
+    indicator.textContent = '';
+    indicator.style.display = 'none';
+  } else {
+    indicator.textContent = `${currentWaypointIndex + 1}/${pathWaypoints.length}`;
+    indicator.style.display = 'inline-block';
+  }
 }
 
 // Flash a tree item with change-type-specific color
@@ -2385,6 +2662,11 @@ const Graph = ForceGraph3D()(container)
   .showNavInfo(false)
   // Click-to-fly navigation
   .onNodeClick(node => {
+    // Stop path playback when user clicks on graph
+    if (pathPlaybackEnabled) {
+      stopPathPlayback();
+    }
+
     // Double-click detection for file nodes
     const now = Date.now();
     if (node.type === 'file' && lastClickNode === node && (now - lastClickTime) < DOUBLE_CLICK_THRESHOLD) {
@@ -4862,6 +5144,22 @@ document.addEventListener('keydown', (e) => {
     }
   }
 });
+
+// P key to toggle path playback
+document.addEventListener('keydown', (e) => {
+  // Ignore if typing in input or if modal is open
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (document.getElementById('file-inspector-modal')?.classList.contains('visible')) return;
+  if (document.getElementById('bookmark-dialog')?.classList.contains('visible')) return;
+
+  if ((e.key === 'p' || e.key === 'P') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    e.preventDefault();
+    togglePathPlayback();
+  }
+});
+
+// Path playback toggle button
+document.getElementById('path-play')?.addEventListener('click', togglePathPlayback);
 
 // Refresh button handler
 document.getElementById('refresh-btn').addEventListener('click', async () => {

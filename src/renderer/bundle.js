@@ -81848,6 +81848,19 @@ var<${access}> ${name} : ${structName};`;
   var PLAYBACK_SPEED = 500;
   var bookmarks = new Array(9).fill(null);
   var currentBookmarkSlot = 0;
+  var pathPlaybackEnabled = false;
+  var pathWaypoints = [];
+  var currentWaypointIndex = 0;
+  var pathPlaybackTimeoutId = null;
+  var PATH_DWELL_TIME = 2e3;
+  var PATH_TRANSITION_TIME = 1500;
+  var minimapCollapsed = false;
+  var minimapCanvas = null;
+  var minimapCtx = null;
+  var minimapBounds = { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+  var MINIMAP_PADDING = 10;
+  var minimapRafId = null;
+  var minimapDragging = false;
   var currentSearchQuery = "";
   var searchMatches = [];
   var currentMatchIndex = -1;
@@ -83118,6 +83131,100 @@ var<${access}> ${name} : ${structName};`;
       }
     });
   }
+  function startPathPlayback() {
+    pathWaypoints = bookmarks.map((bm, index5) => bm ? { ...bm, slot: index5 + 1 } : null).filter((bm) => bm !== null && bm.nodeId !== null);
+    if (pathWaypoints.length < 2) {
+      showToast("Save at least 2 bookmarks to create a path (Ctrl+1-9)", "warning");
+      return;
+    }
+    pathPlaybackEnabled = true;
+    currentWaypointIndex = 0;
+    const playBtn = document.getElementById("path-play");
+    if (playBtn) {
+      playBtn.classList.add("active");
+      playBtn.innerHTML = '<span class="path-icon">&#9632;</span> Stop';
+    }
+    updatePathProgress();
+    flyToWaypoint(0);
+  }
+  function stopPathPlayback() {
+    pathPlaybackEnabled = false;
+    if (pathPlaybackTimeoutId) {
+      clearTimeout(pathPlaybackTimeoutId);
+      pathPlaybackTimeoutId = null;
+    }
+    pathWaypoints = [];
+    currentWaypointIndex = 0;
+    const playBtn = document.getElementById("path-play");
+    if (playBtn) {
+      playBtn.classList.remove("active");
+      playBtn.innerHTML = '<span class="path-icon">&#9654;</span> Path';
+    }
+    updatePathProgress();
+  }
+  function flyToWaypoint(index5) {
+    if (!pathPlaybackEnabled || index5 >= pathWaypoints.length) {
+      if (pathPlaybackEnabled && pathWaypoints.length > 0) {
+        currentWaypointIndex = 0;
+        flyToWaypoint(0);
+      } else {
+        stopPathPlayback();
+      }
+      return;
+    }
+    currentWaypointIndex = index5;
+    updatePathProgress();
+    const waypoint = pathWaypoints[index5];
+    const node = currentGraphData?.nodes?.find((n2) => n2.id === waypoint.nodeId);
+    if (node && Graph) {
+      if (is3D) {
+        const distance3 = 80;
+        const distRatio = 1 + distance3 / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
+        Graph.cameraPosition(
+          {
+            x: (node.x || 0) * distRatio,
+            y: (node.y || 0) * distRatio,
+            z: (node.z || 0) * distRatio
+          },
+          node,
+          PATH_TRANSITION_TIME
+        );
+      } else {
+        Graph.cameraPosition(
+          { x: node.x || 0, y: node.y || 0, z: 180 },
+          node,
+          PATH_TRANSITION_TIME
+        );
+      }
+      selectedNode = node;
+      showDetailsPanel(node);
+      updateBreadcrumb(node);
+      showToast(`${index5 + 1}/${pathWaypoints.length}: ${waypoint.name || "Bookmark " + waypoint.slot}`, "info");
+    }
+    pathPlaybackTimeoutId = setTimeout(() => {
+      if (pathPlaybackEnabled) {
+        flyToWaypoint(index5 + 1);
+      }
+    }, PATH_TRANSITION_TIME + PATH_DWELL_TIME);
+  }
+  function togglePathPlayback() {
+    if (pathPlaybackEnabled) {
+      stopPathPlayback();
+    } else {
+      startPathPlayback();
+    }
+  }
+  function updatePathProgress() {
+    const indicator = document.getElementById("path-progress");
+    if (!indicator) return;
+    if (!pathPlaybackEnabled || pathWaypoints.length === 0) {
+      indicator.textContent = "";
+      indicator.style.display = "none";
+    } else {
+      indicator.textContent = `${currentWaypointIndex + 1}/${pathWaypoints.length}`;
+      indicator.style.display = "inline-block";
+    }
+  }
   function flashTreeItem(nodeId, changeType = "modified") {
     const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);
     if (!treeItem) return;
@@ -83380,6 +83487,9 @@ ${node.goal}`;
     }
     return false;
   }).linkColor((link) => getLinkColor(link, currentGraphData)).linkWidth((link) => getLinkWidth(link, currentGraphData)).linkOpacity(0.6).linkDirectionalArrowLength(3.5).linkDirectionalArrowRelPos(1).backgroundColor("#1a1a2e").showNavInfo(false).onNodeClick((node) => {
+    if (pathPlaybackEnabled) {
+      stopPathPlayback();
+    }
     const now4 = Date.now();
     if (node.type === "file" && lastClickNode === node && now4 - lastClickTime < DOUBLE_CLICK_THRESHOLD) {
       openFileInspector(node);
@@ -85173,6 +85283,16 @@ ${node.goal}`;
       }
     }
   });
+  document.addEventListener("keydown", (e2) => {
+    if (e2.target.tagName === "INPUT" || e2.target.tagName === "TEXTAREA") return;
+    if (document.getElementById("file-inspector-modal")?.classList.contains("visible")) return;
+    if (document.getElementById("bookmark-dialog")?.classList.contains("visible")) return;
+    if ((e2.key === "p" || e2.key === "P") && !e2.ctrlKey && !e2.metaKey && !e2.altKey) {
+      e2.preventDefault();
+      togglePathPlayback();
+    }
+  });
+  document.getElementById("path-play")?.addEventListener("click", togglePathPlayback);
   document.getElementById("refresh-btn").addEventListener("click", async () => {
     if (selectedProjectPath) {
       const btn = document.getElementById("refresh-btn");
@@ -86323,6 +86443,216 @@ ${file.count} changes (${file.events.created} created, ${file.events.modified} m
       }
     }
   });
+  function calculateMinimapBounds() {
+    if (!currentGraphData?.nodes || currentGraphData.nodes.length === 0) {
+      return { minX: -100, maxX: 100, minY: -100, maxY: 100 };
+    }
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    currentGraphData.nodes.forEach((node) => {
+      if (node.x !== void 0 && node.y !== void 0) {
+        minX = Math.min(minX, node.x);
+        maxX = Math.max(maxX, node.x);
+        minY = Math.min(minY, node.y);
+        maxY = Math.max(maxY, node.y);
+      }
+    });
+    if (!isFinite(minX)) {
+      return { minX: -100, maxX: 100, minY: -100, maxY: 100 };
+    }
+    const xPadding = (maxX - minX) * 0.1 || 10;
+    const yPadding = (maxY - minY) * 0.1 || 10;
+    return {
+      minX: minX - xPadding,
+      maxX: maxX + xPadding,
+      minY: minY - yPadding,
+      maxY: maxY + yPadding
+    };
+  }
+  function worldToMinimap(worldX, worldY) {
+    if (!minimapCanvas) return { x: 0, y: 0 };
+    const canvasWidth = minimapCanvas.width - MINIMAP_PADDING * 2;
+    const canvasHeight = minimapCanvas.height - MINIMAP_PADDING * 2;
+    const worldWidth = minimapBounds.maxX - minimapBounds.minX;
+    const worldHeight = minimapBounds.maxY - minimapBounds.minY;
+    const x3 = (worldX - minimapBounds.minX) / worldWidth * canvasWidth + MINIMAP_PADDING;
+    const y3 = (worldY - minimapBounds.minY) / worldHeight * canvasHeight + MINIMAP_PADDING;
+    return { x: x3, y: y3 };
+  }
+  function minimapToWorld(canvasX, canvasY) {
+    if (!minimapCanvas) return { x: 0, y: 0 };
+    const canvasWidth = minimapCanvas.width - MINIMAP_PADDING * 2;
+    const canvasHeight = minimapCanvas.height - MINIMAP_PADDING * 2;
+    const worldWidth = minimapBounds.maxX - minimapBounds.minX;
+    const worldHeight = minimapBounds.maxY - minimapBounds.minY;
+    const x3 = (canvasX - MINIMAP_PADDING) / canvasWidth * worldWidth + minimapBounds.minX;
+    const y3 = (canvasY - MINIMAP_PADDING) / canvasHeight * worldHeight + minimapBounds.minY;
+    return { x: x3, y: y3 };
+  }
+  function drawMinimapViewport(ctx) {
+    if (!Graph || !Graph.cameraPosition) return;
+    const cameraPos = Graph.cameraPosition();
+    if (!cameraPos || !cameraPos.x || !cameraPos.y) return;
+    const distance3 = Math.sqrt(cameraPos.x * cameraPos.x + cameraPos.y * cameraPos.y + (cameraPos.z || 0) * (cameraPos.z || 0));
+    const viewportWorldWidth = Math.max(distance3 * 0.5, 50);
+    const viewportWorldHeight = Math.max(distance3 * 0.375, 37.5);
+    const viewportMinX = cameraPos.x - viewportWorldWidth / 2;
+    const viewportMaxX = cameraPos.x + viewportWorldWidth / 2;
+    const viewportMinY = cameraPos.y - viewportWorldHeight / 2;
+    const viewportMaxY = cameraPos.y + viewportWorldHeight / 2;
+    const topLeft = worldToMinimap(viewportMinX, viewportMinY);
+    const bottomRight = worldToMinimap(viewportMaxX, viewportMaxY);
+    const rectWidth = bottomRight.x - topLeft.x;
+    const rectHeight = bottomRight.y - topLeft.y;
+    ctx.strokeStyle = "#4ECDC4";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(topLeft.x, topLeft.y, rectWidth, rectHeight);
+    ctx.fillStyle = "rgba(78, 205, 196, 0.15)";
+    ctx.fillRect(topLeft.x, topLeft.y, rectWidth, rectHeight);
+  }
+  function renderMinimap() {
+    if (!minimapCtx || !minimapCanvas || minimapCollapsed) return;
+    minimapCtx.clearRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+    minimapBounds = calculateMinimapBounds();
+    if (currentGraphData?.nodes) {
+      currentGraphData.nodes.forEach((node) => {
+        if (node.x !== void 0 && node.y !== void 0) {
+          const pos = worldToMinimap(node.x, node.y);
+          minimapCtx.fillStyle = "#4ECDC4";
+          minimapCtx.beginPath();
+          minimapCtx.arc(pos.x, pos.y, 2, 0, Math.PI * 2);
+          minimapCtx.fill();
+        }
+      });
+    }
+    drawMinimapViewport(minimapCtx);
+  }
+  function startMinimapUpdateLoop() {
+    function updateLoop() {
+      renderMinimap();
+      minimapRafId = requestAnimationFrame(updateLoop);
+    }
+    updateLoop();
+  }
+  function stopMinimapUpdateLoop() {
+    if (minimapRafId) {
+      cancelAnimationFrame(minimapRafId);
+      minimapRafId = null;
+    }
+  }
+  function navigateToMinimapPosition(canvasX, canvasY) {
+    if (!Graph || !Graph.cameraPosition) return;
+    const worldPos = minimapToWorld(canvasX, canvasY);
+    const currentPos = Graph.cameraPosition();
+    const currentDistance = Math.sqrt(
+      currentPos.x * currentPos.x + currentPos.y * currentPos.y + (currentPos.z || 0) * (currentPos.z || 0)
+    );
+    if (is3D) {
+      const distRatio = currentDistance / Math.hypot(worldPos.x, worldPos.y, 0) || 1;
+      Graph.cameraPosition(
+        {
+          x: worldPos.x * distRatio,
+          y: worldPos.y * distRatio,
+          z: currentDistance * 0.5
+        },
+        { x: worldPos.x, y: worldPos.y, z: 0 },
+        800
+        // Smooth animation
+      );
+    } else {
+      Graph.cameraPosition(
+        { x: worldPos.x, y: worldPos.y, z: currentDistance },
+        { x: worldPos.x, y: worldPos.y, z: 0 },
+        800
+      );
+    }
+    console.log("[Minimap] Navigated to:", worldPos);
+  }
+  function handleMinimapClick(event) {
+    if (minimapDragging) return;
+    const rect = minimapCanvas.getBoundingClientRect();
+    const canvasX = event.clientX - rect.left;
+    const canvasY = event.clientY - rect.top;
+    navigateToMinimapPosition(canvasX, canvasY);
+  }
+  function navigateToMinimapPositionInstant(canvasX, canvasY) {
+    if (!Graph || !Graph.cameraPosition) return;
+    const worldPos = minimapToWorld(canvasX, canvasY);
+    const currentPos = Graph.cameraPosition();
+    const currentDistance = Math.sqrt(
+      currentPos.x * currentPos.x + currentPos.y * currentPos.y + (currentPos.z || 0) * (currentPos.z || 0)
+    );
+    if (is3D) {
+      const distRatio = currentDistance / Math.hypot(worldPos.x, worldPos.y, 0) || 1;
+      Graph.cameraPosition(
+        {
+          x: worldPos.x * distRatio,
+          y: worldPos.y * distRatio,
+          z: currentDistance * 0.5
+        },
+        { x: worldPos.x, y: worldPos.y, z: 0 },
+        0
+        // Instant, no animation
+      );
+    } else {
+      Graph.cameraPosition(
+        { x: worldPos.x, y: worldPos.y, z: currentDistance },
+        { x: worldPos.x, y: worldPos.y, z: 0 },
+        0
+      );
+    }
+  }
+  function handleMinimapMouseDown(event) {
+    minimapDragging = true;
+    const rect = minimapCanvas.getBoundingClientRect();
+    const canvasX = event.clientX - rect.left;
+    const canvasY = event.clientY - rect.top;
+    navigateToMinimapPositionInstant(canvasX, canvasY);
+  }
+  function handleMinimapMouseMove(event) {
+    if (!minimapDragging) return;
+    const rect = minimapCanvas.getBoundingClientRect();
+    const canvasX = event.clientX - rect.left;
+    const canvasY = event.clientY - rect.top;
+    navigateToMinimapPositionInstant(canvasX, canvasY);
+  }
+  function handleMinimapMouseUp(event) {
+    minimapDragging = false;
+  }
+  function handleMinimapMouseLeave(event) {
+    minimapDragging = false;
+  }
+  function initMinimap() {
+    minimapCanvas = document.getElementById("minimap-canvas");
+    if (!minimapCanvas) return;
+    minimapCtx = minimapCanvas.getContext("2d");
+    if (!minimapCtx) return;
+    const minimapHeader = document.getElementById("minimap-header");
+    const minimapPanel = document.getElementById("minimap-panel");
+    if (minimapHeader && minimapPanel) {
+      minimapHeader.addEventListener("click", () => {
+        minimapCollapsed = !minimapCollapsed;
+        minimapPanel.classList.toggle("collapsed", minimapCollapsed);
+        if (!minimapCollapsed) {
+          startMinimapUpdateLoop();
+        } else {
+          stopMinimapUpdateLoop();
+        }
+      });
+    }
+    minimapCanvas.addEventListener("click", handleMinimapClick);
+    minimapCanvas.addEventListener("mousedown", handleMinimapMouseDown);
+    minimapCanvas.addEventListener("mousemove", handleMinimapMouseMove);
+    minimapCanvas.addEventListener("mouseup", handleMinimapMouseUp);
+    minimapCanvas.addEventListener("mouseleave", handleMinimapMouseLeave);
+    document.addEventListener("mouseup", () => {
+      if (minimapDragging) {
+        minimapDragging = false;
+      }
+    });
+    startMinimapUpdateLoop();
+  }
+  initMinimap();
   console.log("GSD Viewer initialized - select a project folder to visualize");
 })();
 /*! Bundled license information:
