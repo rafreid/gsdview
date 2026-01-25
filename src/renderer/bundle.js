@@ -81987,6 +81987,12 @@ var<${access}> ${name} : ${structName};`;
     }
   }
   var followActiveEnabled = false;
+  var orbitModeEnabled = false;
+  var orbitSpeed = 0.5;
+  var orbitAngle = 0;
+  var orbitAnimationId = null;
+  var orbitCenterNode = null;
+  var ORBIT_RADIUS_MULTIPLIER = 1.5;
   function formatTrailDuration(ms) {
     const seconds = Math.round(ms / 1e3);
     if (seconds < 60) return `${seconds}s`;
@@ -82936,6 +82942,99 @@ var<${access}> ${name} : ${structName};`;
       );
     }
   }
+  function startOrbitMode() {
+    if (!selectedNode || !Graph) return;
+    orbitModeEnabled = true;
+    orbitCenterNode = selectedNode;
+    const cameraPos = Graph.cameraPosition();
+    const nodePos = { x: orbitCenterNode.x || 0, y: orbitCenterNode.y || 0, z: orbitCenterNode.z || 0 };
+    const currentDistance = Math.sqrt(
+      Math.pow(cameraPos.x - nodePos.x, 2) + Math.pow(cameraPos.y - nodePos.y, 2) + Math.pow(cameraPos.z - nodePos.z, 2)
+    );
+    const orbitRadius = currentDistance * ORBIT_RADIUS_MULTIPLIER;
+    orbitAngle = Math.atan2(cameraPos.x - nodePos.x, cameraPos.z - nodePos.z);
+    let lastTime = performance.now();
+    function orbitLoop(currentTime) {
+      if (!orbitModeEnabled) {
+        orbitAnimationId = null;
+        return;
+      }
+      const deltaTime = (currentTime - lastTime) / 1e3;
+      lastTime = currentTime;
+      orbitAngle += orbitSpeed * deltaTime;
+      const nodePos2 = {
+        x: orbitCenterNode.x || 0,
+        y: orbitCenterNode.y || 0,
+        z: orbitCenterNode.z || 0
+      };
+      if (is3D) {
+        const camX = nodePos2.x + orbitRadius * Math.sin(orbitAngle);
+        const camY = nodePos2.y + orbitRadius * 0.3;
+        const camZ = nodePos2.z + orbitRadius * Math.cos(orbitAngle);
+        Graph.cameraPosition(
+          { x: camX, y: camY, z: camZ },
+          nodePos2,
+          0
+          // Instant positioning for smooth orbit
+        );
+      } else {
+        const camX = nodePos2.x + orbitRadius * Math.sin(orbitAngle);
+        const camY = nodePos2.y + orbitRadius * Math.cos(orbitAngle);
+        const camZ = 200;
+        Graph.cameraPosition(
+          { x: camX, y: camY, z: camZ },
+          { x: nodePos2.x, y: nodePos2.y, z: 0 },
+          0
+        );
+      }
+      orbitAnimationId = requestAnimationFrame(orbitLoop);
+    }
+    orbitAnimationId = requestAnimationFrame(orbitLoop);
+    const toggle = document.getElementById("orbit-toggle");
+    if (toggle) toggle.classList.add("active");
+  }
+  function stopOrbitMode() {
+    orbitModeEnabled = false;
+    if (orbitAnimationId) {
+      cancelAnimationFrame(orbitAnimationId);
+      orbitAnimationId = null;
+    }
+    orbitCenterNode = null;
+    const toggle = document.getElementById("orbit-toggle");
+    if (toggle) toggle.classList.remove("active");
+  }
+  function toggleOrbitMode() {
+    if (orbitModeEnabled) {
+      stopOrbitMode();
+    } else {
+      if (!selectedNode) {
+        showToast("Select a node first to orbit around", "warning");
+        return;
+      }
+      startOrbitMode();
+    }
+  }
+  function updateOrbitSpeed(value) {
+    orbitSpeed = value / 10;
+    const label2 = document.getElementById("orbit-speed-value");
+    if (label2) label2.textContent = value.toFixed(1);
+  }
+  async function loadOrbitSpeedSetting() {
+    try {
+      const saved = await window.electronAPI.store.get("orbitSpeed");
+      if (typeof saved === "number") {
+        const slider = document.getElementById("orbit-speed-slider");
+        const label2 = document.getElementById("orbit-speed-value");
+        if (slider) {
+          slider.value = saved;
+          orbitSpeed = saved / 10;
+          if (label2) label2.textContent = saved.toFixed(1);
+        }
+      }
+    } catch (err) {
+      console.log("[Orbit] Could not load speed setting:", err);
+    }
+  }
   function saveBookmark(slot, name) {
     if (slot < 0 || slot > 8) return;
     let cameraPos = null;
@@ -83489,6 +83588,9 @@ ${node.goal}`;
   }).linkColor((link) => getLinkColor(link, currentGraphData)).linkWidth((link) => getLinkWidth(link, currentGraphData)).linkOpacity(0.6).linkDirectionalArrowLength(3.5).linkDirectionalArrowRelPos(1).backgroundColor("#1a1a2e").showNavInfo(false).onNodeClick((node) => {
     if (pathPlaybackEnabled) {
       stopPathPlayback();
+    }
+    if (orbitModeEnabled) {
+      stopOrbitMode();
     }
     const now4 = Date.now();
     if (node.type === "file" && lastClickNode === node && now4 - lastClickTime < DOUBLE_CLICK_THRESHOLD) {
@@ -86382,6 +86484,18 @@ ${file.count} changes (${file.events.created} created, ${file.events.modified} m
     zoomToDetail();
   });
   updateZoomButtonStates();
+  document.getElementById("orbit-toggle")?.addEventListener("click", toggleOrbitMode);
+  document.getElementById("orbit-speed-slider")?.addEventListener("input", (e2) => {
+    updateOrbitSpeed(parseFloat(e2.target.value));
+  });
+  document.getElementById("orbit-speed-slider")?.addEventListener("change", async (e2) => {
+    try {
+      await window.electronAPI.store.set("orbitSpeed", parseFloat(e2.target.value));
+    } catch (err) {
+      console.log("[Orbit] Could not save speed setting:", err);
+    }
+  });
+  loadOrbitSpeedSetting();
   document.getElementById("nav-back")?.addEventListener("click", () => {
     navigateBack();
   });

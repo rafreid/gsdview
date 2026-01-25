@@ -244,6 +244,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed 25-01-PLAN.md (Phase 25 complete, v1.3 milestone complete)
+Stopped at: v1.3 milestone archived and tagged
 Resume file: None
-Next action: v1.3 shipped - Begin planning v1.4 or conclude project
+Next action: Run `/gsd:new-milestone` to start v1.4 or conclude project

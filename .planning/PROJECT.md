@@ -8,21 +8,11 @@ A desktop application that visualizes GSD project structure as an interactive 3D
 
 Make the invisible structure of a GSD project visible and navigable — so users always know where they are, what's connected, and what's blocked.
 
-## Current Milestone: v1.3 Enhanced Navigation + Smooth Activity
+## Current State
 
-**Goal:** Transform graph navigation with smart camera behaviors, bookmarks, and a minimap — while fixing activity visualization to update smoothly without disrupting the user's view.
+**Latest shipped:** v1.3 Enhanced Navigation + Smooth Activity (2026-01-25)
 
-**Target features:**
-- Smart camera: follow active node, zoom presets, orbit mode, path animation
-- Named bookmarks with keyboard shortcuts (1-9)
-- Back/forward navigation through visited nodes
-- Recent nodes dropdown for quick return
-- Minimap panel showing current position in graph
-- Breadcrumb trail showing hierarchy to current node
-- Incremental graph updates (no full rebuild on file changes)
-- Preserve camera position when files change
-- Stronger flash effects for file activity
-- Activity trails showing change flow through graph
+All major navigation and activity features are complete. The app now provides smart camera behaviors, bookmarks, minimap, breadcrumb navigation, and smooth activity updates.
 
 ## Requirements
 
@@ -77,24 +67,25 @@ Make the invisible structure of a GSD project visible and navigable — so users
 - [x] Recent activity for selected file
 - [x] Related files section
 
+*Shipped in v1.3:*
+
+- [x] Incremental graph updates (no full rebuild on file changes)
+- [x] Camera position preserved when files change
+- [x] Stronger flash effects with configurable duration/intensity
+- [x] Activity trails showing change flow through graph
+- [x] Follow-active camera mode
+- [x] Zoom presets (overview/focus/detail)
+- [x] Named bookmarks with keyboard shortcuts (1-9)
+- [x] Back/forward navigation buttons
+- [x] Recent nodes dropdown
+- [x] Breadcrumb trail showing hierarchy to current node
+- [x] Minimap panel with click-to-navigate
+- [x] Orbit mode for presentations
+- [x] Path animation through bookmarks
+
 ### Active
 
-*v1.3 scope:*
-
-- [ ] Smart camera with follow-active behavior
-- [ ] Zoom presets (overview/focus/detail)
-- [ ] Orbit mode for presentations
-- [ ] Path animation between nodes
-- [ ] Named bookmarks with custom names
-- [ ] Back/forward navigation buttons
-- [ ] Recent nodes dropdown
-- [ ] Bookmark keyboard shortcuts (1-9)
-- [ ] Minimap panel
-- [ ] Breadcrumb trail
-- [ ] Incremental graph updates (no full rebuild)
-- [ ] Preserve camera on file changes
-- [ ] Stronger flash effects
-- [ ] Activity trails visualization
+No active requirements. Run `/gsd:new-milestone` to define v1.4 scope.
 
 ### Out of Scope
 
@@ -144,4 +135,4 @@ Make the invisible structure of a GSD project visible and navigable — so users
 | Limit scope to .planning/ + src/ | Performance and relevance balance | — Pending |
 
 ---
-*Last updated: 2026-01-24 after v1.3 milestone start*
+*Last updated: 2026-01-25 after v1.3 milestone completion*

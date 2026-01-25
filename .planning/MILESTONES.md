@@ -80,8 +80,41 @@
 
 ---
 
+### v1.3 - Enhanced Navigation + Smooth Activity (2026-01-24 to 2026-01-25)
+
+**Goal:** Transform graph navigation with smart camera behaviors, bookmarks, and a minimap — while fixing activity visualization to update smoothly without disrupting the user's view.
+
+**Phases:** 18-25 (17 plans total)
+18. Smooth Activity Updates - Incremental graph updates with camera preservation
+19. Enhanced Flash Effects - Brighter, more visible pulse/glow animations
+20. Activity Trails - Visual trails showing recent activity flow through graph
+21. Smart Camera Core - Follow-active mode and zoom presets
+22. Bookmarks & History - Named bookmarks and back/forward navigation
+23. Breadcrumb Trail - Hierarchy path display with click navigation
+24. Minimap - Bird's-eye overview with click-to-navigate
+25. Advanced Camera - Orbit mode and path animation
+
+**Quick Tasks:** 1
+- Fix Open in Editor IPC handler
+
+**Key Deliverables:**
+- Incremental graph updates without full rebuild
+- Camera position preserved during file changes
+- Brighter flash effects with configurable duration/intensity
+- Activity trails connecting recently changed files
+- Follow-active camera mode
+- Zoom presets (overview/focus/detail)
+- 9 bookmark slots with keyboard shortcuts (1-9)
+- Back/forward navigation with history
+- Breadcrumb trail for hierarchy navigation
+- Minimap panel with click/drag navigation
+- Orbit mode for presentations
+- Path animation through bookmarks
+
+**Archive:** [v1.3-ROADMAP.md](./milestones/v1.3-ROADMAP.md), [v1.3-REQUIREMENTS.md](./milestones/v1.3-REQUIREMENTS.md)
+
+---
+
 ## Current Milestone
 
-**v1.3 - Enhanced Navigation + Smooth Activity** (Started 2026-01-24)
-
-See: `.planning/PROJECT.md` Current Milestone section
+None active. Run `/gsd:new-milestone` to start v1.4.
