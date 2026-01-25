@@ -336,8 +336,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRL-01 | Phase 20 | Complete |
 | TRL-02 | Phase 20 | Complete |
 | TRL-03 | Phase 20 | Complete |
-| CAM-01 | Phase 21 | Pending |
-| CAM-02 | Phase 21 | Pending |
+| CAM-01 | Phase 21 | Complete |
+| CAM-02 | Phase 21 | Complete |
 | BKM-01 | Phase 22 | Pending |
 | BKM-02 | Phase 22 | Pending |
 | BKM-03 | Phase 22 | Pending |
