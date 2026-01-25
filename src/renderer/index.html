@@ -1086,6 +1086,79 @@
       pointer-events: none;
     }
 
+    /* Navigation History Controls */
+    #nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 12px;
+      padding-left: 12px;
+      border-left: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 24px;
+      background: rgba(78, 205, 196, 0.15);
+      border: 1px solid rgba(78, 205, 196, 0.3);
+      border-radius: 3px;
+      color: rgba(78, 205, 196, 0.8);
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover:not(.disabled) {
+      background: rgba(78, 205, 196, 0.3);
+      border-color: rgba(78, 205, 196, 0.6);
+      color: #4ECDC4;
+    }
+
+    .nav-btn:active:not(.disabled) {
+      background: rgba(78, 205, 196, 0.4);
+      transform: scale(0.95);
+    }
+
+    .nav-btn.disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .nav-btn span {
+      font-size: 12px;
+    }
+
+    #recent-nodes {
+      height: 24px;
+      padding: 0 8px;
+      background: rgba(42, 42, 78, 0.8);
+      border: 1px solid rgba(78, 205, 196, 0.3);
+      border-radius: 3px;
+      color: #ccc;
+      font-size: 11px;
+      cursor: pointer;
+      min-width: 120px;
+      max-width: 160px;
+    }
+
+    #recent-nodes:hover {
+      border-color: rgba(78, 205, 196, 0.5);
+    }
+
+    #recent-nodes:focus {
+      outline: none;
+      border-color: #4ECDC4;
+    }
+
+    #recent-nodes option {
+      background: #2a2a4e;
+      color: #eee;
+      padding: 4px;
+    }
+
     /* Heat Decay Slider */
     #heat-decay-container {
       display: flex;
@@ -2338,6 +2411,17 @@
       <button id="zoom-detail" class="zoom-btn" title="Detail view of selected node (close-up)">
         <span>&#128269;+</span>
       </button>
+    </div>
+    <div id="nav-controls" title="Navigation history">
+      <button id="nav-back" class="nav-btn disabled" title="Go back (Alt+Left)">
+        <span>&#9664;</span>
+      </button>
+      <button id="nav-forward" class="nav-btn disabled" title="Go forward (Alt+Right)">
+        <span>&#9654;</span>
+      </button>
+      <select id="recent-nodes" title="Recent nodes">
+        <option value="">Recent nodes...</option>
+      </select>
     </div>
     <div id="heat-decay-container">
       <span id="heat-decay-label">Heat:</span>
