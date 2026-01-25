@@ -116,6 +116,14 @@ const PLAYBACK_SPEED = 500; // ms between steps during playback
 let bookmarks = new Array(9).fill(null);  // 9 bookmark slots (accessed via keys 1-9)
 let currentBookmarkSlot = 0;  // Track selected slot in dialog
 
+// Minimap state
+let minimapCollapsed = false;
+let minimapCanvas = null;
+let minimapCtx = null;
+let minimapBounds = { minX: 0, maxX: 0, minY: 0, maxY: 0 }; // World coordinate bounds
+const MINIMAP_PADDING = 10; // Pixels of padding around minimap content
+let minimapRafId = null; // RAF loop ID for continuous updates
+
 // Modal search state
 let currentSearchQuery = '';
 let searchMatches = [];
@@ -6473,5 +6481,80 @@ document.getElementById('modal-search-input')?.addEventListener('keydown', (e) =
     }
   }
 });
+
+// =====================================================
+// MINIMAP FUNCTIONALITY
+// =====================================================
+
+/**
+ * Calculate the bounding box of all nodes in the graph (world coordinates)
+ */
+function calculateMinimapBounds() {
+  if (!currentGraphData?.nodes || currentGraphData.nodes.length === 0) {
+    return { minX: -100, maxX: 100, minY: -100, maxY: 100 };
+  }
+
+  let minX = Infinity, maxX = -Infinity;
+  let minY = Infinity, maxY = -Infinity;
+
+  currentGraphData.nodes.forEach(node => {
+    if (node.x !== undefined && node.y !== undefined) {
+      minX = Math.min(minX, node.x);
+      maxX = Math.max(maxX, node.x);
+      minY = Math.min(minY, node.y);
+      maxY = Math.max(maxY, node.y);
+    }
+  });
+
+  // If no positioned nodes, return default bounds
+  if (!isFinite(minX)) {
+    return { minX: -100, maxX: 100, minY: -100, maxY: 100 };
+  }
+
+  // Add 10% padding around bounds
+  const xPadding = (maxX - minX) * 0.1 || 10;
+  const yPadding = (maxY - minY) * 0.1 || 10;
+
+  return {
+    minX: minX - xPadding,
+    maxX: maxX + xPadding,
+    minY: minY - yPadding,
+    maxY: maxY + yPadding
+  };
+}
+
+/**
+ * Convert world coordinates to minimap canvas coordinates
+ */
+function worldToMinimap(worldX, worldY) {
+  if (!minimapCanvas) return { x: 0, y: 0 };
+
+  const canvasWidth = minimapCanvas.width - MINIMAP_PADDING * 2;
+  const canvasHeight = minimapCanvas.height - MINIMAP_PADDING * 2;
+  const worldWidth = minimapBounds.maxX - minimapBounds.minX;
+  const worldHeight = minimapBounds.maxY - minimapBounds.minY;
+
+  const x = ((worldX - minimapBounds.minX) / worldWidth) * canvasWidth + MINIMAP_PADDING;
+  const y = ((worldY - minimapBounds.minY) / worldHeight) * canvasHeight + MINIMAP_PADDING;
+
+  return { x, y };
+}
+
+/**
+ * Convert minimap canvas coordinates to world coordinates
+ */
+function minimapToWorld(canvasX, canvasY) {
+  if (!minimapCanvas) return { x: 0, y: 0 };
+
+  const canvasWidth = minimapCanvas.width - MINIMAP_PADDING * 2;
+  const canvasHeight = minimapCanvas.height - MINIMAP_PADDING * 2;
+  const worldWidth = minimapBounds.maxX - minimapBounds.minX;
+  const worldHeight = minimapBounds.maxY - minimapBounds.minY;
+
+  const x = ((canvasX - MINIMAP_PADDING) / canvasWidth) * worldWidth + minimapBounds.minX;
+  const y = ((canvasY - MINIMAP_PADDING) / canvasHeight) * worldHeight + minimapBounds.minY;
+
+  return { x, y };
+}
 
 console.log('GSD Viewer initialized - select a project folder to visualize');
