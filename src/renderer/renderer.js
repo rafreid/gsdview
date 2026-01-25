@@ -333,6 +333,9 @@ async function loadFlashSettings() {
   }
 }
 
+// Follow-active camera mode
+let followActiveEnabled = false; // Default off - user opts in
+
 // Format trail duration for display (value in ms, display in seconds)
 function formatTrailDuration(ms) {
   const seconds = Math.round(ms / 1000);
@@ -1514,6 +1517,33 @@ function removeNodeFromGraph(nodeId) {
   Graph.graphData(currentGraphData);
 
   console.log('[Fade] Removed node from graph:', nodeId);
+}
+
+// Smooth camera fly to node (used by follow-active mode)
+function flyToNodeSmooth(nodeId, distance = 80) {
+  if (!Graph || !currentGraphData) return;
+
+  const node = currentGraphData.nodes.find(n => n.id === nodeId);
+  if (!node || node.x === undefined) return;
+
+  if (is3D) {
+    const distRatio = 1 + distance / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
+    Graph.cameraPosition(
+      {
+        x: (node.x || 0) * distRatio,
+        y: (node.y || 0) * distRatio,
+        z: (node.z || 0) * distRatio
+      },
+      node,
+      800  // Slightly faster transition for follow mode
+    );
+  } else {
+    Graph.cameraPosition(
+      { x: node.x || 0, y: node.y || 0, z: distance + 100 },
+      node,
+      800
+    );
+  }
 }
 
 // Flash a tree item with change-type-specific color
@@ -4881,6 +4911,128 @@ document.getElementById('dimension-toggle').addEventListener('click', () => {
     }, 100);
   }
 });
+
+// =====================================================
+// ZOOM PRESET FUNCTIONS
+// =====================================================
+
+// Zoom preset: Overview - show entire graph
+function zoomToOverview() {
+  if (!Graph || !currentGraphData || currentGraphData.nodes.length === 0) return;
+
+  // Calculate bounding box of all nodes
+  let minX = Infinity, maxX = -Infinity;
+  let minY = Infinity, maxY = -Infinity;
+  let minZ = Infinity, maxZ = -Infinity;
+
+  currentGraphData.nodes.forEach(node => {
+    if (node.x !== undefined) {
+      minX = Math.min(minX, node.x);
+      maxX = Math.max(maxX, node.x);
+      minY = Math.min(minY, node.y);
+      maxY = Math.max(maxY, node.y);
+      minZ = Math.min(minZ, node.z || 0);
+      maxZ = Math.max(maxZ, node.z || 0);
+    }
+  });
+
+  // Calculate center and required distance
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  const centerZ = (minZ + maxZ) / 2;
+
+  const spanX = maxX - minX;
+  const spanY = maxY - minY;
+  const spanZ = maxZ - minZ;
+  const maxSpan = Math.max(spanX, spanY, spanZ, 100);
+
+  // Distance based on graph size (with padding)
+  const distance = maxSpan * 1.5;
+
+  if (is3D) {
+    Graph.cameraPosition(
+      { x: centerX + distance * 0.5, y: centerY + distance * 0.5, z: centerZ + distance },
+      { x: centerX, y: centerY, z: centerZ },
+      1000
+    );
+  } else {
+    Graph.cameraPosition(
+      { x: centerX, y: centerY, z: distance + 200 },
+      { x: centerX, y: centerY, z: 0 },
+      1000
+    );
+  }
+
+  console.log('[Camera] Zoom to overview');
+}
+
+// Zoom preset: Focus - selected node at medium distance
+function zoomToFocus() {
+  if (!Graph || !selectedNode) {
+    console.log('[Camera] No node selected for focus zoom');
+    return;
+  }
+
+  const node = currentGraphData.nodes.find(n => n.id === selectedNode.id);
+  if (!node || node.x === undefined) return;
+
+  const distance = 120; // Medium distance for context
+
+  if (is3D) {
+    const distRatio = 1 + distance / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
+    Graph.cameraPosition(
+      {
+        x: (node.x || 0) * distRatio,
+        y: (node.y || 0) * distRatio,
+        z: (node.z || 0) * distRatio
+      },
+      node,
+      1000
+    );
+  } else {
+    Graph.cameraPosition(
+      { x: node.x || 0, y: node.y || 0, z: distance + 100 },
+      node,
+      1000
+    );
+  }
+
+  console.log('[Camera] Zoom to focus on:', selectedNode.id);
+}
+
+// Zoom preset: Detail - close-up on selected node
+function zoomToDetail() {
+  if (!Graph || !selectedNode) {
+    console.log('[Camera] No node selected for detail zoom');
+    return;
+  }
+
+  const node = currentGraphData.nodes.find(n => n.id === selectedNode.id);
+  if (!node || node.x === undefined) return;
+
+  const distance = 40; // Close distance for inspection
+
+  if (is3D) {
+    const distRatio = 1 + distance / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
+    Graph.cameraPosition(
+      {
+        x: (node.x || 0) * distRatio,
+        y: (node.y || 0) * distRatio,
+        z: (node.z || 0) * distRatio
+      },
+      node,
+      1000
+    );
+  } else {
+    Graph.cameraPosition(
+      { x: node.x || 0, y: node.y || 0, z: distance + 50 },
+      node,
+      1000
+    );
+  }
+
+  console.log('[Camera] Zoom to detail on:', selectedNode.id);
+}
 
 // =====================================================
 // ACTIVITY ENTRY INTERACTIONS
