@@ -1519,9 +1519,9 @@ function flashNodeWithType(nodeId, changeType) {
 
       flashingNodes.delete(nodeId);
 
-      // Process pending flashes now that a slot is free
+      // Process pending flashes now that a slot is free (with stagger delay)
       if (pendingFlashes.length > 0) {
-        processPendingFlashes();
+        setTimeout(processPendingFlashes, 50);
       }
     }
   }
@@ -1533,10 +1533,15 @@ function flashNodeWithType(nodeId, changeType) {
 
 // Process queued flash animations when slots become available
 function processPendingFlashes() {
-  while (pendingFlashes.length > 0 && flashingNodes.size < MAX_CONCURRENT_FLASHES) {
-    const { nodeId, changeType } = pendingFlashes.shift();
-    // Re-call flashNodeWithType (it will now have room)
-    flashNodeWithType(nodeId, changeType);
+  if (pendingFlashes.length === 0) return;
+  if (flashingNodes.size >= MAX_CONCURRENT_FLASHES) return;
+
+  const { nodeId, changeType } = pendingFlashes.shift();
+  flashNodeWithType(nodeId, changeType);
+
+  // Stagger next batch item by 50ms to prevent frame spike
+  if (pendingFlashes.length > 0) {
+    setTimeout(processPendingFlashes, 50);
   }
 }
 
