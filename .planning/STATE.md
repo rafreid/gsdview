@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 22 in progress
+**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 22 complete
 
 ## Current Position
 
 Phase: 22 of 25 (Bookmarks & History)
-Plan: 1/1
+Plan: 2/2
 Status: Phase complete
-Last activity: 2026-01-25 - Completed 22-01-PLAN.md
+Last activity: 2026-01-25 - Completed 22-02-PLAN.md
 
 Progress: [█████████████████████████████████░] 22/25 phases complete (88%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 50 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 13)
+- Total plans completed: 51 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 14)
 - Average duration: 5min
-- Total execution time: 2 days + 76m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 59m)
+- Total execution time: 2 days + 82m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 65m)
 
 **By Milestone:**
 
@@ -39,7 +39,7 @@ Progress: [███████████████████████
 
 *v1.3 (Active):*
 - 8 phases planned
-- Status: Phase 22 complete (5 plans)
+- Status: Phase 22 complete (6 plans)
 
 ## Accumulated Context
 
@@ -176,6 +176,11 @@ Recent decisions affecting current work:
 - Focus zoom at 120 units for context, Detail zoom at 40 units for inspection (21-02)
 - Focus/Detail buttons disabled when no node selected (21-02)
 - updateZoomButtonStates() pattern for selection-based UI state (21-02)
+- 9 bookmark slots (1-9 keys) for instant access without number row clutter (22-02)
+- Ctrl/Cmd+1-9 to save, plain 1-9 to jump for minimal friction (22-02)
+- Gold theme (#FFD700) for bookmarks to distinguish from other features (22-02)
+- Store both camera position and selected node for complete context restoration (22-02)
+- Bookmark count badge shows only when >0 for clean UI (22-02)
 - Navigation history with browser-style back/forward buttons (22-01)
 - Max history size 50 entries to prevent memory bloat (22-01)
 - Recent nodes dropdown shows last 10 unique visited nodes (22-01)
@@ -212,7 +217,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-25T01:29:47Z
-Stopped at: Completed 22-01-PLAN.md (Navigation History)
+Last session: 2026-01-25T01:28:00Z
+Stopped at: Completed 22-02-PLAN.md (Named Bookmarks)
 Resume file: None
 Next action: Continue to Phase 23
