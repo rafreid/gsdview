@@ -377,6 +377,15 @@ let orbitAnimationId = null; // RAF reference
 let orbitCenterNode = null; // Node being orbited
 const ORBIT_RADIUS_MULTIPLIER = 1.5; // Distance from node (multiplied by node's current camera distance)
 
+// Hook status detection
+let hookStatusTimeout = null;
+let hookNotificationDismissed = false;
+const HOOK_DETECTION_DELAY = 30000; // 30 seconds
+
+// Debug mode
+let debugModeEnabled = false;
+const MAX_DEBUG_ENTRIES = 50;
+
 // Format trail duration for display (value in ms, display in seconds)
 function formatTrailDuration(ms) {
   const seconds = Math.round(ms / 1000);
@@ -3170,6 +3179,9 @@ async function loadProject(projectPath) {
       updateRecentProjects();
     }
 
+    // Start hook status detection (30s timeout for notification)
+    startHookStatusDetection();
+
   } catch (error) {
     console.error('Error loading project:', error);
     document.getElementById('selected-path').textContent = `Error: ${error.message}`;
@@ -5329,6 +5341,16 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
 // Listen for Claude Code operations (read/write/edit via hooks)
 if (window.electronAPI && window.electronAPI.onClaudeOperation) {
   window.electronAPI.onClaudeOperation((event) => {
+    // Clear hook status timeout on first event (hooks are working)
+    if (hookStatusTimeout) {
+      clearTimeout(hookStatusTimeout);
+      hookStatusTimeout = null;
+      console.log('[HookStatus] Claude events detected, hooks working');
+    }
+
+    // Log to debug panel if enabled
+    logDebugOperation(event);
+
     console.log('[Claude Operation]', event.operation, event.file_path, 'nodeId:', event.nodeId);
 
     // Map Claude operations to change types for visual animation
@@ -7242,5 +7264,79 @@ function initMinimap() {
 
 // Initialize minimap on load
 initMinimap();
+
+// =====================================================
+// HOOK STATUS DETECTION & DEBUG MODE
+// =====================================================
+
+// Start hook status detection (called after project loads)
+function startHookStatusDetection() {
+  hookStatusTimeout = setTimeout(() => {
+    if (!hookNotificationDismissed) {
+      document.getElementById('hook-status-notification')?.classList.remove('hidden');
+      console.log('[HookStatus] No Claude events received in 30s, showing notification');
+    }
+  }, HOOK_DETECTION_DELAY);
+}
+
+// Dismiss hook notification
+function dismissHookNotification() {
+  document.getElementById('hook-status-notification')?.classList.add('hidden');
+  hookNotificationDismissed = true;
+}
+
+// Open setup guide in browser
+function showHookHelp() {
+  // Open setup guide in default browser
+  window.electronAPI.openExternal('https://github.com/anthropics/claude-code/blob/main/HOOKS.md');
+  dismissHookNotification();
+}
+
+// Expose functions globally for onclick handlers
+window.dismissHookNotification = dismissHookNotification;
+window.showHookHelp = showHookHelp;
+
+// Debug mode toggle handler
+document.getElementById('debug-toggle')?.addEventListener('click', (e) => {
+  debugModeEnabled = !debugModeEnabled;
+  e.target.closest('#debug-toggle').classList.toggle('active', debugModeEnabled);
+  document.getElementById('debug-panel')?.classList.toggle('hidden', !debugModeEnabled);
+  console.log('[Debug] Mode', debugModeEnabled ? 'enabled' : 'disabled');
+});
+
+// Debug clear button
+document.getElementById('debug-clear')?.addEventListener('click', () => {
+  const content = document.getElementById('debug-content');
+  if (content) content.innerHTML = '';
+});
+
+// Log Claude operation to debug panel
+function logDebugOperation(event) {
+  if (!debugModeEnabled) return;
+
+  const content = document.getElementById('debug-content');
+  if (!content) return;
+
+  const entry = document.createElement('div');
+  entry.className = 'debug-entry';
+
+  const time = new Date(event.timestamp).toLocaleTimeString();
+  const op = event.operation;
+  const path = event.file_path.split('/').pop(); // Just filename
+
+  entry.innerHTML = `
+    <span class="debug-time">${time}</span>
+    <span class="debug-op ${op}">${op.toUpperCase()}</span>
+    <span class="debug-path">${path}</span>
+    ${event.nodeId ? '' : '<span style="color:#FF6B6B">(no node)</span>'}
+  `;
+
+  content.insertBefore(entry, content.firstChild);
+
+  // Limit entries
+  while (content.children.length > MAX_DEBUG_ENTRIES) {
+    content.removeChild(content.lastChild);
+  }
+}
 
 console.log('GSD Viewer initialized - select a project folder to visualize');
