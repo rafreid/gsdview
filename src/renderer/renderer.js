@@ -141,6 +141,10 @@ let currentMatchIndex = -1;
 // Track nodes currently flashing (nodeId -> animation state)
 const flashingNodes = new Map();
 
+// Animation batching to handle rapid operation bursts
+const MAX_CONCURRENT_FLASHES = 20; // Limit concurrent animations
+const pendingFlashes = [];          // Queue for overflow
+
 // Track currently highlighted node (for hover effect)
 let highlightedNodeId = null;
 
@@ -1369,6 +1373,13 @@ function flashNodeWithType(nodeId, changeType) {
     return;
   }
 
+  // Check concurrent flash limit - queue if at capacity
+  if (flashingNodes.size >= MAX_CONCURRENT_FLASHES && !flashingNodes.has(nodeId)) {
+    pendingFlashes.push({ nodeId, changeType });
+    console.log('[Flash] Queued (active:', flashingNodes.size, 'pending:', pendingFlashes.length, '):', nodeId);
+    return;
+  }
+
   // Collect all materials to animate
   const materials = [];
   if (threeObj.material) {
@@ -1507,12 +1518,26 @@ function flashNodeWithType(nodeId, changeType) {
       threeObj.scale.copy(originalScale);
 
       flashingNodes.delete(nodeId);
+
+      // Process pending flashes now that a slot is free
+      if (pendingFlashes.length > 0) {
+        processPendingFlashes();
+      }
     }
   }
 
   const rafId = requestAnimationFrame(animate);
   flashingNodes.set(nodeId, { rafId, startTime, changeType, originalScale, originalEmissives });
   console.log('[Flash] Started', changeType, 'flash for:', nodeId);
+}
+
+// Process queued flash animations when slots become available
+function processPendingFlashes() {
+  while (pendingFlashes.length > 0 && flashingNodes.size < MAX_CONCURRENT_FLASHES) {
+    const { nodeId, changeType } = pendingFlashes.shift();
+    // Re-call flashNodeWithType (it will now have room)
+    flashNodeWithType(nodeId, changeType);
+  }
 }
 
 // Flash a node when its file changes (fallback for manual flashes like tree clicks)
@@ -1622,6 +1647,12 @@ function fadeOutAndRemoveNode(nodeId) {
     const existing = flashingNodes.get(nodeId);
     if (existing.rafId) cancelAnimationFrame(existing.rafId);
     flashingNodes.delete(nodeId);
+  }
+
+  // Remove from pending flashes queue if present
+  const pendingIndex = pendingFlashes.findIndex(item => item.nodeId === nodeId);
+  if (pendingIndex !== -1) {
+    pendingFlashes.splice(pendingIndex, 1);
   }
 
   // Clear from heat tracking
