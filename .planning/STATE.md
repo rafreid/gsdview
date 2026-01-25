@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 Phase: —
 Plan: —
 Status: Ready for next milestone
-Last activity: 2026-01-25 — v1.4 milestone archived
+Last activity: 2026-01-25 — Completed quick task 012: Fix Setup Guide button
 
 Progress: No active milestone
 
@@ -272,6 +272,7 @@ None.
 | 009 | Resizable divider between file tree panel and graph | 2026-01-23 | [009-resizable-panel-divider](./quick/009-resizable-panel-divider/) |
 | 010 | File Tree panel open by default on startup | 2026-01-23 | [010-file-tree-open-by-default](./quick/010-file-tree-open-by-default/) |
 | 011 | Fix Open in Editor not launching - missing sourceType in graph-builder | 2026-01-24 | [011-fix-open-in-editor](./quick/011-fix-double-click-and-open-in-editor-not-/) |
+| 012 | Fix Setup Guide button for Claude hooks - add error handling | 2026-01-25 | [012-fix-setup-guidelines-button](./quick/012-fix-setup-guidelines-button-for-claude-h/) |
 
 ## Session Continuity
 
