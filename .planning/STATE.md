@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 
 ## Current Position
 
-Phase: 26 - Hook Infrastructure
+Phase: 27 - Chokidar Extension & IPC
 Plan: 01 of 01
 Status: Phase complete
-Last activity: 2026-01-25 — Completed 26-01-PLAN.md
+Last activity: 2026-01-25 — Completed 27-01-PLAN.md
 
-Progress: [██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░] 1/4 phases (25%)
+Progress: [████████████████████░░░░░░░░░░░░░░░░░░░░] 2/4 phases (50%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 62 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 1)
+- Total plans completed: 63 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 2)
 - Average duration: 5min
-- Total execution time: 2 days + 92m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 3m)
+- Total execution time: 2 days + 94m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 5m)
 
 **By Milestone:**
 
@@ -42,8 +42,8 @@ Progress: [██████████░░░░░░░░░░░░░
 - Status: Shipped 2026-01-25
 
 *v1.4 (In Progress):*
-- 4 phases, 1 plan complete
-- Status: Phase 26 complete (Hook Infrastructure) - 2026-01-25
+- 4 phases, 2 plans complete
+- Status: Phase 27 complete (Chokidar Extension & IPC) - 2026-01-25
 
 ## Accumulated Context
 
@@ -226,6 +226,11 @@ Recent decisions affecting current work:
 - Atomic writes with temp file + mv to prevent partial reads (26-01)
 - Event schema v1.0: schema_version, timestamp, operation, file_path, tool, source (26-01)
 - Event files ignored by git (ephemeral, created/consumed/deleted) (26-01)
+- Separate chokidar watcher for Claude events (no debounce unlike file changes) (27-01)
+- 200ms deduplication window for same file_path (hooks can fire twice) (27-01)
+- Serial queue processing to maintain event order and prevent race conditions (27-01)
+- NodeId enrichment matches graph-builder format (sourceType:/relative/path) (27-01)
+- IPC channel 'claude-operation' forwards enriched events to renderer (27-01)
 
 ### Pending Todos
 
@@ -254,6 +259,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed 26-01-PLAN.md (Hook Infrastructure)
+Stopped at: Completed 27-01-PLAN.md (Chokidar Extension & IPC)
 Resume file: None
-Next action: Plan Phase 27 (Chokidar Extension & IPC)
+Next action: Plan Phase 28 (Renderer Event Consumer)
