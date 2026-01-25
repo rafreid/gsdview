@@ -84238,10 +84238,60 @@ ${node.goal}`;
     }
     return `<div class="diff-content">${htmlLines}${truncateMsg}</div>`;
   }
+  function buildBreadcrumbPath(node) {
+    if (!node || node.type !== "file" && node.type !== "directory") {
+      return [];
+    }
+    const breadcrumbs = [];
+    const sourceType = node.sourceType;
+    const rootName = sourceType === "planning" ? ".planning" : "src";
+    const rootId = sourceType === "planning" ? "dir-planning" : "dir-src";
+    if (node.id === rootId) {
+      return [{ id: rootId, name: rootName, isRoot: true }];
+    }
+    breadcrumbs.push({ id: rootId, name: rootName, isRoot: true });
+    const path = node.path || "";
+    const pathParts = path.split("/");
+    for (let i2 = 0; i2 < pathParts.length; i2++) {
+      const part = pathParts[i2];
+      if (!part) continue;
+      const partialPath = pathParts.slice(0, i2 + 1).join("/");
+      const isFile = i2 === pathParts.length - 1 && node.type === "file";
+      const nodeId = `${sourceType}-${isFile ? "file" : "dir"}-${partialPath}`;
+      breadcrumbs.push({
+        id: nodeId,
+        name: part,
+        isRoot: false
+      });
+    }
+    return breadcrumbs;
+  }
+  function updateBreadcrumb(node) {
+    const breadcrumbContainer = document.getElementById("breadcrumb-trail");
+    if (!breadcrumbContainer) return;
+    if (!node || node.type !== "file" && node.type !== "directory") {
+      breadcrumbContainer.innerHTML = '<span class="breadcrumb-segment root">Project</span>';
+      return;
+    }
+    const breadcrumbs = buildBreadcrumbPath(node);
+    if (breadcrumbs.length === 0) {
+      breadcrumbContainer.innerHTML = '<span class="breadcrumb-segment root">Project</span>';
+      return;
+    }
+    const html = breadcrumbs.map((crumb, index5) => {
+      const isCurrent = index5 === breadcrumbs.length - 1;
+      const className = isCurrent ? "breadcrumb-segment current" : "breadcrumb-segment";
+      const dataAttr = isCurrent ? "" : `data-node-id="${crumb.id}"`;
+      const separator = index5 > 0 ? '<span class="breadcrumb-separator">/</span>' : "";
+      return `${separator}<span class="${className}" ${dataAttr}>${crumb.name}</span>`;
+    }).join("");
+    breadcrumbContainer.innerHTML = html;
+  }
   async function showDetailsPanel(node) {
     selectedNode = node;
     updateZoomButtonStates();
     pushNavigationHistory(node.id);
+    updateBreadcrumb(node);
     const panel = document.getElementById("details-panel");
     const title = document.getElementById("panel-title");
     const content = document.getElementById("panel-content");
@@ -86229,6 +86279,17 @@ ${file.count} changes (${file.events.created} created, ${file.events.modified} m
     }
   });
   updateNavigationButtonStates();
+  document.getElementById("breadcrumb-trail")?.addEventListener("click", (e2) => {
+    const segment = e2.target.closest(".breadcrumb-segment");
+    if (!segment || segment.classList.contains("current")) return;
+    const nodeId = segment.getAttribute("data-node-id");
+    if (!nodeId) return;
+    const node = currentGraphData?.nodes?.find((n2) => n2.id === nodeId);
+    if (node) {
+      flyToNodeSmooth(nodeId, 80);
+      showDetailsPanel(node);
+    }
+  });
   document.getElementById("bookmark-btn")?.addEventListener("click", () => {
     showBookmarkSaveDialog();
   });
