@@ -34,10 +34,10 @@ Transform a GSD project's .planning/ folder into an explorable 3D force-directed
   3. Event files contain operation type, file path, and timestamp
   4. Hook script exits immediately without blocking Claude operations
 
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 26-01: TBD
+- [ ] 26-01-PLAN.md — Set up Claude Code hooks and bash observer script to write event files
 
 ### Phase 27: Chokidar Extension & IPC
 
@@ -113,11 +113,11 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 26. Hook Infrastructure | 0/TBD | Not started | - |
+| 26. Hook Infrastructure | 0/1 | Not started | - |
 | 27. Chokidar Extension & IPC | 0/TBD | Not started | - |
 | 28. Enhanced Flash Effects | 0/TBD | Not started | - |
 | 29. Performance & Polish | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-25 (v1.4 milestone added)*
+*Last updated: 2026-01-25 (v1.4 milestone added, Phase 26 planned)*
