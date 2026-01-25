@@ -9,6 +9,38 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".gsd-viewer/hooks/notify-electron.sh",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".gsd-viewer/hooks/notify-electron.sh",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".gsd-viewer/hooks/notify-electron.sh",
+            "async": true
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
