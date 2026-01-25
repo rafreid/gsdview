@@ -44,7 +44,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 19: Enhanced Flash Effects** - Brighter, configurable flash animations for file activity
 - [x] **Phase 20: Activity Trails** - Visual trails showing change flow through graph
 - [x] **Phase 21: Smart Camera Core** - Follow-active mode and zoom presets
-- [ ] **Phase 22: Bookmarks & History** - Named bookmarks with navigation history
+- [x] **Phase 22: Bookmarks & History** - Named bookmarks with navigation history
 - [ ] **Phase 23: Breadcrumb Trail** - Hierarchy path navigation
 - [ ] **Phase 24: Minimap** - Bird's-eye overview panel with viewport indicator
 - [ ] **Phase 25: Advanced Camera** - Orbit mode and path animation
@@ -400,8 +400,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 22-01-PLAN.md — Navigation history with back/forward buttons and recent nodes dropdown
-- [ ] 22-02-PLAN.md — Named bookmarks with keyboard shortcuts 1-9 and management UI
+- [x] 22-01-PLAN.md — Navigation history with back/forward buttons and recent nodes dropdown
+- [x] 22-02-PLAN.md — Named bookmarks with keyboard shortcuts 1-9 and management UI
 
 ### Phase 23: Breadcrumb Trail
 **Goal**: User can see hierarchy path to current node and navigate to ancestors
@@ -492,11 +492,11 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 19. Enhanced Flash Effects | 2/2 | Complete | FLX-01-03 |
 | 20. Activity Trails | 2/2 | Complete | TRL-01-03 |
 | 21. Smart Camera Core | 2/2 | Complete | CAM-01-02 |
-| 22. Bookmarks & History | 0/2 | Pending | BKM-01-04 |
+| 22. Bookmarks & History | 2/2 | Complete | BKM-01-04 |
 | 23. Breadcrumb Trail | 0/TBD | Pending | BRD-01-02 |
 | 24. Minimap | 0/TBD | Pending | MAP-01-03 |
 | 25. Advanced Camera | 0/TBD | Pending | CAM-03-04 |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-25 (Phase 22 planned)*
+*Last updated: 2026-01-25 (Phase 22 complete)*

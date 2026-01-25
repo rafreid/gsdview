@@ -338,10 +338,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRL-03 | Phase 20 | Complete |
 | CAM-01 | Phase 21 | Complete |
 | CAM-02 | Phase 21 | Complete |
-| BKM-01 | Phase 22 | Pending |
-| BKM-02 | Phase 22 | Pending |
-| BKM-03 | Phase 22 | Pending |
-| BKM-04 | Phase 22 | Pending |
+| BKM-01 | Phase 22 | Complete |
+| BKM-02 | Phase 22 | Complete |
+| BKM-03 | Phase 22 | Complete |
+| BKM-04 | Phase 22 | Complete |
 | BRD-01 | Phase 23 | Pending |
 | BRD-02 | Phase 23 | Pending |
 | MAP-01 | Phase 24 | Pending |
@@ -367,4 +367,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-22 (v1.0), 2026-01-23 (v1.1), 2026-01-24 (v1.2, v1.3)*
-*Last updated: 2026-01-24 (v1.3 phase mappings added)*
+*Last updated: 2026-01-25 (Phase 22 requirements complete)*
