@@ -1161,6 +1161,88 @@
       pointer-events: none;
     }
 
+    /* Orbit Mode Toggle */
+    #orbit-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      margin-left: 10px;
+      background: rgba(100, 149, 237, 0.15);
+      border: 1px solid rgba(100, 149, 237, 0.4);
+      border-radius: 4px;
+      color: rgba(100, 149, 237, 0.7);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #orbit-toggle:hover {
+      background: rgba(100, 149, 237, 0.25);
+      border-color: rgba(100, 149, 237, 0.6);
+      color: #6495ED;
+    }
+
+    #orbit-toggle.active {
+      background: rgba(100, 149, 237, 0.3);
+      border-color: #6495ED;
+      color: #6495ED;
+      animation: orbit-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes orbit-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(100, 149, 237, 0.4); }
+      50% { box-shadow: 0 0 0 4px rgba(100, 149, 237, 0.2); }
+    }
+
+    #orbit-toggle .orbit-icon {
+      font-size: 14px;
+    }
+
+    /* Orbit Speed Slider */
+    #orbit-speed-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 8px;
+      padding: 4px 8px;
+      background: rgba(100, 149, 237, 0.1);
+      border-radius: 4px;
+    }
+
+    #orbit-speed-label {
+      font-size: 11px;
+      color: rgba(100, 149, 237, 0.7);
+    }
+
+    #orbit-speed-slider {
+      width: 60px;
+      height: 4px;
+      -webkit-appearance: none;
+      background: rgba(100, 149, 237, 0.3);
+      border-radius: 2px;
+      outline: none;
+    }
+
+    #orbit-speed-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      background: #6495ED;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    #orbit-speed-slider::-webkit-slider-thumb:hover {
+      background: #87CEEB;
+    }
+
+    #orbit-speed-value {
+      font-size: 11px;
+      color: rgba(100, 149, 237, 0.7);
+      min-width: 20px;
+    }
+
     /* Navigation History Controls */
     #nav-controls {
       display: flex;
@@ -2946,6 +3028,14 @@
       <button id="zoom-detail" class="zoom-btn" title="Detail view of selected node (close-up)">
         <span>&#128269;+</span>
       </button>
+    </div>
+    <button id="orbit-toggle" title="Orbit camera around selected node (presentation mode)">
+      <span class="orbit-icon">&#10227;</span> Orbit
+    </button>
+    <div id="orbit-speed-container" title="Orbit rotation speed">
+      <span id="orbit-speed-label">Speed:</span>
+      <input type="range" id="orbit-speed-slider" min="1" max="10" value="5" step="0.5">
+      <span id="orbit-speed-value">5.0</span>
     </div>
     <div id="nav-controls" title="Navigation history">
       <button id="nav-back" class="nav-btn disabled" title="Go back (Alt+Left)">
