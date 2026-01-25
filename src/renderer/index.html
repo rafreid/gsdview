@@ -2527,6 +2527,50 @@
       box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.3);
     }
 
+    /* Path Playback Button */
+    #path-play {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      margin-left: 8px;
+      background: rgba(100, 149, 237, 0.15);
+      border: 1px solid rgba(100, 149, 237, 0.4);
+      border-radius: 4px;
+      color: rgba(100, 149, 237, 0.7);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #path-play:hover {
+      background: rgba(100, 149, 237, 0.25);
+      border-color: rgba(100, 149, 237, 0.6);
+      color: #6495ED;
+    }
+
+    #path-play.active {
+      background: rgba(100, 149, 237, 0.3);
+      border-color: #6495ED;
+      color: #6495ED;
+    }
+
+    #path-play .path-icon {
+      font-size: 12px;
+    }
+
+    /* Path Progress Indicator */
+    #path-progress {
+      display: none;
+      margin-left: 6px;
+      padding: 2px 8px;
+      background: rgba(100, 149, 237, 0.2);
+      border-radius: 10px;
+      font-size: 11px;
+      color: #6495ED;
+      font-weight: 500;
+    }
+
     /* Bookmark Button */
     #bookmark-btn {
       display: flex;
@@ -2943,6 +2987,10 @@
       <input type="range" id="trail-duration-slider" min="10" max="300" value="60" step="5">
       <span id="trail-duration-value">60s</span>
     </div>
+    <button id="path-play" title="Play camera path through bookmarks (P key)">
+      <span class="path-icon">&#9654;</span> Path
+    </button>
+    <span id="path-progress"></span>
     <button id="bookmark-btn" title="Save bookmark (Ctrl+1-9)">
       <span class="bookmark-icon">&#9733;</span>
       <span class="bookmark-count"></span>
