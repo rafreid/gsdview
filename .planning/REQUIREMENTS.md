@@ -9,8 +9,8 @@ Requirements for milestone v1.4: Live Activity Sync.
 
 ### Claude Code Integration
 
-- [ ] **CCI-01**: App configures Claude Code PostToolUse hooks to emit file operation events
-- [ ] **CCI-02**: Bash observer script writes operation events to a watched file
+- [x] **CCI-01**: App configures Claude Code PostToolUse hooks to emit file operation events
+- [x] **CCI-02**: Bash observer script writes operation events to a watched file
 - [ ] **CCI-03**: Chokidar watcher detects event file changes and parses operation data
 - [ ] **CCI-04**: Read operations from Claude Code trigger visual feedback (not possible with file watchers)
 - [ ] **CCI-05**: Event deduplication handles duplicate hook fires without double-animating
@@ -61,8 +61,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CCI-01 | Phase 26 | Pending |
-| CCI-02 | Phase 26 | Pending |
+| CCI-01 | Phase 26 | Complete |
+| CCI-02 | Phase 26 | Complete |
 | CCI-03 | Phase 27 | Pending |
 | CCI-04 | Phase 28 | Pending |
 | CCI-05 | Phase 27 | Pending |
