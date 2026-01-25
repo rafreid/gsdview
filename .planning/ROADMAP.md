@@ -412,10 +412,10 @@ Plans:
   2. Each breadcrumb segment shows node name (e.g., "Project / src / components / Graph.js")
   3. Clicking any breadcrumb segment navigates camera to that ancestor node
   4. Breadcrumb trail updates automatically when user selects different node
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] TBD
+- [ ] 23-01-PLAN.md — Breadcrumb path building, UI component, and click-to-navigate
 
 ### Phase 24: Minimap
 **Goal**: User can see bird's-eye overview of graph and quickly navigate to any region
@@ -493,10 +493,10 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 20. Activity Trails | 2/2 | Complete | TRL-01-03 |
 | 21. Smart Camera Core | 2/2 | Complete | CAM-01-02 |
 | 22. Bookmarks & History | 2/2 | Complete | BKM-01-04 |
-| 23. Breadcrumb Trail | 0/TBD | Pending | BRD-01-02 |
+| 23. Breadcrumb Trail | 0/1 | Planned | BRD-01-02 |
 | 24. Minimap | 0/TBD | Pending | MAP-01-03 |
 | 25. Advanced Camera | 0/TBD | Pending | CAM-03-04 |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-25 (Phase 22 complete)*
+*Last updated: 2026-01-25 (Phase 23 planned)*
