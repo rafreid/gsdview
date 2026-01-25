@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 20 complete
+**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 21 in progress
 
 ## Current Position
 
-Phase: 20 of 25 (Activity Trails)
-Plan: 2/2
+Phase: 21 of 25 (Smart Camera Core)
+Plan: 1/1
 Status: Phase complete
-Last activity: 2026-01-24 - Completed 20-02-PLAN.md
+Last activity: 2026-01-25 - Completed 21-01-PLAN.md
 
-Progress: [████████████████████████████████░] 20/25 phases complete (80%)
+Progress: [████████████████████████████████░] 21/25 phases complete (84%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 47 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 10)
+- Total plans completed: 48 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 11)
 - Average duration: 5min
-- Total execution time: 2 days + 60m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 43m)
+- Total execution time: 2 days + 63m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 46m)
 
 **By Milestone:**
 
@@ -39,7 +39,7 @@ Progress: [███████████████████████
 
 *v1.3 (Active):*
 - 8 phases planned
-- Status: Phase 20 complete (2 plans)
+- Status: Phase 21 complete (3 plans)
 
 ## Accumulated Context
 
@@ -166,6 +166,11 @@ Recent decisions affecting current work:
 - LineDashedMaterial with 8:4 dash pattern for visual distinction (20-02)
 - Three-phase color gradient: cyan -> teal -> dim blue-gray (20-02)
 - Persist trail fade duration via electron-store (20-02)
+- Follow-active camera mode defaults to off (user opts in) (21-01)
+- Deleted files excluded from follow-active camera pan (21-01)
+- 800ms transition for follow mode (faster than manual 1000ms) (21-01)
+- Orange color theme (#FFA500) for follow toggle to distinguish from trails (21-01)
+- flyToNodeSmooth() for reusable smooth camera transitions (21-01)
 
 ### Pending Todos
 
@@ -193,7 +198,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-24T23:55:00Z
-Stopped at: Completed 20-02-PLAN.md (Trail Configuration and Enhanced Visuals)
+Last session: 2026-01-25T00:35:00Z
+Stopped at: Completed 21-01-PLAN.md (Follow-Active Camera Mode)
 Resume file: None
-Next action: Continue to Phase 21.
+Next action: Continue to Phase 22.
