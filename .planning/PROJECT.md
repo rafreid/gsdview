@@ -8,11 +8,16 @@ A desktop application that visualizes GSD project structure as an interactive 3D
 
 Make the invisible structure of a GSD project visible and navigable — so users always know where they are, what's connected, and what's blocked.
 
-## Current State
+## Current Milestone: v1.4 Live Activity Sync
 
-**Latest shipped:** v1.3 Enhanced Navigation + Smooth Activity (2026-01-25)
+**Goal:** Make file activity animations highly visible and synchronized with real-time Claude Code operations, so users can see exactly what's happening as files are read, written, created, and deleted.
 
-All major navigation and activity features are complete. The app now provides smart camera behaviors, bookmarks, minimap, breadcrumb navigation, and smooth activity updates.
+**Target features:**
+- Claude Code integration via hooks + WebSocket for real-time operation events
+- Read operation detection (beyond just write/create/delete)
+- Bigger, brighter flash effects with larger glow radius
+- Better synchronization between actual operations and visual feedback
+- Enhanced visual indicators for different operation types (read vs write vs create vs delete)
 
 ## Requirements
 
@@ -85,7 +90,13 @@ All major navigation and activity features are complete. The app now provides sm
 
 ### Active
 
-No active requirements. Run `/gsd:new-milestone` to define v1.4 scope.
+*v1.4 scope:*
+
+- [ ] Claude Code integration for real-time operation events
+- [ ] Read operation detection and visualization
+- [ ] Enhanced flash effects (bigger, brighter, more visible)
+- [ ] Operation-specific visual indicators
+- [ ] WebSocket server for receiving Claude hooks
 
 ### Out of Scope
 
@@ -135,4 +146,4 @@ No active requirements. Run `/gsd:new-milestone` to define v1.4 scope.
 | Limit scope to .planning/ + src/ | Performance and relevance balance | — Pending |
 
 ---
-*Last updated: 2026-01-25 after v1.3 milestone completion*
+*Last updated: 2026-01-25 after v1.4 milestone start*
