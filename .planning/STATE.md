@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-24)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 25 in progress
+**Current focus:** v1.3 Enhanced Navigation + Smooth Activity - Phase 25 complete
 
 ## Current Position
 
 Phase: 25 of 25 (Advanced Camera)
-Plan: 1/2 (25-02 complete)
-Status: Phase 25 in progress
-Last activity: 2026-01-25 - Completed 25-02-PLAN.md
+Plan: 2/2 (complete)
+Status: Phase 25 complete - v1.3 milestone complete
+Last activity: 2026-01-25 - Completed 25-01-PLAN.md
 
-Progress: [█████████████████████████████████████] 25/25 phases (98%)
+Progress: [█████████████████████████████████████] 25/25 phases (100%)
 
 ## Performance Metrics
 
@@ -37,9 +37,9 @@ Progress: [███████████████████████
 - 5 phases, 7 plans
 - Status: Shipped 2026-01-24
 
-*v1.3 (Active):*
-- 8 phases planned
-- Status: Phase 25 in progress (9 plans complete)
+*v1.3 (Complete):*
+- 8 phases, 10 plans
+- Status: Shipped 2026-01-25
 
 ## Accumulated Context
 
@@ -212,6 +212,10 @@ Recent decisions affecting current work:
 - Cornflower blue (#6495ED) for path button theme (25-02)
 - Stop path playback on any graph click for user control (25-02)
 - P key toggles path playback (25-02)
+- Orbit mode uses requestAnimationFrame for 60fps smooth rotation (25-01)
+- Orbit radius = 1.5x current camera distance from node (25-01)
+- Orbit speed slider maps 1-10 to 0.1-1.0 radians/sec (25-01)
+- Cornflower blue (#6495ED) for orbit controls (matches camera theme) (25-01)
 
 ### Pending Todos
 
@@ -240,6 +244,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed 25-02-PLAN.md (path animation)
+Stopped at: Completed 25-01-PLAN.md (Phase 25 complete, v1.3 milestone complete)
 Resume file: None
-Next action: Execute 25-01-PLAN.md (orbit mode) to complete Phase 25
+Next action: v1.3 shipped - Begin planning v1.4 or conclude project
