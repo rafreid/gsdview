@@ -11,9 +11,9 @@ Requirements for milestone v1.4: Live Activity Sync.
 
 - [x] **CCI-01**: App configures Claude Code PostToolUse hooks to emit file operation events
 - [x] **CCI-02**: Bash observer script writes operation events to a watched file
-- [ ] **CCI-03**: Chokidar watcher detects event file changes and parses operation data
+- [x] **CCI-03**: Chokidar watcher detects event file changes and parses operation data
 - [ ] **CCI-04**: Read operations from Claude Code trigger visual feedback (not possible with file watchers)
-- [ ] **CCI-05**: Event deduplication handles duplicate hook fires without double-animating
+- [x] **CCI-05**: Event deduplication handles duplicate hook fires without double-animating
 
 ### Enhanced Flash Effects
 
@@ -24,9 +24,9 @@ Requirements for milestone v1.4: Live Activity Sync.
 
 ### Event Processing
 
-- [ ] **EVT-01**: IPC channel forwards Claude operations from main to renderer process
-- [ ] **EVT-02**: Operation events include file path, operation type, and timestamp
-- [ ] **EVT-03**: Serial queue processing preserves event ordering
+- [x] **EVT-01**: IPC channel forwards Claude operations from main to renderer process
+- [x] **EVT-02**: Operation events include file path, operation type, and timestamp
+- [x] **EVT-03**: Serial queue processing preserves event ordering
 
 ## Future Requirements
 
@@ -63,16 +63,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | CCI-01 | Phase 26 | Complete |
 | CCI-02 | Phase 26 | Complete |
-| CCI-03 | Phase 27 | Pending |
+| CCI-03 | Phase 27 | Complete |
 | CCI-04 | Phase 28 | Pending |
-| CCI-05 | Phase 27 | Pending |
+| CCI-05 | Phase 27 | Complete |
 | FLX-04 | Phase 28 | Pending |
 | FLX-05 | Phase 28 | Pending |
 | FLX-06 | Phase 28 | Pending |
 | FLX-07 | Phase 29 | Pending |
-| EVT-01 | Phase 27 | Pending |
-| EVT-02 | Phase 27 | Pending |
-| EVT-03 | Phase 27 | Pending |
+| EVT-01 | Phase 27 | Complete |
+| EVT-02 | Phase 27 | Complete |
+| EVT-03 | Phase 27 | Complete |
 
 **Coverage:**
 - v1.4 requirements: 12 total
@@ -83,4 +83,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-25*
-*Last updated: 2026-01-25 after v1.4 roadmap creation*
+*Last updated: 2026-01-25 after Phase 27 completion*

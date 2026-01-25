@@ -57,7 +57,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 27-01-PLAN.md — Extend chokidar watcher, implement event pipeline with deduplication, add IPC channel
+- [x] 27-01-PLAN.md — Extend chokidar watcher, implement event pipeline with deduplication, add IPC channel
 
 ### Phase 28: Enhanced Flash Effects
 
@@ -114,10 +114,10 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 26. Hook Infrastructure | 1/1 | Complete | 2026-01-25 |
-| 27. Chokidar Extension & IPC | 0/1 | Not started | - |
+| 27. Chokidar Extension & IPC | 1/1 | Complete | 2026-01-25 |
 | 28. Enhanced Flash Effects | 0/TBD | Not started | - |
 | 29. Performance & Polish | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-25 (Phase 27 planned)*
+*Last updated: 2026-01-25 (Phase 27 complete)*
