@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 
 ## Current Position
 
-Phase: 27 - Chokidar Extension & IPC
+Phase: 28 - Enhanced Flash Effects
 Plan: 01 of 01
 Status: Phase complete
-Last activity: 2026-01-25 — Executed 27-01-PLAN.md (Chokidar Extension & IPC)
+Last activity: 2026-01-25 — Executed 28-01-PLAN.md (Enhanced Flash Effects)
 
-Progress: [████████████████████░░░░░░░░░░░░░░░░░░░░] 2/4 phases (50%)
+Progress: [██████████████████████████░░░░░░░░░░░░░░] 3/4 phases (75%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 63 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 2)
+- Total plans completed: 64 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 3)
 - Average duration: 5min
-- Total execution time: 2 days + 94m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 5m)
+- Total execution time: 2 days + 98m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 9m)
 
 **By Milestone:**
 
@@ -42,8 +42,8 @@ Progress: [████████████████████░░░
 - Status: Shipped 2026-01-25
 
 *v1.4 (In Progress):*
-- 4 phases, 2 plans complete
-- Status: Phase 27 complete (Chokidar Extension & IPC) - 2026-01-25
+- 4 phases, 3 plans complete
+- Status: Phase 28 complete (Enhanced Flash Effects) - 2026-01-25
 
 ## Accumulated Context
 
@@ -231,6 +231,13 @@ Recent decisions affecting current work:
 - Serial queue processing to maintain event order and prevent race conditions (27-01)
 - NodeId enrichment matches graph-builder format (sourceType:/relative/path) (27-01)
 - IPC channel 'claude-operation' forwards enriched events to renderer (27-01)
+- Read operations use bright blue flash (0x4488FF) with 2 quick pulses at 0.8x intensity (28-01)
+- Enhanced emissive intensity 3.5x (was 2.0x) for better visibility from overview zoom (28-01)
+- Enhanced scale pulse 0.8 (was 0.5) creating max 1.8x scale (was 1.5x) for pronounced effect (28-01)
+- Flash intensity slider boosted 1.5x to support up to 3x total intensity (28-01)
+- Claude write/edit operations map to 'modified' change type (amber flash) (28-01)
+- onClaudeOperation IPC listener wires Claude operations to flash animations (28-01)
+- Follow-active camera disabled for read operations (non-intrusive) (28-01)
 
 ### Pending Todos
 
@@ -259,6 +266,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Executed 27-01-PLAN.md (Chokidar Extension & IPC)
+Stopped at: Executed 28-01-PLAN.md (Enhanced Flash Effects)
 Resume file: None
-Next action: Plan Phase 28 (Enhanced Flash Effects)
+Next action: Plan Phase 29 (Comprehensive Testing & Refinement)
