@@ -3,14 +3,16 @@
 # Claude Code PostToolUse hook observer script
 # Purpose: Capture file operations (Read/Write/Edit) and write event files for GSD Viewer
 #
-# Input: JSON from stdin with structure:
+# Input: JSON from stdin with structure (Claude Code current schema):
 #   {
-#     "tool": "Read|Write|Edit",
-#     "parameters": {
+#     "session_id": "...",
+#     "hook_event_name": "PostToolUse",
+#     "tool_name": "Read|Write|Edit",
+#     "tool_input": {
 #       "file_path": "/absolute/path/to/file.txt",
 #       ...other params...
 #     },
-#     "timestamp": 1234567890123
+#     "tool_response": {...}
 #   }
 #
 # Output: Event file in .gsd-viewer/events/ directory with schema:
@@ -64,17 +66,22 @@ if [[ -z "$HOOK_INPUT" ]]; then
   exit 0
 fi
 
+# Debug: Log the raw input to help diagnose parsing issues
+echo "[$(date -Iseconds)] DEBUG INPUT: $HOOK_INPUT" >> "$ERROR_LOG" 2>/dev/null || true
+
 # --- Parse JSON ---
 # Try jq if available, fallback to grep/sed patterns
+# Note: Claude Code schema uses tool_name and tool_input (not tool and parameters)
 if command -v jq &> /dev/null; then
   # Use jq for robust parsing
-  TOOL=$(echo "$HOOK_INPUT" | jq -r '.tool // empty' 2>/dev/null) || {
+  # Try new schema (tool_name) first, fallback to old schema (tool)
+  TOOL=$(echo "$HOOK_INPUT" | jq -r '.tool_name // .tool // empty' 2>/dev/null) || {
     log_error "jq failed to parse tool field"
     exit 0
   }
 
-  # Try multiple possible parameter field names (file_path, path)
-  FILE_PATH=$(echo "$HOOK_INPUT" | jq -r '.parameters.file_path // .parameters.path // empty' 2>/dev/null) || {
+  # Try new schema (tool_input.file_path) first, fallback to old schema (parameters.file_path)
+  FILE_PATH=$(echo "$HOOK_INPUT" | jq -r '.tool_input.file_path // .tool_input.path // .parameters.file_path // .parameters.path // empty' 2>/dev/null) || {
     log_error "jq failed to parse file_path field"
     exit 0
   }
@@ -86,10 +93,14 @@ if command -v jq &> /dev/null; then
   fi
 else
   # Fallback: grep/sed parsing (less reliable but functional)
-  TOOL=$(echo "$HOOK_INPUT" | grep -oP '"tool"\s*:\s*"\K[^"]+' 2>/dev/null) || {
-    log_error "grep failed to parse tool field (jq not available)"
-    exit 0
-  }
+  # Try new schema (tool_name) first, fallback to old schema (tool)
+  TOOL=$(echo "$HOOK_INPUT" | grep -oP '"tool_name"\s*:\s*"\K[^"]+' 2>/dev/null)
+  if [[ -z "$TOOL" ]]; then
+    TOOL=$(echo "$HOOK_INPUT" | grep -oP '"tool"\s*:\s*"\K[^"]+' 2>/dev/null) || {
+      log_error "grep failed to parse tool field (jq not available)"
+      exit 0
+    }
+  fi
 
   FILE_PATH=$(echo "$HOOK_INPUT" | grep -oP '"file_path"\s*:\s*"\K[^"]+' 2>/dev/null)
   if [[ -z "$FILE_PATH" ]]; then
@@ -154,8 +165,9 @@ EOF
 )
 
 # --- Atomic Write ---
-# Write to temp file, then mv for atomicity (prevents partial reads by chokidar)
-TEMP_FILE="${EVENT_PATH}.tmp"
+# Write to temp file OUTSIDE the events directory, then mv for atomicity
+# (chokidar watches the events directory and can race with .tmp files inside it)
+TEMP_FILE="/tmp/gsd-event-${RANDOM_SUFFIX}.json"
 
 echo "$EVENT_JSON" > "$TEMP_FILE" 2>/dev/null || {
   log_error "Failed to write temp event file: $TEMP_FILE"
