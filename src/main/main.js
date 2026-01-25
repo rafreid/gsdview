@@ -598,6 +598,11 @@ app.whenReady().then(() => {
     }
   });
 
+  // IPC handler for opening external URLs
+  ipcMain.handle('open-external', async (event, url) => {
+    await shell.openExternal(url);
+  });
+
   // Create window AFTER all IPC handlers are registered
   createWindow();
 
