@@ -5287,6 +5287,41 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
   });
 }
 
+// Listen for Claude Code operations (read/write/edit via hooks)
+if (window.electronAPI && window.electronAPI.onClaudeOperation) {
+  window.electronAPI.onClaudeOperation((event) => {
+    console.log('[Claude Operation]', event.operation, event.file_path, 'nodeId:', event.nodeId);
+
+    // Map Claude operations to change types for visual animation
+    // - read: unique to Claude (file watchers can't detect reads)
+    // - write: maps to 'modified' (file was written)
+    // - edit: maps to 'modified' (file was edited)
+    let changeType;
+    if (event.operation === 'read') {
+      changeType = 'read';
+    } else if (event.operation === 'write' || event.operation === 'edit') {
+      changeType = 'modified';
+    } else {
+      changeType = 'modified'; // Fallback for unknown operations
+    }
+
+    // Flash the node if we have a valid nodeId
+    if (event.nodeId) {
+      flashNodeWithType(event.nodeId, changeType);
+      flashTreeItem(event.nodeId, changeType);
+
+      // Follow camera to file if follow-active is enabled (but not for reads)
+      if (followActiveEnabled && changeType !== 'read') {
+        flyToNodeSmooth(event.nodeId);
+      }
+    }
+
+    // Note: We don't add to activity feed here since these are Claude operations,
+    // not file system events. The activity feed tracks file changes, not tool usage.
+    // Could add a separate "Claude Activity" indicator in future if desired.
+  });
+}
+
 // Load recent projects on startup
 updateRecentProjects();
 
