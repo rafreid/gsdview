@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Phase: 26 - Hook Infrastructure
-Plan: —
-Status: Not started
-Last activity: 2026-01-25 — v1.4 roadmap created
+Plan: 01 of 01
+Status: Phase complete
+Last activity: 2026-01-25 — Completed 26-01-PLAN.md
 
-Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0/4 phases (0%)
+Progress: [██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░] 1/4 phases (25%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 61 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17)
+- Total plans completed: 62 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 1)
 - Average duration: 5min
-- Total execution time: 2 days + 89m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m)
+- Total execution time: 2 days + 92m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 3m)
 
 **By Milestone:**
 
@@ -42,8 +42,8 @@ Progress: [░░░░░░░░░░░░░░░░░░░░░░░
 - Status: Shipped 2026-01-25
 
 *v1.4 (In Progress):*
-- 4 phases, TBD plans
-- Status: Roadmap created 2026-01-25
+- 4 phases, 1 plan complete
+- Status: Phase 26 complete (Hook Infrastructure) - 2026-01-25
 
 ## Accumulated Context
 
@@ -220,6 +220,12 @@ Recent decisions affecting current work:
 - Orbit radius = 1.5x current camera distance from node (25-01)
 - Orbit speed slider maps 1-10 to 0.1-1.0 radians/sec (25-01)
 - Cornflower blue (#6495ED) for orbit controls (matches camera theme) (25-01)
+- PostToolUse hooks fire after operation with full context (26-01)
+- File-based event communication via .gsd-viewer/events/ directory (26-01)
+- Hook script always exits 0 to never block Claude operations (26-01)
+- Atomic writes with temp file + mv to prevent partial reads (26-01)
+- Event schema v1.0: schema_version, timestamp, operation, file_path, tool, source (26-01)
+- Event files ignored by git (ephemeral, created/consumed/deleted) (26-01)
 
 ### Pending Todos
 
@@ -248,6 +254,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: v1.4 roadmap created with 4 phases (26-29)
+Stopped at: Completed 26-01-PLAN.md (Hook Infrastructure)
 Resume file: None
-Next action: Plan Phase 26 (Hook Infrastructure)
+Next action: Plan Phase 27 (Chokidar Extension & IPC)
