@@ -61,24 +61,26 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CCI-01 | TBD | Pending |
-| CCI-02 | TBD | Pending |
-| CCI-03 | TBD | Pending |
-| CCI-04 | TBD | Pending |
-| CCI-05 | TBD | Pending |
-| FLX-04 | TBD | Pending |
-| FLX-05 | TBD | Pending |
-| FLX-06 | TBD | Pending |
-| FLX-07 | TBD | Pending |
-| EVT-01 | TBD | Pending |
-| EVT-02 | TBD | Pending |
-| EVT-03 | TBD | Pending |
+| CCI-01 | Phase 26 | Pending |
+| CCI-02 | Phase 26 | Pending |
+| CCI-03 | Phase 27 | Pending |
+| CCI-04 | Phase 28 | Pending |
+| CCI-05 | Phase 27 | Pending |
+| FLX-04 | Phase 28 | Pending |
+| FLX-05 | Phase 28 | Pending |
+| FLX-06 | Phase 28 | Pending |
+| FLX-07 | Phase 29 | Pending |
+| EVT-01 | Phase 27 | Pending |
+| EVT-02 | Phase 27 | Pending |
+| EVT-03 | Phase 27 | Pending |
 
 **Coverage:**
 - v1.4 requirements: 12 total
-- Mapped to phases: 0 (awaiting roadmap)
-- Unmapped: 12
+- Mapped to phases: 12
+- Unmapped: 0
+
+**100% coverage verified**
 
 ---
 *Requirements defined: 2026-01-25*
-*Last updated: 2026-01-25 after initial definition*
+*Last updated: 2026-01-25 after v1.4 roadmap creation*
