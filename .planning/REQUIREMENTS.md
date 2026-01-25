@@ -347,8 +347,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MAP-01 | Phase 24 | Complete |
 | MAP-02 | Phase 24 | Complete |
 | MAP-03 | Phase 24 | Complete |
-| CAM-03 | Phase 25 | Pending |
-| CAM-04 | Phase 25 | Pending |
+| CAM-03 | Phase 25 | Complete |
+| CAM-04 | Phase 25 | Complete |
 
 **Coverage:**
 - v1.3 requirements: 22 total
@@ -367,4 +367,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-22 (v1.0), 2026-01-23 (v1.1), 2026-01-24 (v1.2, v1.3)*
-*Last updated: 2026-01-25 (Phase 23 requirements complete)*
+*Last updated: 2026-01-25 (v1.3 milestone complete - all requirements complete)*

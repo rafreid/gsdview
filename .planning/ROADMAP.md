@@ -38,7 +38,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 16: File Context & Metadata** - Metadata header, quick actions, activity history, related files
 - [x] **Phase 17: Search & Polish** - Keyboard shortcuts (Esc, Ctrl+F) and content search/highlighting
 
-### v1.3 (Active)
+### v1.3 (Complete)
 
 - [x] **Phase 18: Smooth Activity Updates** - Incremental graph updates without camera disruption
 - [x] **Phase 19: Enhanced Flash Effects** - Brighter, configurable flash animations for file activity
@@ -47,7 +47,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 22: Bookmarks & History** - Named bookmarks with navigation history
 - [x] **Phase 23: Breadcrumb Trail** - Hierarchy path navigation
 - [x] **Phase 24: Minimap** - Bird's-eye overview panel with viewport indicator
-- [ ] **Phase 25: Advanced Camera** - Orbit mode and path animation
+- [x] **Phase 25: Advanced Camera** - Orbit mode and path animation
 
 ## Phase Details
 
@@ -446,8 +446,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 25-01-PLAN.md — Orbit mode with continuous camera rotation and speed control
-- [ ] 25-02-PLAN.md — Path animation through bookmarks with sequential playback
+- [x] 25-01-PLAN.md — Orbit mode with continuous camera rotation and speed control
+- [x] 25-02-PLAN.md — Path animation through bookmarks with sequential playback
 
 ## Progress
 
@@ -486,7 +486,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 16. File Context & Metadata | 2/2 | Complete | 2026-01-24 |
 | 17. Search & Polish | 1/1 | Complete | 2026-01-24 |
 
-### v1.3 (Active)
+### v1.3 (Complete)
 
 | Phase | Plans Complete | Status | Target |
 |-------|----------------|--------|--------|
@@ -497,8 +497,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 22. Bookmarks & History | 2/2 | Complete | BKM-01-04 |
 | 23. Breadcrumb Trail | 1/1 | Complete | BRD-01-02 |
 | 24. Minimap | 2/2 | Complete | MAP-01-03 |
-| 25. Advanced Camera | 0/2 | Pending | CAM-03-04 |
+| 25. Advanced Camera | 2/2 | Complete | CAM-03-04 |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-25 (Phase 25 planned)*
+*Last updated: 2026-01-25 (Phase 25 complete - v1.3 milestone complete)*
