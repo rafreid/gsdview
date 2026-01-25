@@ -6557,4 +6557,129 @@ function minimapToWorld(canvasX, canvasY) {
   return { x, y };
 }
 
+/**
+ * Draw camera viewport rectangle on minimap
+ */
+function drawMinimapViewport(ctx) {
+  if (!Graph || !Graph.cameraPosition) return;
+
+  // Get camera position - this is the center of the viewport
+  const cameraPos = Graph.cameraPosition();
+  if (!cameraPos || !cameraPos.x || !cameraPos.y) return;
+
+  // Estimate viewport size based on camera distance
+  // The viewport size in world coordinates depends on camera distance
+  // Rough approximation: viewport size is proportional to distance from origin
+  const distance = Math.sqrt(cameraPos.x * cameraPos.x + cameraPos.y * cameraPos.y + (cameraPos.z || 0) * (cameraPos.z || 0));
+  const viewportWorldWidth = Math.max(distance * 0.5, 50); // Minimum 50 units
+  const viewportWorldHeight = Math.max(distance * 0.375, 37.5); // Maintain aspect ratio
+
+  // Calculate viewport bounds in world coordinates
+  const viewportMinX = cameraPos.x - viewportWorldWidth / 2;
+  const viewportMaxX = cameraPos.x + viewportWorldWidth / 2;
+  const viewportMinY = cameraPos.y - viewportWorldHeight / 2;
+  const viewportMaxY = cameraPos.y + viewportWorldHeight / 2;
+
+  // Convert to minimap coordinates
+  const topLeft = worldToMinimap(viewportMinX, viewportMinY);
+  const bottomRight = worldToMinimap(viewportMaxX, viewportMaxY);
+
+  const rectWidth = bottomRight.x - topLeft.x;
+  const rectHeight = bottomRight.y - topLeft.y;
+
+  // Draw viewport rectangle
+  ctx.strokeStyle = '#4ECDC4'; // Teal accent color
+  ctx.lineWidth = 2;
+  ctx.strokeRect(topLeft.x, topLeft.y, rectWidth, rectHeight);
+
+  // Draw semi-transparent fill
+  ctx.fillStyle = 'rgba(78, 205, 196, 0.15)';
+  ctx.fillRect(topLeft.x, topLeft.y, rectWidth, rectHeight);
+}
+
+/**
+ * Render the minimap - draw all nodes as dots and viewport rectangle
+ */
+function renderMinimap() {
+  if (!minimapCtx || !minimapCanvas || minimapCollapsed) return;
+
+  // Clear canvas
+  minimapCtx.clearRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+
+  // Recalculate bounds (nodes may have moved)
+  minimapBounds = calculateMinimapBounds();
+
+  // Draw nodes as dots
+  if (currentGraphData?.nodes) {
+    currentGraphData.nodes.forEach(node => {
+      if (node.x !== undefined && node.y !== undefined) {
+        const pos = worldToMinimap(node.x, node.y);
+
+        minimapCtx.fillStyle = '#4ECDC4'; // Teal dots
+        minimapCtx.beginPath();
+        minimapCtx.arc(pos.x, pos.y, 2, 0, Math.PI * 2);
+        minimapCtx.fill();
+      }
+    });
+  }
+
+  // Draw viewport rectangle
+  drawMinimapViewport(minimapCtx);
+}
+
+/**
+ * Start minimap continuous update loop (RAF)
+ */
+function startMinimapUpdateLoop() {
+  function updateLoop() {
+    renderMinimap();
+    minimapRafId = requestAnimationFrame(updateLoop);
+  }
+  updateLoop();
+}
+
+/**
+ * Stop minimap update loop
+ */
+function stopMinimapUpdateLoop() {
+  if (minimapRafId) {
+    cancelAnimationFrame(minimapRafId);
+    minimapRafId = null;
+  }
+}
+
+/**
+ * Initialize minimap - set up canvas and start updates
+ */
+function initMinimap() {
+  minimapCanvas = document.getElementById('minimap-canvas');
+  if (!minimapCanvas) return;
+
+  minimapCtx = minimapCanvas.getContext('2d');
+  if (!minimapCtx) return;
+
+  // Set up collapse toggle
+  const minimapHeader = document.getElementById('minimap-header');
+  const minimapPanel = document.getElementById('minimap-panel');
+
+  if (minimapHeader && minimapPanel) {
+    minimapHeader.addEventListener('click', () => {
+      minimapCollapsed = !minimapCollapsed;
+      minimapPanel.classList.toggle('collapsed', minimapCollapsed);
+
+      if (!minimapCollapsed) {
+        startMinimapUpdateLoop();
+      } else {
+        stopMinimapUpdateLoop();
+      }
+    });
+  }
+
+  // Start update loop
+  startMinimapUpdateLoop();
+}
+
+// Initialize minimap on load
+initMinimap();
+
 console.log('GSD Viewer initialized - select a project folder to visualize');
