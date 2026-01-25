@@ -42,7 +42,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 18: Smooth Activity Updates** - Incremental graph updates without camera disruption
 - [x] **Phase 19: Enhanced Flash Effects** - Brighter, configurable flash animations for file activity
-- [ ] **Phase 20: Activity Trails** - Visual trails showing change flow through graph
+- [x] **Phase 20: Activity Trails** - Visual trails showing change flow through graph
 - [ ] **Phase 21: Smart Camera Core** - Follow-active mode and zoom presets
 - [ ] **Phase 22: Bookmarks & History** - Named bookmarks with navigation history
 - [ ] **Phase 23: Breadcrumb Trail** - Hierarchy path navigation
@@ -368,8 +368,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 20-01-PLAN.md — Trail state management, rendering, and toggle button
-- [ ] 20-02-PLAN.md — Configurable trail duration and enhanced visual styling
+- [x] 20-01-PLAN.md — Trail state management, rendering, and toggle button
+- [x] 20-02-PLAN.md — Configurable trail duration and enhanced visual styling
 
 ### Phase 21: Smart Camera Core
 **Goal**: Camera intelligently follows file activity and provides quick zoom shortcuts
@@ -488,7 +488,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 |-------|----------------|--------|--------|
 | 18. Smooth Activity Updates | 3/3 | Complete | UPD-01-03 |
 | 19. Enhanced Flash Effects | 2/2 | Complete | FLX-01-03 |
-| 20. Activity Trails | 0/2 | Pending | TRL-01-03 |
+| 20. Activity Trails | 2/2 | Complete | TRL-01-03 |
 | 21. Smart Camera Core | 0/TBD | Pending | CAM-01-02 |
 | 22. Bookmarks & History | 0/TBD | Pending | BKM-01-04 |
 | 23. Breadcrumb Trail | 0/TBD | Pending | BRD-01-02 |
@@ -497,4 +497,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-24 (Phase 20 planned)*
+*Last updated: 2026-01-24 (Phase 20 complete)*

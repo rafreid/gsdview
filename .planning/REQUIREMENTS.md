@@ -192,9 +192,9 @@ Requirements for milestone v1.3: Enhanced Navigation + Smooth Activity.
 
 ### Activity Trails
 
-- [ ] **TRL-01**: Visual trails show recent activity flow through graph
-- [ ] **TRL-02**: Trail intensity fades over time (recent = bright, older = dim)
-- [ ] **TRL-03**: User can toggle activity trails on/off
+- [x] **TRL-01**: Visual trails show recent activity flow through graph
+- [x] **TRL-02**: Trail intensity fades over time (recent = bright, older = dim)
+- [x] **TRL-03**: User can toggle activity trails on/off
 
 ---
 
@@ -333,9 +333,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FLX-01 | Phase 19 | Complete |
 | FLX-02 | Phase 19 | Complete |
 | FLX-03 | Phase 19 | Complete |
-| TRL-01 | Phase 20 | Pending |
-| TRL-02 | Phase 20 | Pending |
-| TRL-03 | Phase 20 | Pending |
+| TRL-01 | Phase 20 | Complete |
+| TRL-02 | Phase 20 | Complete |
+| TRL-03 | Phase 20 | Complete |
 | CAM-01 | Phase 21 | Pending |
 | CAM-02 | Phase 21 | Pending |
 | BKM-01 | Phase 22 | Pending |
