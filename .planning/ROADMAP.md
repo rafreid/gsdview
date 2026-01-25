@@ -397,10 +397,11 @@ Plans:
   3. Back button navigates to previously visited node (like browser back button)
   4. Forward button navigates forward through navigation history
   5. Recent nodes dropdown shows last 10 visited nodes for quick return
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD
+- [ ] 22-01-PLAN.md — Navigation history with back/forward buttons and recent nodes dropdown
+- [ ] 22-02-PLAN.md — Named bookmarks with keyboard shortcuts 1-9 and management UI
 
 ### Phase 23: Breadcrumb Trail
 **Goal**: User can see hierarchy path to current node and navigate to ancestors
@@ -491,11 +492,11 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 19. Enhanced Flash Effects | 2/2 | Complete | FLX-01-03 |
 | 20. Activity Trails | 2/2 | Complete | TRL-01-03 |
 | 21. Smart Camera Core | 2/2 | Complete | CAM-01-02 |
-| 22. Bookmarks & History | 0/TBD | Pending | BKM-01-04 |
+| 22. Bookmarks & History | 0/2 | Pending | BKM-01-04 |
 | 23. Breadcrumb Trail | 0/TBD | Pending | BRD-01-02 |
 | 24. Minimap | 0/TBD | Pending | MAP-01-03 |
 | 25. Advanced Camera | 0/TBD | Pending | CAM-03-04 |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-24 (Phase 21 complete)*
+*Last updated: 2026-01-25 (Phase 22 planned)*
