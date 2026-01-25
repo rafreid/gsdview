@@ -95,8 +95,8 @@ const MAX_ACTIVITY_ENTRIES = 100; // Limit to prevent memory issues
 // Activity trail state
 let activityTrailsEnabled = true; // User toggle (default on)
 let activityTrails = []; // Array of { fromNodeId, toNodeId, timestamp, lineObject }
-const trailFadeDuration_DEFAULT = 60000; // 1 minute default
-let trailFadeDuration = trailFadeDuration_DEFAULT; // User-configurable trail fade duration (ms)
+const TRAIL_FADE_DURATION_DEFAULT = 60000; // 1 minute default (ms)
+let trailFadeDuration = TRAIL_FADE_DURATION_DEFAULT; // User-configurable trail fade duration (ms)
 const MAX_TRAILS = 20; // Maximum number of trail connections to show
 let trailAnimationLoop = null; // Reference to animation loop
 
