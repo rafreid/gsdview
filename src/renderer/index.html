@@ -178,7 +178,11 @@
       border: 1px solid rgba(78, 205, 196, 0.3);
       z-index: 100;
       overflow: hidden;
-      transition: max-height 0.3s ease;
+      transition: max-height 0.3s ease, background 0.2s ease;
+    }
+
+    #minimap-panel:hover:not(.collapsed) {
+      background: rgba(0, 0, 0, 0.85);
     }
 
     #minimap-panel.collapsed {
@@ -229,8 +233,14 @@
       display: block;
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 4px;
-      cursor: crosshair;
+      cursor: pointer;
       background: rgba(26, 26, 46, 0.5);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #minimap-canvas:hover {
+      border-color: rgba(78, 205, 196, 0.5);
+      box-shadow: 0 0 8px rgba(78, 205, 196, 0.2);
     }
 
     /* Details Panel */
