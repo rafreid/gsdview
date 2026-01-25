@@ -600,7 +600,14 @@ app.whenReady().then(() => {
 
   // IPC handler for opening external URLs
   ipcMain.handle('open-external', async (event, url) => {
-    await shell.openExternal(url);
+    console.log('[Main] Opening external URL:', url);
+    try {
+      await shell.openExternal(url);
+      console.log('[Main] External URL opened successfully');
+    } catch (err) {
+      console.error('[Main] Failed to open external URL:', err);
+      throw err;
+    }
   });
 
   // Create window AFTER all IPC handlers are registered

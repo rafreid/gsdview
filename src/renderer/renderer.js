@@ -7286,9 +7286,14 @@ function dismissHookNotification() {
 }
 
 // Open setup guide in browser
-function showHookHelp() {
-  // Open setup guide in default browser
-  window.electronAPI.openExternal('https://github.com/anthropics/claude-code/blob/main/HOOKS.md');
+async function showHookHelp() {
+  console.log('[HookHelp] Opening setup guide...');
+  try {
+    await window.electronAPI.openExternal('https://github.com/anthropics/claude-code/blob/main/HOOKS.md');
+    console.log('[HookHelp] Setup guide opened successfully');
+  } catch (err) {
+    console.error('[HookHelp] Failed to open setup guide:', err);
+  }
   dismissHookNotification();
 }
 
