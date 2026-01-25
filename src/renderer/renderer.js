@@ -6649,6 +6649,58 @@ function stopMinimapUpdateLoop() {
 }
 
 /**
+ * Navigate camera to a position on the minimap (with animation)
+ */
+function navigateToMinimapPosition(canvasX, canvasY) {
+  if (!Graph || !Graph.cameraPosition) return;
+
+  const worldPos = minimapToWorld(canvasX, canvasY);
+
+  // Calculate camera distance to maintain current zoom level
+  const currentPos = Graph.cameraPosition();
+  const currentDistance = Math.sqrt(
+    currentPos.x * currentPos.x +
+    currentPos.y * currentPos.y +
+    (currentPos.z || 0) * (currentPos.z || 0)
+  );
+
+  // Navigate to the clicked position with smooth animation
+  if (is3D) {
+    // In 3D, position camera at same distance but looking at clicked point
+    const distRatio = currentDistance / Math.hypot(worldPos.x, worldPos.y, 0) || 1;
+    Graph.cameraPosition(
+      {
+        x: worldPos.x * distRatio,
+        y: worldPos.y * distRatio,
+        z: currentDistance * 0.5
+      },
+      { x: worldPos.x, y: worldPos.y, z: 0 },
+      800  // Smooth animation
+    );
+  } else {
+    // In 2D, position camera above the clicked point
+    Graph.cameraPosition(
+      { x: worldPos.x, y: worldPos.y, z: currentDistance },
+      { x: worldPos.x, y: worldPos.y, z: 0 },
+      800
+    );
+  }
+
+  console.log('[Minimap] Navigated to:', worldPos);
+}
+
+/**
+ * Handle minimap click - navigate camera to clicked position
+ */
+function handleMinimapClick(event) {
+  const rect = minimapCanvas.getBoundingClientRect();
+  const canvasX = event.clientX - rect.left;
+  const canvasY = event.clientY - rect.top;
+
+  navigateToMinimapPosition(canvasX, canvasY);
+}
+
+/**
  * Initialize minimap - set up canvas and start updates
  */
 function initMinimap() {
@@ -6674,6 +6726,9 @@ function initMinimap() {
       }
     });
   }
+
+  // Add click listener for navigation
+  minimapCanvas.addEventListener('click', handleMinimapClick);
 
   // Start update loop
   startMinimapUpdateLoop();
