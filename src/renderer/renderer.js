@@ -376,6 +376,26 @@ async function loadTrailSettings() {
   }
 }
 
+// Load follow-active setting from store
+async function loadFollowActiveSetting() {
+  try {
+    const saved = await window.electronAPI.store.get('followActiveEnabled');
+    if (typeof saved === 'boolean') {
+      followActiveEnabled = saved;
+      const toggle = document.getElementById('follow-toggle');
+      if (toggle) {
+        if (followActiveEnabled) {
+          toggle.classList.add('active');
+        } else {
+          toggle.classList.remove('active');
+        }
+      }
+    }
+  } catch (err) {
+    console.log('[Camera] Could not load follow-active setting:', err);
+  }
+}
+
 // Color interpolation helper for flash animation
 function lerpColor(color1, color2, t) {
   const r1 = (color1 >> 16) & 0xFF, g1 = (color1 >> 8) & 0xFF, b1 = color1 & 0xFF;
@@ -4344,6 +4364,11 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
       if (entry.nodeId) {
         flashNodeWithType(entry.nodeId, entry.event);
         flashTreeItem(entry.nodeId, entry.event);
+
+        // Follow camera to changed file if follow-active is enabled
+        if (followActiveEnabled && entry.event !== 'deleted') {
+          flyToNodeSmooth(entry.nodeId);
+        }
       }
 
       // Check if the changed file is currently shown in details panel
@@ -5733,6 +5758,9 @@ document.getElementById('trail-duration-slider')?.addEventListener('input', asyn
 
 // Load trail settings on startup
 loadTrailSettings();
+
+// Load follow-active setting on startup
+loadFollowActiveSetting();
 
 // Modal search event listeners
 document.getElementById('modal-search-input')?.addEventListener('input', (e) => {
