@@ -100,11 +100,21 @@ let trailFadeDuration = TRAIL_FADE_DURATION_DEFAULT; // User-configurable trail 
 const MAX_TRAILS = 20; // Maximum number of trail connections to show
 let trailAnimationLoop = null; // Reference to animation loop
 
+// Navigation history (browser-style back/forward)
+let navigationHistory = [];      // Stack of visited node IDs
+let navigationIndex = -1;        // Current position in history (-1 = none)
+const MAX_HISTORY_SIZE = 50;     // Limit to prevent memory bloat
+let isNavigating = false;        // Flag to prevent history push during back/forward
+
 // Timeline replay state
 let timelinePosition = null; // null = live mode (tracking latest), number = historical timestamp
 let isTimelinePlaying = false;
 let playbackInterval = null;
 const PLAYBACK_SPEED = 500; // ms between steps during playback
+
+// Bookmarks (slots 1-9)
+let bookmarks = new Array(9).fill(null);  // 9 bookmark slots (accessed via keys 1-9)
+let currentBookmarkSlot = 0;  // Track selected slot in dialog
 
 // Modal search state
 let currentSearchQuery = '';
@@ -393,6 +403,162 @@ async function loadFollowActiveSetting() {
     }
   } catch (err) {
     console.log('[Camera] Could not load follow-active setting:', err);
+  }
+}
+
+// ===== Navigation History Functions =====
+
+// Push node to navigation history (called when user selects a node)
+function pushNavigationHistory(nodeId) {
+  // Don't push if we're navigating via back/forward
+  if (isNavigating) return;
+
+  // Don't push duplicate of current position
+  if (navigationHistory[navigationIndex] === nodeId) return;
+
+  // If we navigated back and then select new node, truncate forward history
+  if (navigationIndex < navigationHistory.length - 1) {
+    navigationHistory = navigationHistory.slice(0, navigationIndex + 1);
+  }
+
+  // Add new entry
+  navigationHistory.push(nodeId);
+  navigationIndex = navigationHistory.length - 1;
+
+  // Trim if exceeds max size (remove oldest)
+  if (navigationHistory.length > MAX_HISTORY_SIZE) {
+    navigationHistory.shift();
+    navigationIndex--;
+  }
+
+  // Update UI state
+  updateNavigationButtonStates();
+  updateRecentNodesDropdown();
+
+  // Persist to store (async, non-blocking)
+  saveNavigationHistory();
+}
+
+// Navigate back in history
+function navigateBack() {
+  if (navigationIndex <= 0) return;
+
+  isNavigating = true;
+  navigationIndex--;
+  const nodeId = navigationHistory[navigationIndex];
+
+  // Find and navigate to node
+  const node = currentGraphData?.nodes?.find(n => n.id === nodeId);
+  if (node) {
+    flyToNodeSmooth(nodeId, 80);
+    showDetailsPanel(node);
+  }
+
+  updateNavigationButtonStates();
+  updateRecentNodesDropdown();
+  isNavigating = false;
+
+  console.log('[Nav] Back to:', nodeId, 'index:', navigationIndex);
+}
+
+// Navigate forward in history
+function navigateForward() {
+  if (navigationIndex >= navigationHistory.length - 1) return;
+
+  isNavigating = true;
+  navigationIndex++;
+  const nodeId = navigationHistory[navigationIndex];
+
+  // Find and navigate to node
+  const node = currentGraphData?.nodes?.find(n => n.id === nodeId);
+  if (node) {
+    flyToNodeSmooth(nodeId, 80);
+    showDetailsPanel(node);
+  }
+
+  updateNavigationButtonStates();
+  updateRecentNodesDropdown();
+  isNavigating = false;
+
+  console.log('[Nav] Forward to:', nodeId, 'index:', navigationIndex);
+}
+
+// Update navigation button enabled/disabled states
+function updateNavigationButtonStates() {
+  const backBtn = document.getElementById('nav-back');
+  const forwardBtn = document.getElementById('nav-forward');
+
+  if (backBtn) {
+    if (navigationIndex > 0) {
+      backBtn.classList.remove('disabled');
+    } else {
+      backBtn.classList.add('disabled');
+    }
+  }
+
+  if (forwardBtn) {
+    if (navigationIndex < navigationHistory.length - 1) {
+      forwardBtn.classList.remove('disabled');
+    } else {
+      forwardBtn.classList.add('disabled');
+    }
+  }
+}
+
+// Update recent nodes dropdown with last 10 visited
+function updateRecentNodesDropdown() {
+  const dropdown = document.getElementById('recent-nodes');
+  if (!dropdown) return;
+
+  // Get last 10 unique node IDs (most recent first)
+  const recentIds = [];
+  for (let i = navigationHistory.length - 1; i >= 0 && recentIds.length < 10; i--) {
+    const nodeId = navigationHistory[i];
+    if (!recentIds.includes(nodeId)) {
+      recentIds.push(nodeId);
+    }
+  }
+
+  // Build dropdown options
+  let html = '<option value="">Recent nodes...</option>';
+  recentIds.forEach(nodeId => {
+    const node = currentGraphData?.nodes?.find(n => n.id === nodeId);
+    if (node) {
+      // Extract display name (last part of path or node name)
+      const displayName = node.name || nodeId.split('/').pop() || nodeId;
+      const truncated = displayName.length > 25 ? displayName.substring(0, 22) + '...' : displayName;
+      html += `<option value="${nodeId}">${truncated}</option>`;
+    }
+  });
+
+  dropdown.innerHTML = html;
+}
+
+// Save navigation history to electron-store
+async function saveNavigationHistory() {
+  try {
+    await window.electronAPI.store.set('navigationHistory', {
+      history: navigationHistory,
+      index: navigationIndex
+    });
+  } catch (err) {
+    console.log('[Nav] Could not save history:', err);
+  }
+}
+
+// Load navigation history from electron-store
+async function loadNavigationHistory() {
+  try {
+    const saved = await window.electronAPI.store.get('navigationHistory');
+    if (saved && Array.isArray(saved.history)) {
+      navigationHistory = saved.history;
+      navigationIndex = typeof saved.index === 'number' ? saved.index : saved.history.length - 1;
+      updateNavigationButtonStates();
+      updateRecentNodesDropdown();
+      console.log('[Nav] Loaded history:', navigationHistory.length, 'entries, index:', navigationIndex);
+    }
+  } catch (err) {
+    console.log('[Nav] Could not load history:', err);
   }
 }
 
@@ -3133,6 +3299,10 @@ function renderDiffView(diffResult, filename) {
 async function showDetailsPanel(node) {
   selectedNode = node;
   updateZoomButtonStates(); // Enable focus/detail zoom buttons
+
+  // Add to navigation history
+  pushNavigationHistory(node.id);
+
   const panel = document.getElementById('details-panel');
   const title = document.getElementById('panel-title');
   const content = document.getElementById('panel-content');
@@ -4297,6 +4467,20 @@ document.addEventListener('keydown', (e) => {
       e.preventDefault(); // Prevent browser search
       openModalSearch();
     }
+  }
+});
+
+// Keyboard shortcuts for navigation (Alt+Left/Right)
+document.addEventListener('keydown', (e) => {
+  // Alt+Left = Back
+  if (e.altKey && e.key === 'ArrowLeft') {
+    e.preventDefault();
+    navigateBack();
+  }
+  // Alt+Right = Forward
+  if (e.altKey && e.key === 'ArrowRight') {
+    e.preventDefault();
+    navigateForward();
   }
 });
 
@@ -5801,6 +5985,9 @@ loadTrailSettings();
 // Load follow-active setting on startup
 loadFollowActiveSetting();
 
+// Load navigation history on startup
+loadNavigationHistory();
+
 // Zoom preset buttons
 document.getElementById('zoom-overview')?.addEventListener('click', () => {
   zoomToOverview();
@@ -5816,6 +6003,34 @@ document.getElementById('zoom-detail')?.addEventListener('click', () => {
 
 // Initialize zoom button states (disabled on startup)
 updateZoomButtonStates();
+
+// Navigation history controls
+document.getElementById('nav-back')?.addEventListener('click', () => {
+  navigateBack();
+});
+
+document.getElementById('nav-forward')?.addEventListener('click', () => {
+  navigateForward();
+});
+
+// Recent nodes dropdown selection
+document.getElementById('recent-nodes')?.addEventListener('change', (e) => {
+  const nodeId = e.target.value;
+  if (!nodeId) return;
+
+  // Reset dropdown display
+  e.target.value = '';
+
+  // Find and navigate to selected node
+  const node = currentGraphData?.nodes?.find(n => n.id === nodeId);
+  if (node) {
+    flyToNodeSmooth(nodeId, 80);
+    showDetailsPanel(node);
+  }
+});
+
+// Initialize navigation controls
+updateNavigationButtonStates();
 
 // Modal search event listeners
 document.getElementById('modal-search-input')?.addEventListener('input', (e) => {
