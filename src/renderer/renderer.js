@@ -3557,6 +3557,87 @@ function renderDiffView(diffResult, filename) {
   return `<div class="diff-content">${htmlLines}${truncateMsg}</div>`;
 }
 
+// Breadcrumb trail functions
+function buildBreadcrumbPath(node) {
+  // Only build breadcrumb for file/directory nodes
+  if (!node || (node.type !== 'file' && node.type !== 'directory')) {
+    return [];
+  }
+
+  const breadcrumbs = [];
+  const sourceType = node.sourceType;
+
+  // Determine root
+  const rootName = sourceType === 'planning' ? '.planning' : 'src';
+  const rootId = sourceType === 'planning' ? 'dir-planning' : 'dir-src';
+
+  // If node IS the root, return just that
+  if (node.id === rootId) {
+    return [{ id: rootId, name: rootName, isRoot: true }];
+  }
+
+  // Start with root
+  breadcrumbs.push({ id: rootId, name: rootName, isRoot: true });
+
+  // Parse path to build intermediate segments
+  const path = node.path || '';
+  const pathParts = path.split('/');
+
+  // Build breadcrumb for each directory in the path
+  for (let i = 0; i < pathParts.length; i++) {
+    const part = pathParts[i];
+    if (!part) continue; // Skip empty parts
+
+    // Build path up to this point
+    const partialPath = pathParts.slice(0, i + 1).join('/');
+
+    // Determine if this part is a file or directory
+    // Files have extensions, directories don't (unless it's the last part and it's a file)
+    const isFile = i === pathParts.length - 1 && node.type === 'file';
+    const nodeId = `${sourceType}-${isFile ? 'file' : 'dir'}-${partialPath}`;
+
+    breadcrumbs.push({
+      id: nodeId,
+      name: part,
+      isRoot: false
+    });
+  }
+
+  return breadcrumbs;
+}
+
+function updateBreadcrumb(node) {
+  const breadcrumbContainer = document.getElementById('breadcrumb-trail');
+  if (!breadcrumbContainer) return;
+
+  // Only show breadcrumb for file/directory nodes
+  if (!node || (node.type !== 'file' && node.type !== 'directory')) {
+    breadcrumbContainer.innerHTML = '<span class="breadcrumb-segment root">Project</span>';
+    return;
+  }
+
+  const breadcrumbs = buildBreadcrumbPath(node);
+
+  if (breadcrumbs.length === 0) {
+    breadcrumbContainer.innerHTML = '<span class="breadcrumb-segment root">Project</span>';
+    return;
+  }
+
+  // Build HTML for breadcrumb trail
+  const html = breadcrumbs.map((crumb, index) => {
+    const isCurrent = index === breadcrumbs.length - 1;
+    const className = isCurrent ? 'breadcrumb-segment current' : 'breadcrumb-segment';
+    const dataAttr = isCurrent ? '' : `data-node-id="${crumb.id}"`;
+
+    // Add separator before all segments except the first
+    const separator = index > 0 ? '<span class="breadcrumb-separator">/</span>' : '';
+
+    return `${separator}<span class="${className}" ${dataAttr}>${crumb.name}</span>`;
+  }).join('');
+
+  breadcrumbContainer.innerHTML = html;
+}
+
 // Details panel functions
 async function showDetailsPanel(node) {
   selectedNode = node;
@@ -3564,6 +3645,9 @@ async function showDetailsPanel(node) {
 
   // Add to navigation history
   pushNavigationHistory(node.id);
+
+  // Update breadcrumb trail
+  updateBreadcrumb(node);
 
   const panel = document.getElementById('details-panel');
   const title = document.getElementById('panel-title');
@@ -6323,6 +6407,22 @@ document.getElementById('recent-nodes')?.addEventListener('change', (e) => {
 
 // Initialize navigation controls
 updateNavigationButtonStates();
+
+// Breadcrumb trail click handler (event delegation)
+document.getElementById('breadcrumb-trail')?.addEventListener('click', (e) => {
+  const segment = e.target.closest('.breadcrumb-segment');
+  if (!segment || segment.classList.contains('current')) return;
+
+  const nodeId = segment.getAttribute('data-node-id');
+  if (!nodeId) return;
+
+  // Find node in graph data
+  const node = currentGraphData?.nodes?.find(n => n.id === nodeId);
+  if (node) {
+    flyToNodeSmooth(nodeId, 80);
+    showDetailsPanel(node);
+  }
+});
 
 // Bookmark button click - show dialog
 document.getElementById('bookmark-btn')?.addEventListener('click', () => {
