@@ -31,3 +31,7 @@ yarn-error.log*
 # Electron build outputs
 out/
 release/
+
+# GSD Viewer ephemeral files
+.gsd-viewer/events/*.json
+.gsd-viewer/hooks/errors.log
