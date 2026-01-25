@@ -12,6 +12,11 @@ const { parseState } = require('./parsers/state-parser');
 const store = new Store();
 let mainWindow;
 let watcher = null;
+let claudeEventWatcher = null;
+const recentEvents = new Map(); // For deduplication: file_path -> timestamp
+const eventQueue = [];          // Serial processing queue
+let isProcessingQueue = false;  // Queue lock
+const DEDUP_WINDOW_MS = 200;    // Timestamp window for deduplication
 
 // Git helper function - runs git commands in specified directory
 function runGitCommand(command, cwd) {
@@ -120,6 +125,9 @@ function startWatching(projectPath) {
       }
     }, 500);
   });
+
+  // Start Claude event watcher
+  startClaudeEventWatcher(projectPath);
 }
 
 function stopWatching() {
@@ -127,6 +135,42 @@ function stopWatching() {
     watcher.close();
     watcher = null;
   }
+  stopClaudeEventWatcher();
+}
+
+// Claude event watcher functions
+function startClaudeEventWatcher(projectPath) {
+  stopClaudeEventWatcher();
+
+  const eventsPath = path.join(projectPath, '.gsd-viewer', 'events');
+
+  // Check if events directory exists
+  if (!fs.existsSync(eventsPath)) {
+    console.log('[ClaudeEvents] Events directory not found:', eventsPath);
+    return;
+  }
+
+  console.log('[ClaudeEvents] Watching:', eventsPath);
+
+  claudeEventWatcher = chokidar.watch(eventsPath, {
+    ignoreInitial: true,
+    persistent: true,
+    depth: 0
+  });
+
+  claudeEventWatcher.on('add', (filePath) => {
+    handleClaudeEvent(filePath);
+  });
+}
+
+function stopClaudeEventWatcher() {
+  if (claudeEventWatcher) {
+    claudeEventWatcher.close();
+    claudeEventWatcher = null;
+  }
+  recentEvents.clear();
+  eventQueue.length = 0;
+  isProcessingQueue = false;
 }
 
 app.whenReady().then(() => {
