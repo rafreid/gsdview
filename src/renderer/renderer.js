@@ -1537,11 +1537,14 @@ function processPendingFlashes() {
   if (flashingNodes.size >= MAX_CONCURRENT_FLASHES) return;
 
   const { nodeId, changeType } = pendingFlashes.shift();
+  console.log('[Flash] Processing from queue (remaining:', pendingFlashes.length, '):', nodeId);
   flashNodeWithType(nodeId, changeType);
 
   // Stagger next batch item by 50ms to prevent frame spike
   if (pendingFlashes.length > 0) {
     setTimeout(processPendingFlashes, 50);
+  } else {
+    console.log('[Flash] Queue drained, all animations complete');
   }
 }
 
