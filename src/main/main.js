@@ -173,6 +173,104 @@ function stopClaudeEventWatcher() {
   isProcessingQueue = false;
 }
 
+async function handleClaudeEvent(eventFilePath) {
+  try {
+    // 1. Parse event file
+    const content = fs.readFileSync(eventFilePath, 'utf-8');
+    const event = JSON.parse(content);
+
+    // 2. Validate required fields
+    if (!event.file_path || !event.operation || !event.timestamp) {
+      console.error('[ClaudeEvents] Invalid event - missing fields:', eventFilePath);
+      fs.unlinkSync(eventFilePath); // Cleanup invalid file
+      return;
+    }
+
+    // 3. Deduplication check
+    const lastTimestamp = recentEvents.get(event.file_path);
+    if (lastTimestamp && (event.timestamp - lastTimestamp) < DEDUP_WINDOW_MS) {
+      console.log('[ClaudeEvents] Duplicate ignored:', event.file_path);
+      fs.unlinkSync(eventFilePath); // Cleanup duplicate
+      return;
+    }
+    recentEvents.set(event.file_path, event.timestamp);
+
+    // 4. Clean up old entries from recentEvents (prevent memory leak)
+    const cutoff = Date.now() - 60000; // 1 minute
+    for (const [path, ts] of recentEvents.entries()) {
+      if (ts < cutoff) recentEvents.delete(path);
+    }
+
+    // 5. Add to queue for serial processing
+    eventQueue.push({ event, eventFilePath });
+    processEventQueue();
+
+  } catch (err) {
+    console.error('[ClaudeEvents] Error processing event:', err.message);
+    // Still try to cleanup the file
+    try { fs.unlinkSync(eventFilePath); } catch (e) {}
+  }
+}
+
+async function processEventQueue() {
+  if (isProcessingQueue || eventQueue.length === 0) return;
+
+  isProcessingQueue = true;
+
+  while (eventQueue.length > 0) {
+    const { event, eventFilePath } = eventQueue.shift();
+
+    // Enrich with node ID
+    const enrichedEvent = enrichEventWithNodeId(event);
+
+    // Forward to renderer
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('claude-operation', enrichedEvent);
+      console.log('[ClaudeEvents] Forwarded:', enrichedEvent.operation, enrichedEvent.nodeId || event.file_path);
+    }
+
+    // Cleanup event file
+    try {
+      fs.unlinkSync(eventFilePath);
+    } catch (err) {
+      console.error('[ClaudeEvents] Cleanup failed:', eventFilePath);
+    }
+  }
+
+  isProcessingQueue = false;
+}
+
+function enrichEventWithNodeId(event) {
+  // Determine sourceType from file path
+  let sourceType = 'unknown';
+  let relativePath = event.file_path;
+
+  // Check if path contains .planning/ or src/
+  if (event.file_path.includes('/.planning/') || event.file_path.includes('\\.planning\\')) {
+    sourceType = 'planning';
+    // Extract relative path from .planning/
+    const match = event.file_path.match(/\.planning[\/\\](.+)$/);
+    if (match) relativePath = match[1];
+  } else if (event.file_path.includes('/src/') || event.file_path.includes('\\src\\')) {
+    sourceType = 'src';
+    // Extract relative path from src/
+    const match = event.file_path.match(/src[\/\\](.+)$/);
+    if (match) relativePath = match[1];
+  }
+
+  // Build node ID matching graph-builder.js pattern
+  // Format: sourceType:/relative/path
+  const nodeId = sourceType !== 'unknown'
+    ? `${sourceType}:/${relativePath.replace(/\\/g, '/')}`
+    : null;
+
+  return {
+    ...event,
+    nodeId,
+    sourceType
+  };
+}
+
 app.whenReady().then(() => {
   // Register ALL IPC handlers BEFORE creating window to avoid race conditions
 
