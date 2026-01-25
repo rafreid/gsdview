@@ -93,10 +93,11 @@ Plans:
   3. User receives notification if hooks are not configured correctly
   4. Debug mode shows Claude operation traffic for troubleshooting
 
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 29-01: TBD
+- [ ] 29-01-PLAN.md — Animation batching with concurrent flash limit and stagger delay
+- [ ] 29-02-PLAN.md — Hook configuration detection notification and debug mode panel
 
 ## Progress Summary
 
@@ -106,8 +107,8 @@ Plans:
 | v1.1 | 6 | 14 | Shipped 2026-01-23 |
 | v1.2 | 5 | 7 | Shipped 2026-01-24 |
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
-| v1.4 | 4 | TBD | In progress |
-| **Total** | **29** | **61+** | |
+| v1.4 | 4 | 5 | In progress |
+| **Total** | **29** | **66** | |
 
 ## v1.4 Progress
 
@@ -116,8 +117,8 @@ Plans:
 | 26. Hook Infrastructure | 1/1 | Complete | 2026-01-25 |
 | 27. Chokidar Extension & IPC | 1/1 | Complete | 2026-01-25 |
 | 28. Enhanced Flash Effects | 1/1 | Complete | 2026-01-25 |
-| 29. Performance & Polish | 0/TBD | Not started | - |
+| 29. Performance & Polish | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-25 (Phase 28 complete)*
+*Last updated: 2026-01-25 (Phase 29 planned)*
