@@ -530,17 +530,23 @@ function createActivityTrail(fromNodeId, toNodeId) {
   ]);
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-  // Create material with bright cyan color (will fade based on age)
-  const material = new THREE.LineBasicMaterial({
+  // Create dashed material for visual distinction from solid graph edges
+  // Dash pattern: 8 units dash, 4 units gap
+  const material = new THREE.LineDashedMaterial({
     color: 0x4ECDC4, // Bright cyan to match UI theme
     transparent: true,
     opacity: 0.8,
+    dashSize: 8,
+    gapSize: 4,
     linewidth: 2 // Note: linewidth only works on some platforms
   });
 
   // Create the line object
   const line = new THREE.Line(geometry, material);
   line.name = `trail-${fromNodeId}-${toNodeId}`;
+
+  // Compute line distances for dashed material to work
+  line.computeLineDistances();
 
   // Add to the graph's scene
   if (typeof Graph !== 'undefined' && Graph.scene) {
@@ -662,12 +668,15 @@ function updateTrailPositions() {
         positions.array[5] = toNode.z || 0;
 
         positions.needsUpdate = true;
+
+        // Recompute line distances for dashed material
+        trail.lineObject.computeLineDistances();
       }
     }
   });
 }
 
-// Update trail opacities based on age (newer = more opaque)
+// Update trail opacities and colors based on age (newer = more opaque)
 function updateTrailOpacities() {
   const now = Date.now();
 
@@ -677,15 +686,31 @@ function updateTrailOpacities() {
     const age = now - trail.timestamp;
     const ageRatio = Math.min(age / trailFadeDuration, 1.0);
 
-    // Opacity fades from 0.8 (new) to 0.1 (old)
-    const opacity = 0.8 - (ageRatio * 0.7);
-    trail.lineObject.material.opacity = Math.max(0.1, opacity);
+    // Opacity fades from 0.9 (new) to 0.15 (old) - smoother fade
+    const opacity = 0.9 - (ageRatio * 0.75);
+    trail.lineObject.material.opacity = Math.max(0.15, opacity);
 
-    // Color transitions from bright cyan to dim teal
-    // New: 0x4ECDC4 (bright cyan), Old: 0x2a6b67 (dim teal)
-    const r = Math.round(0x4E - (ageRatio * 0x24));
-    const g = Math.round(0xCD - (ageRatio * 0x62));
-    const b = Math.round(0xC4 - (ageRatio * 0x5D));
+    // Enhanced color gradient: bright cyan -> teal -> dim blue-gray
+    // Phases: 0-0.3 bright cyan, 0.3-0.7 teal transition, 0.7-1.0 dim gray
+    let r, g, b;
+    if (ageRatio < 0.3) {
+      // Bright cyan phase (0x4ECDC4)
+      r = 0x4E;
+      g = 0xCD;
+      b = 0xC4;
+    } else if (ageRatio < 0.7) {
+      // Transition to teal (0x4ECDC4 -> 0x2D8B84)
+      const phase = (ageRatio - 0.3) / 0.4;
+      r = Math.round(0x4E - (phase * 0x21)); // 78 -> 45
+      g = Math.round(0xCD - (phase * 0x42)); // 205 -> 139
+      b = Math.round(0xC4 - (phase * 0x40)); // 196 -> 132
+    } else {
+      // Fade to dim blue-gray (0x2D8B84 -> 0x1a4a4a)
+      const phase = (ageRatio - 0.7) / 0.3;
+      r = Math.round(0x2D - (phase * 0x13)); // 45 -> 26
+      g = Math.round(0x8B - (phase * 0x41)); // 139 -> 74
+      b = Math.round(0x84 - (phase * 0x3A)); // 132 -> 74
+    }
 
     const fadedColor = (r << 16) | (g << 8) | b;
     trail.lineObject.material.color.setHex(fadedColor);
