@@ -1206,6 +1206,50 @@
       font-size: 14px;
     }
 
+    /* Trail Duration Slider */
+    #trail-duration-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 10px;
+    }
+
+    #trail-duration-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.8);
+      white-space: nowrap;
+    }
+
+    #trail-duration-slider {
+      width: 80px;
+      height: 4px;
+      -webkit-appearance: none;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    #trail-duration-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #4ECDC4;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #trail-duration-slider::-webkit-slider-thumb:hover {
+      background: #5ddfd6;
+    }
+
+    #trail-duration-value {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      min-width: 30px;
+    }
+
     /* Git Branch Display */
     #branch-display {
       display: flex;
@@ -2222,6 +2266,11 @@
     <button id="trails-toggle" class="active" title="Toggle activity trails connecting changed files">
       <span class="trails-icon">&#9872;</span> Trails
     </button>
+    <div id="trail-duration-container" title="Trail fade duration (seconds)">
+      <span id="trail-duration-label">Trail:</span>
+      <input type="range" id="trail-duration-slider" min="10" max="300" value="60" step="5">
+      <span id="trail-duration-value">60s</span>
+    </div>
     <div id="branch-display" title="Current git branch">
       <span class="branch-icon">&#9095;</span>
       <span id="branch-name">&#8212;</span>

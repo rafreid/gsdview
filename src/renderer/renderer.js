@@ -95,7 +95,8 @@ const MAX_ACTIVITY_ENTRIES = 100; // Limit to prevent memory issues
 // Activity trail state
 let activityTrailsEnabled = true; // User toggle (default on)
 let activityTrails = []; // Array of { fromNodeId, toNodeId, timestamp, lineObject }
-const TRAIL_MAX_AGE = 60000; // 1 minute - trails older than this are removed
+const trailFadeDuration_DEFAULT = 60000; // 1 minute default
+let trailFadeDuration = trailFadeDuration_DEFAULT; // User-configurable trail fade duration (ms)
 const MAX_TRAILS = 20; // Maximum number of trail connections to show
 let trailAnimationLoop = null; // Reference to animation loop
 
@@ -332,9 +333,17 @@ async function loadFlashSettings() {
   }
 }
 
+// Format trail duration for display (value in ms, display in seconds)
+function formatTrailDuration(ms) {
+  const seconds = Math.round(ms / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  return `${Math.round(seconds / 60)}m`;
+}
+
 // Load trail settings from store
 async function loadTrailSettings() {
   try {
+    // Load enabled state
     const savedEnabled = await window.electronAPI.store.get('activityTrailsEnabled');
     if (savedEnabled !== undefined && savedEnabled !== null) {
       activityTrailsEnabled = savedEnabled;
@@ -347,7 +356,18 @@ async function loadTrailSettings() {
         }
       }
     }
-    console.log('[Trail] Loaded settings, enabled:', activityTrailsEnabled);
+
+    // Load trail fade duration
+    const savedDuration = await window.electronAPI.store.get('trailFadeDuration');
+    if (savedDuration && typeof savedDuration === 'number') {
+      trailFadeDuration = savedDuration;
+      const slider = document.getElementById('trail-duration-slider');
+      const valueDisplay = document.getElementById('trail-duration-value');
+      if (slider) slider.value = savedDuration / 1000; // Convert ms to seconds for slider
+      if (valueDisplay) valueDisplay.textContent = formatTrailDuration(savedDuration);
+    }
+
+    console.log('[Trail] Loaded settings, enabled:', activityTrailsEnabled, 'duration:', trailFadeDuration);
   } catch (err) {
     console.log('[Trail] Using default trail settings');
   }
@@ -542,14 +562,14 @@ function createActivityTrail(fromNodeId, toNodeId) {
   return trail;
 }
 
-// Clean up trails older than TRAIL_MAX_AGE
+// Clean up trails older than trailFadeDuration
 function cleanupOldTrails() {
   const now = Date.now();
   const trailsToRemove = [];
 
   activityTrails.forEach((trail, index) => {
     const age = now - trail.timestamp;
-    if (age > TRAIL_MAX_AGE) {
+    if (age > trailFadeDuration) {
       trailsToRemove.push(index);
 
       // Remove from scene
@@ -655,7 +675,7 @@ function updateTrailOpacities() {
     if (!trail.lineObject || !trail.lineObject.material) return;
 
     const age = now - trail.timestamp;
-    const ageRatio = Math.min(age / TRAIL_MAX_AGE, 1.0);
+    const ageRatio = Math.min(age / trailFadeDuration, 1.0);
 
     // Opacity fades from 0.8 (new) to 0.1 (old)
     const opacity = 0.8 - (ageRatio * 0.7);
@@ -5514,6 +5534,23 @@ document.getElementById('trails-toggle')?.addEventListener('click', async () => 
     await window.electronAPI.store.set('activityTrailsEnabled', activityTrailsEnabled);
   } catch (err) {
     console.log('[Trail] Could not save setting:', err);
+  }
+});
+
+// Trail duration slider handler
+document.getElementById('trail-duration-slider')?.addEventListener('input', async (e) => {
+  const seconds = parseInt(e.target.value, 10);
+  trailFadeDuration = seconds * 1000; // Convert to ms
+
+  // Update display
+  const valueDisplay = document.getElementById('trail-duration-value');
+  if (valueDisplay) valueDisplay.textContent = formatTrailDuration(trailFadeDuration);
+
+  // Save to store
+  try {
+    await window.electronAPI.store.set('trailFadeDuration', trailFadeDuration);
+  } catch (err) {
+    console.log('[Trail] Could not save duration setting:', err);
   }
 });
 
