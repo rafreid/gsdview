@@ -20,7 +20,7 @@ Requirements for milestone v1.4: Live Activity Sync.
 - [x] **FLX-04**: Read operations display distinct blue flash/glow animation
 - [x] **FLX-05**: Flash glow radius is significantly larger (more visible from any zoom level)
 - [x] **FLX-06**: Flash intensity is brighter by default with higher configurable max
-- [ ] **FLX-07**: Rapid successive operations are batched for smooth animation
+- [x] **FLX-07**: Rapid successive operations are batched for smooth animation
 
 ### Event Processing
 
@@ -69,7 +69,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FLX-04 | Phase 28 | Complete |
 | FLX-05 | Phase 28 | Complete |
 | FLX-06 | Phase 28 | Complete |
-| FLX-07 | Phase 29 | Pending |
+| FLX-07 | Phase 29 | Complete |
 | EVT-01 | Phase 27 | Complete |
 | EVT-02 | Phase 27 | Complete |
 | EVT-03 | Phase 27 | Complete |
@@ -83,4 +83,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-25*
-*Last updated: 2026-01-25 after Phase 28 completion*
+*Last updated: 2026-01-25 after Phase 29 completion - v1.4 MILESTONE COMPLETE*

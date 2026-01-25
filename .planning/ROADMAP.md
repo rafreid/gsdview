@@ -96,8 +96,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 29-01-PLAN.md — Animation batching with concurrent flash limit and stagger delay
-- [ ] 29-02-PLAN.md — Hook configuration detection notification and debug mode panel
+- [x] 29-01-PLAN.md — Animation batching with concurrent flash limit and stagger delay
+- [x] 29-02-PLAN.md — Hook configuration detection notification and debug mode panel
 
 ## Progress Summary
 
@@ -117,8 +117,8 @@ Plans:
 | 26. Hook Infrastructure | 1/1 | Complete | 2026-01-25 |
 | 27. Chokidar Extension & IPC | 1/1 | Complete | 2026-01-25 |
 | 28. Enhanced Flash Effects | 1/1 | Complete | 2026-01-25 |
-| 29. Performance & Polish | 0/2 | Not started | - |
+| 29. Performance & Polish | 2/2 | Complete | 2026-01-25 |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-25 (Phase 29 planned)*
+*Last updated: 2026-01-25 (Phase 29 complete - v1.4 MILESTONE COMPLETE)*
