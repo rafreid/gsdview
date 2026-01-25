@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   startWatching: (projectPath) => ipcRenderer.invoke('start-watching', projectPath),
   stopWatching: () => ipcRenderer.invoke('stop-watching'),
   onFilesChanged: (callback) => ipcRenderer.on('files-changed', (event, data) => callback(data)),
+  onClaudeOperation: (callback) => ipcRenderer.on('claude-operation', (event, data) => callback(data)),
   getRecentProjects: () => ipcRenderer.invoke('get-recent-projects'),
   addRecentProject: (projectPath) => ipcRenderer.invoke('add-recent-project', projectPath),
   getGitStatus: (projectPath) => ipcRenderer.invoke('get-git-status', projectPath),
