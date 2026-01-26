@@ -248,6 +248,12 @@ Recent decisions affecting current work:
 - Color-coded debug operations match flash animation colors (29-02)
 - hookStatusTimeout cleared on first Claude event (hooks working) (29-02)
 - IPC handler 'open-external' enables Setup Guide documentation access (29-02)
+- Particle burst effects use THREE.Points for efficient rendering (quick-016)
+- Particle count varies by change type: created=20 (x2), modified=20, deleted=25, read=12 (quick-016)
+- 800ms particle lifetime with gravity (-0.01) and fade-out opacity (quick-016)
+- AdditiveBlending for glowing particle overlap effect (quick-016)
+- Separate RAF loop for particle animation, runs only when particles active (quick-016)
+- particleEffectsEnabled setting defaults to true, persisted via electron-store (quick-016)
 
 ### Pending Todos
 
@@ -276,10 +282,11 @@ None.
 | 013 | Implement test suites for application - Jest with parser and graph-builder tests | 2026-01-25 | [013-implement-test-suites](./quick/013-implement-test-suites-for-application/) |
 | 014 | Fix Claude Code hooks detection - add diagnostic logging and verify end-to-end flow | 2026-01-25 | [014-fix-claude-code-hooks-not-detected](./quick/014-fix-claude-code-hooks-not-detected/) |
 | 015 | Add legend to graph - show shapes, flash animations, source types | 2026-01-26 | [015-add-legend-to-graph](./quick/015-add-legend-to-graph/) |
+| 016 | Add particle effects to flash animations | 2026-01-26 | [016-add-particle-effects-to-flash-animations](./quick/016-add-particle-effects-to-flash-animations/) |
 
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Completed quick task 015
+Stopped at: Completed quick task 016
 Resume file: None
 Next action: Run /gsd:new-milestone to define v1.5
