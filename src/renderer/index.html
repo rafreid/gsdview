@@ -73,7 +73,7 @@
     }
 
     #color-legend {
-      position: fixed;
+      position: absolute;
       bottom: 20px;
       left: 20px;
       background: rgba(0, 0, 0, 0.7);
@@ -3327,13 +3327,14 @@
     <div id="tree-content"></div>
     <div id="tree-resizer"></div>
   </div>
-  <div id="graph-container" class="tree-open"></div>
-  <div id="color-legend">
-    <div id="legend-header">
-      <span class="legend-header-title">Legend</span>
-      <span class="legend-toggle-icon">▼</span>
+  <div id="graph-container" class="tree-open">
+    <div id="color-legend">
+      <div id="legend-header">
+        <span class="legend-header-title">Legend</span>
+        <span class="legend-toggle-icon">▼</span>
+      </div>
+      <div id="legend-content"></div>
     </div>
-    <div id="legend-content"></div>
   </div>
   <div id="minimap-panel">
     <div id="minimap-header">
