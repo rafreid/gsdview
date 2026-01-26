@@ -2,7 +2,7 @@
 
 **One-liner:** Emissive glow, scale pulsing, and brighter neon colors for unmistakable file change animations
 
-## Execution Details
+## Execution Details 
 
 | Metric | Value |
 |--------|-------|

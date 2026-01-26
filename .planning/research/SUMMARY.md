@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-GSD Viewer v1.4 will integrate Claude Code hooks to visualize AI assistant file operations in real-time alongside existing file system monitoring. The recommended approach uses Claude Code's native PostToolUse hooks with a file-based event communication pattern that requires zero new dependencies. Hooks write event files to a watched directory, extending the existing chokidar infrastructure rather than introducing WebSocket server complexity.
+GSD Viewer v1.4 will integrate Claude Code hooks to visualize AI assistant file operations in real-time alongside existing file system monitoring. The recommended approach uses Claude Code's native PostToolUse hooks with a file-based event communication pattern that requires zero new dependencies. Hooks write event files to a watched directory, extending the existing chokidar infrastructure rather than introducing WebSocket server complexity. 
 
 The key architectural insight is that Claude Code hooks provide the only reliable way to detect Read operations (which file system watchers cannot capture), while avoiding common pitfalls like duplicate events, event ordering issues, and main process blocking. By reusing the proven chokidar watcher pattern with a simple bash hook script, we achieve real-time Claude operation visualization without adding npm dependencies or server lifecycle management overhead.
 

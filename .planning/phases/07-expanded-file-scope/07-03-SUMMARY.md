@@ -21,7 +21,7 @@ tech-stack:
   added: []
   patterns:
     - sourceType-based coloring via applySourceTint function
-    - Geometry differentiation by sourceType
+    - Geometry differentiation by sourceType 
 
 key-files:
   created: []

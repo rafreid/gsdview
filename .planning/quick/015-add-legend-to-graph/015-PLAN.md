@@ -19,7 +19,7 @@ must_haves:
       provides: "Enhanced populateColorLegend with shapes, flash colors, source types"
       contains: "Node Shapes"
     - path: "src/renderer/index.html"
-      provides: "CSS for shape icons in legend"
+      provides: "CSS for shape icons in lgend"
       contains: "legend-shape"
   key_links:
     - from: "populateColorLegend"

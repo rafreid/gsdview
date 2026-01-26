@@ -16,7 +16,7 @@
 
 **Quick Tasks:** 7
 - File/directory visual distinction
-- Tree panel with bidirectional sync
+- Tree panel with bidirectional sync 
 - Flash animations on file changes
 - 2D/3D toggle switch
 - Extended color coding (39 extensions)

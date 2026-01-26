@@ -8,7 +8,7 @@ tags: [three.js, flash-animations, tree-panel, 3d-graph, materials]
 requires:
   - phase: 19-enhanced-flash-effects
     provides: Flash animation system with emissive glow effects
-  - phase: quick-015
+  - phase: quick-015 
     provides: Tree panel with expand/collapse functionality
 provides:
   - Tree panel auto-expansion for flashing files in collapsed directories

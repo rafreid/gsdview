@@ -25,7 +25,7 @@ must_haves:
 ---
 
 <objective>
-Move legend panel to stay within the graph screen area
+Move legend panel to stay ithin the graph screen area
 
 Purpose: Currently the legend is fixed at `left: 20px` which means it overlaps the tree panel when open. The legend should move with the graph viewport so it's always visible within the graph area.
 

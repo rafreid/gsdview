@@ -13,7 +13,7 @@ requires:
 provides:
   - Complete visual legend explaining node shapes, flash animations, and source types
   - CSS shape icons (diamond, sphere, hexagon) for legend display
-  - Enhanced populateColorLegend with three new sections
+  - Enhanced populateColorLegend with three new sectins
 affects: []
 
 # Tech tracking

@@ -7,7 +7,7 @@ tags: [notification, event-listeners, dom, csp]
 # Dependency graph
 requires:
   - phase: 29-02
-    provides: "Hook status notification UI"
+    provides: "Hook status notification Ui"
 provides:
   - "Working dismiss button for hooks notification"
   - "DOM-ready event listener pattern for CSP-blocked inline handlers"

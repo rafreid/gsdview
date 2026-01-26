@@ -11,7 +11,7 @@ autonomous: true
 must_haves:
   truths:
     - "Tree panel auto-expands to reveal flashing files in collapsed directories"
-    - "3D graph nodes display visible emissive glow during flash animations"
+    - "3D graph nodes display visible emissive glow during flash animations" 
   artifacts:
     - path: "src/renderer/renderer.js"
       provides: "Auto-expand and emissive material fixes"

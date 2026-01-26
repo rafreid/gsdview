@@ -26,7 +26,7 @@ must_haves:
 <objective>
 Fix the hooks notification X button not closing the notification
 
-Purpose: The "Claude Code hooks not detected" notification's X close button does not dismiss the notification when clicked.
+Purpose: The "Claude Code hooks not detected" notification's X close button does not dismiss the notification when clicked
 
 Output: Working close button that properly dismisses the notification banner
 </objective>

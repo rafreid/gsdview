@@ -8,7 +8,7 @@ This research identifies common mistakes when adding real-time external event in
 
 ---
 
-## Critical Pitfalls
+## Critical Pitfalls  
 
 Mistakes that cause rewrites, data corruption, or major architectural changes.
 

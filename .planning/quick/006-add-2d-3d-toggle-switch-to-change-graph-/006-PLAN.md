@@ -27,7 +27,7 @@ must_haves:
 ---
 
 <objective>
-Add a 2D/3D toggle switch to the graph window toolbar that allows users to switch between 2D and 3D graph views.
+Add a 2D/3D toggle switch to the graph window toolbar that allows users to switch between 2D and 3D graph views
 
 Purpose: Enable users to view the graph in a flattened 2D layout (easier to read for large graphs) or full 3D layout (better spatial understanding).
 

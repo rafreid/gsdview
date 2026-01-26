@@ -8,7 +8,7 @@
 
 Features users expect from real-time activity visualization. Missing = product feels incomplete.
 
-| Feature | Why Expected | Complexity | Notes |
+| Feature | Why Expected | Complexity | Notes | 
 |---------|--------------|------------|-------|
 | **Write operation flash** | All activity tools show modifications visually | Low | ✓ Already implemented via chokidar |
 | **Create operation indicator** | Users expect to see new files appear | Low | ✓ Already implemented |

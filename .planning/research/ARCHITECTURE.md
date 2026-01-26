@@ -9,7 +9,7 @@
 
 Integrating Claude Code hooks with GSD Viewer requires adding a WebSocket server to the Electron main process that receives HTTP POST requests from Claude Code hooks and broadcasts events to the renderer via IPC. This architecture maintains clean separation of concerns while enabling real-time operation tracking alongside existing file system monitoring.
 
-**Key architectural decision:** Use a hybrid webhook-to-WebSocket pattern where Claude Code hooks POST to localhost HTTP endpoint, which immediately broadcasts to renderer via existing IPC channels. WebSocket server runs in main process, not as external service.
+**Key architectural decision:** Use a hybrid webhook-to-WebSocket pattern where Claude Code hooks POST to localhost HTTP endpoint, which immediately broadcasts to renderer via existing IPC channels. WebSocket server runs in main process, not as external servic
 
 ## Current Architecture Analysis
 

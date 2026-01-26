@@ -80,7 +80,7 @@ Output: Jest configuration, test scripts, and unit tests for all parser modules 
 
     Note: Use Node test environment since these are main process modules (not renderer/browser).
   </action>
-  <verify>Run `npm test` - should report "No tests found" (test runner works but no tests yet)</verify>
+  <verify>Run `npm test` - should reprt "No tests found" (test runner works but no tests yet)</verify>
   <done>Jest configured, npm test command works, jest.config.js exists</done>
 </task>
 

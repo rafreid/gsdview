@@ -17,5 +17,5 @@ Allow users to resize the file tree panel by dragging a vertical divider between
 
 <files>
 - src/renderer/index.html (HTML + CSS)
-- src/renderer/renderer.js (resize logic)
+- src/renderer/renderer.js (resize logic
 </files>

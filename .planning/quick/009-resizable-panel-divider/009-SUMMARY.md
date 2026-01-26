@@ -1,7 +1,7 @@
 # Quick Task 009: Resizable Panel Divider
 
 ## Summary
-Added a draggable resize handle to the right edge of the file tree panel, allowing users to adjust the panel width by dragging.
+Added a draggable resize handle to the right edge of the file tree panel, allowing users to adjust the panel width by dragging. 
 
 ## Implementation
 

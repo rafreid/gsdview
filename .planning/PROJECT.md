@@ -12,7 +12,7 @@ Make the invisible structure of a GSD project visible and navigable — so users
 
 **Shipped:** v1.4 Live Activity Sync (2026-01-25)
 
-Claude Code operations now trigger highly visible flash animations synchronized with real-time file operations. Read operations display distinct blue flash (0x4488FF), enhanced visibility (3.5x emissive, 1.8x scale), animation batching for 60fps during rapid operations, and hook status notification with debug mode.
+Claude Code operations now trigger highly visible flash animations synchronized with real-time file operations. Read operations display distinct blue flash (0x4488FF), enhanced visibility (3.5x emissive, 1.8x scale), animation batching for 60fps during rapid operations, and hook status notification with debug mod
 
 ## Requirements
 
