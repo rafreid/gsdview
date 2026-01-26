@@ -7534,8 +7534,17 @@ async function showHookHelp() {
 }
 
 // Hook notification button event listeners (CSP blocks inline onclick)
-document.getElementById('hook-dismiss-btn')?.addEventListener('click', dismissHookNotification);
-document.getElementById('hook-help-btn')?.addEventListener('click', showHookHelp);
+// Wrap in DOMContentLoaded to ensure elements exist
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('hook-dismiss-btn')?.addEventListener('click', dismissHookNotification);
+    document.getElementById('hook-help-btn')?.addEventListener('click', showHookHelp);
+  });
+} else {
+  // DOM already loaded, attach immediately
+  document.getElementById('hook-dismiss-btn')?.addEventListener('click', dismissHookNotification);
+  document.getElementById('hook-help-btn')?.addEventListener('click', showHookHelp);
+}
 
 // Debug mode toggle handler
 document.getElementById('debug-toggle')?.addEventListener('click', (e) => {
