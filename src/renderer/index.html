@@ -154,6 +154,45 @@
       color: #aaa;
     }
 
+    /* Legend shape icons */
+    #color-legend .legend-shape {
+      width: 14px;
+      height: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    #color-legend .legend-shape.diamond {
+      width: 10px;
+      height: 10px;
+      background: currentColor;
+      transform: rotate(45deg);
+    }
+
+    #color-legend .legend-shape.sphere {
+      width: 12px;
+      height: 12px;
+      background: currentColor;
+      border-radius: 50%;
+    }
+
+    #color-legend .legend-shape.hexagon {
+      width: 14px;
+      height: 12px;
+      background: currentColor;
+      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    }
+
+    /* Legend flash indicators */
+    #color-legend .legend-flash {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      box-shadow: 0 0 4px currentColor;
+    }
+
     /* Scrollbar for legend content */
     #legend-content::-webkit-scrollbar {
       width: 6px;
