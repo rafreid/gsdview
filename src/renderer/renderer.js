@@ -3214,9 +3214,39 @@ function populateColorLegend() {
   const legendContent = document.getElementById('legend-content');
   if (!legendContent) return;
 
+  // Node Shapes section
+  const shapesTitle = document.createElement('div');
+  shapesTitle.className = 'legend-title';
+  shapesTitle.textContent = 'Node Shapes';
+  legendContent.appendChild(shapesTitle);
+
+  const shapes = [
+    { shape: 'diamond', color: '#DDA0DD', label: 'Planning files (octahedron)' },
+    { shape: 'sphere', color: '#7EC8E3', label: 'Source files (icosahedron)' },
+    { shape: 'hexagon', color: '#9B59B6', label: 'Commits (hexagonal cylinder)' }
+  ];
+
+  shapes.forEach(({ shape, color, label }) => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+
+    const shapeIcon = document.createElement('div');
+    shapeIcon.className = `legend-shape ${shape}`;
+    shapeIcon.style.color = color;
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'legend-label';
+    labelSpan.textContent = label;
+
+    item.appendChild(shapeIcon);
+    item.appendChild(labelSpan);
+    legendContent.appendChild(item);
+  });
+
   // Node types section
   const typeTitle = document.createElement('div');
   typeTitle.className = 'legend-title';
+  typeTitle.style.marginTop = '12px';
   typeTitle.textContent = 'Node Types';
   legendContent.appendChild(typeTitle);
 
@@ -3238,6 +3268,35 @@ function populateColorLegend() {
     item.appendChild(label);
     legendContent.appendChild(item);
   }
+
+  // Source Types section
+  const sourceTitle = document.createElement('div');
+  sourceTitle.className = 'legend-title';
+  sourceTitle.style.marginTop = '12px';
+  sourceTitle.textContent = 'Source Types';
+  legendContent.appendChild(sourceTitle);
+
+  const sourceTypes = [
+    { color: '#DDA0DD', label: 'Planning (.planning/) - plum, diamond' },
+    { color: '#7EC8E3', label: 'Source (src/) - blue, sphere' }
+  ];
+
+  sourceTypes.forEach(({ color, label }) => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+
+    const colorCircle = document.createElement('div');
+    colorCircle.className = 'legend-color';
+    colorCircle.style.backgroundColor = color;
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'legend-label';
+    labelSpan.textContent = label;
+
+    item.appendChild(colorCircle);
+    item.appendChild(labelSpan);
+    legendContent.appendChild(item);
+  });
 
   // Status section
   const statusTitle = document.createElement('div');
@@ -3338,6 +3397,38 @@ function populateColorLegend() {
     item.appendChild(labelSpan);
     legendContent.appendChild(item);
   }
+
+  // Flash Animations section
+  const flashTitle = document.createElement('div');
+  flashTitle.className = 'legend-title';
+  flashTitle.style.marginTop = '12px';
+  flashTitle.textContent = 'Flash Animations';
+  legendContent.appendChild(flashTitle);
+
+  const flashTypes = [
+    { color: '#00FF88', label: 'File Created (4 quick pulses)' },
+    { color: '#FFAA00', label: 'File Modified (3 steady pulses)' },
+    { color: '#FF3333', label: 'File Deleted (2 slow pulses)' },
+    { color: '#4488FF', label: 'Claude Read (2 quick pulses)' }
+  ];
+
+  flashTypes.forEach(({ color, label }) => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+
+    const flashIcon = document.createElement('div');
+    flashIcon.className = 'legend-flash';
+    flashIcon.style.backgroundColor = color;
+    flashIcon.style.color = color;
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'legend-label';
+    labelSpan.textContent = label;
+
+    item.appendChild(flashIcon);
+    item.appendChild(labelSpan);
+    legendContent.appendChild(item);
+  });
 }
 
 populateColorLegend();
