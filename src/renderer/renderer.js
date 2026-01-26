@@ -169,6 +169,10 @@ const changeTypeColors = {
 // Flash animation configuration
 let flashDuration = 2000;  // Default flash duration in ms
 let flashIntensity = 1.0;  // Intensity multiplier for glow and scale effects
+let particleEffectsEnabled = true;  // Enable/disable particle burst effects
+
+// Particle system tracking
+const activeParticleBursts = [];  // Array of active particle systems
 
 // Git status colors for node indicators
 const gitStatusColors = {
@@ -360,6 +364,13 @@ async function loadFlashSettings() {
       const valueDisplay = document.getElementById('flash-intensity-value');
       if (slider) slider.value = savedIntensity;
       if (valueDisplay) valueDisplay.textContent = formatFlashIntensity(savedIntensity);
+    }
+
+    const savedParticleEffects = await window.electronAPI.store.get('particleEffectsEnabled');
+    if (savedParticleEffects !== undefined) {
+      particleEffectsEnabled = savedParticleEffects;
+      const toggle = document.getElementById('particle-effects-toggle');
+      if (toggle) toggle.checked = particleEffectsEnabled;
     }
   } catch (err) {
     console.log('[Flash] Using default flash settings');
@@ -1368,6 +1379,106 @@ function findNodeIdFromPath(changedPath) {
   return null;
 }
 
+// Create particle burst effect at node position
+function createParticleBurst(position, color, intensity, changeType) {
+  if (!particleEffectsEnabled) return;
+
+  // Determine particle count based on change type
+  let particleCount;
+  if (changeType === 'deleted') {
+    particleCount = Math.floor(25 * intensity);  // Larger burst for deletions
+  } else if (changeType === 'read') {
+    particleCount = Math.floor(12 * intensity);  // Smaller burst for reads
+  } else {
+    particleCount = Math.floor(20 * intensity);  // Standard burst
+  }
+
+  // Create particle geometry
+  const geometry = new THREE.BufferGeometry();
+  const positions = new Float32Array(particleCount * 3);
+  const velocities = [];
+
+  for (let i = 0; i < particleCount; i++) {
+    // Start all particles at the node position
+    positions[i * 3] = position.x;
+    positions[i * 3 + 1] = position.y;
+    positions[i * 3 + 2] = position.z;
+
+    // Random outward velocity
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.random() * Math.PI;
+    const speed = 0.5 + Math.random() * 1.0;
+
+    velocities.push({
+      x: Math.sin(phi) * Math.cos(theta) * speed,
+      y: Math.sin(phi) * Math.sin(theta) * speed,
+      z: Math.cos(phi) * speed
+    });
+  }
+
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+  // Create particle material
+  const material = new THREE.PointsMaterial({
+    color: color,
+    size: 3,
+    transparent: true,
+    opacity: 0.8,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+
+  // Create particle system
+  const particles = new THREE.Points(geometry, material);
+  Graph.scene().add(particles);
+
+  // Track particle system for animation
+  activeParticleBursts.push({
+    particles,
+    velocities,
+    startTime: Date.now(),
+    lifetime: 800  // ms
+  });
+}
+
+// Animate all active particle bursts
+function animateParticleBursts() {
+  const now = Date.now();
+
+  for (let i = activeParticleBursts.length - 1; i >= 0; i--) {
+    const burst = activeParticleBursts[i];
+    const elapsed = now - burst.startTime;
+    const progress = Math.min(elapsed / burst.lifetime, 1);
+
+    if (progress >= 1) {
+      // Remove and dispose
+      Graph.scene().remove(burst.particles);
+      burst.particles.geometry.dispose();
+      burst.particles.material.dispose();
+      activeParticleBursts.splice(i, 1);
+      continue;
+    }
+
+    // Update particle positions
+    const positions = burst.particles.geometry.attributes.position.array;
+    for (let j = 0; j < burst.velocities.length; j++) {
+      const vel = burst.velocities[j];
+      positions[j * 3] += vel.x;
+      positions[j * 3 + 1] += vel.y - 0.01;  // Gravity
+      positions[j * 3 + 2] += vel.z;
+    }
+    burst.particles.geometry.attributes.position.needsUpdate = true;
+
+    // Fade opacity
+    burst.particles.material.opacity = 0.8 * (1 - progress);
+  }
+
+  // Continue animation loop
+  if (activeParticleBursts.length > 0) {
+    requestAnimationFrame(animateParticleBursts);
+  }
+}
+
 // Flash a node with change-type-specific color, emissive glow, and scale pulsing
 function flashNodeWithType(nodeId, changeType) {
   const node = currentGraphData.nodes.find(n => n.id === nodeId);
@@ -1410,6 +1521,18 @@ function flashNodeWithType(nodeId, changeType) {
 
   const originalColors = materials.map(m => m.color.getHex());
   const flashColor = changeTypeColors[changeType] || 0xFFFFFF;
+
+  // Get node world position for particle burst
+  const nodePosition = new THREE.Vector3();
+  threeObj.getWorldPosition(nodePosition);
+
+  // Create initial particle burst
+  createParticleBurst(nodePosition, flashColor, flashIntensity, changeType);
+
+  // Start particle animation loop if not already running
+  if (activeParticleBursts.length === 1) {
+    requestAnimationFrame(animateParticleBursts);
+  }
 
   // Store original emissive colors and intensities for restoration
   const originalEmissives = materials.map(m => {
@@ -1457,9 +1580,18 @@ function flashNodeWithType(nodeId, changeType) {
   const isDelete = changeType === 'deleted';
   const originalOpacities = materials.map(m => m.opacity || 1);
 
+  // Track second burst for 'created' type
+  let secondBurstTriggered = false;
+
   function animate() {
     const elapsed = Date.now() - startTime;
     const progress = Math.min(elapsed / duration, 1);
+
+    // Trigger second particle burst for 'created' type at 50% progress
+    if (changeType === 'created' && !secondBurstTriggered && progress >= 0.5) {
+      createParticleBurst(nodePosition, flashColor, flashIntensity, changeType);
+      secondBurstTriggered = true;
+    }
 
     // Pulsing effect with smoother ease-in-out curve (sin squared)
     const pulsePhase = progress * pulseCount * Math.PI * 2;
@@ -6792,6 +6924,18 @@ document.getElementById('flash-intensity-slider')?.addEventListener('input', asy
     await window.electronAPI.store.set('flashIntensity', value);
   } catch (err) {
     console.log('[Flash] Could not save intensity setting:', err);
+  }
+});
+
+// Particle effects toggle handler
+document.getElementById('particle-effects-toggle')?.addEventListener('change', async (e) => {
+  particleEffectsEnabled = e.target.checked;
+
+  // Save to store
+  try {
+    await window.electronAPI.store.set('particleEffectsEnabled', particleEffectsEnabled);
+  } catch (err) {
+    console.log('[Particles] Could not save particle effects setting:', err);
   }
 });
 
