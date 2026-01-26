@@ -11,8 +11,8 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 
 Phase: —
 Plan: —
-Status: Ready for next milestone
-Last activity: 2026-01-26 — Completed quick task 020: Fix tree auto-expand and graph flash visibility
+Status: Ready for next mileston
+Last activity: 2026-01-26 — Completed quick task 021: Enhance flash visibility with intensity and null-safe DOM queries
 
 Progress: No active milestone
 
@@ -297,10 +297,11 @@ None.
 | 018 | Move legend to graph screen - position relative to viewport | 2026-01-26 | [018-move-legend-to-graph-screen](./quick/018-move-legend-to-graph-screen/) |
 | 019 | Fix hooks notification X button not closing | 2026-01-26 | [019-fix-hooks-notification-x-button-not-clos](./quick/019-fix-hooks-notification-x-button-not-clos/) |
 | 020 | Fix tree auto-expand and graph flash visibility | 2026-01-26 | [020-fix-tree-auto-expand-and-graph-flash-vis](./quick/020-fix-tree-auto-expand-and-graph-flash-vis/) |
+| 021 | Enhance flash visibility with intensity and null-safe DOM queries | 2026-01-26 | [021-enhance-flash-visibility](./quick/021-enhance-flash-visibility/) |
 
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Completed quick task 020
+Stopped at: Completed quick task 021
 Resume file: None
 Next action: Run /gsd:new-milestone to define v1.5
