@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 Phase: —
 Plan: —
 Status: Ready for next milestone
-Last activity: 2026-01-25 — Completed quick task 013: Implement test suites
+Last activity: 2026-01-25 — Completed quick task 014: Fix Claude Code hooks detection
 
 Progress: No active milestone
 
@@ -274,10 +274,11 @@ None.
 | 011 | Fix Open in Editor not launching - missing sourceType in graph-builder | 2026-01-24 | [011-fix-open-in-editor](./quick/011-fix-double-click-and-open-in-editor-not-/) |
 | 012 | Fix Setup Guide button for Claude hooks - add error handling | 2026-01-25 | [012-fix-setup-guidelines-button](./quick/012-fix-setup-guidelines-button-for-claude-h/) |
 | 013 | Implement test suites for application - Jest with parser and graph-builder tests | 2026-01-25 | [013-implement-test-suites](./quick/013-implement-test-suites-for-application/) |
+| 014 | Fix Claude Code hooks detection - add diagnostic logging and verify end-to-end flow | 2026-01-25 | [014-fix-claude-code-hooks-not-detected](./quick/014-fix-claude-code-hooks-not-detected/) |
 
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed quick task 013
+Stopped at: Completed quick task 014
 Resume file: None
 Next action: Run /gsd:new-milestone to define v1.5
