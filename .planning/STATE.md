@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 Phase: —
 Plan: —
 Status: Ready for next milestone
-Last activity: 2026-01-26 — Completed quick task 019: Fix hooks notification X button not closing
+Last activity: 2026-01-26 — Completed quick task 020: Fix tree auto-expand and graph flash visibility
 
 Progress: No active milestone
 
@@ -260,6 +260,10 @@ Recent decisions affecting current work:
 - Link curvature 0.1 for subtle curves that distinguish overlapping connections (quick-017)
 - Legend positioned absolute inside graph-container for viewport-relative positioning (quick-018)
 - Legend moves with graph when tree panel toggles, preventing overlap (quick-018)
+- flashTreeItem auto-expands parent directories and scrolls into view with 50ms delay (quick-020)
+- MeshStandardMaterial used for all 3D nodes to support emissive glow effects (quick-020)
+- Scene lighting: AmbientLight 0.6 + DirectionalLight 0.8 from (100,100,100) (quick-020)
+- Node metalness 0-0.1, roughness 0.7-0.9 to maintain visual appearance (quick-020)
 
 ### Pending Todos
 
@@ -292,10 +296,11 @@ None.
 | 017 | Make links between nodes more visible | 2026-01-26 | [017-make-links-between-nodes-more-visible](./quick/017-make-links-between-nodes-more-visible/) |
 | 018 | Move legend to graph screen - position relative to viewport | 2026-01-26 | [018-move-legend-to-graph-screen](./quick/018-move-legend-to-graph-screen/) |
 | 019 | Fix hooks notification X button not closing | 2026-01-26 | [019-fix-hooks-notification-x-button-not-clos](./quick/019-fix-hooks-notification-x-button-not-clos/) |
+| 020 | Fix tree auto-expand and graph flash visibility | 2026-01-26 | [020-fix-tree-auto-expand-and-graph-flash-vis](./quick/020-fix-tree-auto-expand-and-graph-flash-vis/) |
 
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Completed quick task 019
+Stopped at: Completed quick task 020
 Resume file: None
 Next action: Run /gsd:new-milestone to define v1.5
