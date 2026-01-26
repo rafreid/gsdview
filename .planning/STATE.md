@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 Phase: —
 Plan: —
 Status: Ready for next milestone
-Last activity: 2026-01-26 — Completed quick task 018: Move legend to graph screen
+Last activity: 2026-01-26 — Completed quick task 019: Fix hooks notification X button not closing
 
 Progress: No active milestone
 
@@ -291,10 +291,11 @@ None.
 | 016 | Add particle effects to flash animations | 2026-01-26 | [016-add-particle-effects-to-flash-animations](./quick/016-add-particle-effects-to-flash-animations/) |
 | 017 | Make links between nodes more visible | 2026-01-26 | [017-make-links-between-nodes-more-visible](./quick/017-make-links-between-nodes-more-visible/) |
 | 018 | Move legend to graph screen - position relative to viewport | 2026-01-26 | [018-move-legend-to-graph-screen](./quick/018-move-legend-to-graph-screen/) |
+| 019 | Fix hooks notification X button not closing | 2026-01-26 | [019-fix-hooks-notification-x-button-not-clos](./quick/019-fix-hooks-notification-x-button-not-clos/) |
 
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Completed quick task 018
+Stopped at: Completed quick task 019
 Resume file: None
 Next action: Run /gsd:new-milestone to define v1.5
