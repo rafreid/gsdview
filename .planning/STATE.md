@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 Phase: —
 Plan: —
 Status: Ready for next milestone
-Last activity: 2026-01-26 — Completed quick task 015: Add legend to graph
+Last activity: 2026-01-26 — Completed quick task 016: Add particle effects to flash animations
 
 Progress: No active milestone
 
