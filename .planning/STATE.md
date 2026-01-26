@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 Phase: —
 Plan: —
 Status: Ready for next milestone
-Last activity: 2026-01-25 — Completed quick task 012: Fix Setup Guide button
+Last activity: 2026-01-25 — Completed quick task 013: Implement test suites
 
 Progress: No active milestone
 
@@ -273,10 +273,11 @@ None.
 | 010 | File Tree panel open by default on startup | 2026-01-23 | [010-file-tree-open-by-default](./quick/010-file-tree-open-by-default/) |
 | 011 | Fix Open in Editor not launching - missing sourceType in graph-builder | 2026-01-24 | [011-fix-open-in-editor](./quick/011-fix-double-click-and-open-in-editor-not-/) |
 | 012 | Fix Setup Guide button for Claude hooks - add error handling | 2026-01-25 | [012-fix-setup-guidelines-button](./quick/012-fix-setup-guidelines-button-for-claude-h/) |
+| 013 | Implement test suites for application - Jest with parser and graph-builder tests | 2026-01-25 | [013-implement-test-suites](./quick/013-implement-test-suites-for-application/) |
 
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: v1.4 milestone archived
+Stopped at: Completed quick task 013
 Resume file: None
 Next action: Run /gsd:new-milestone to define v1.5
