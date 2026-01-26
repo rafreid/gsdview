@@ -2636,7 +2636,7 @@ function getLinkColor(link, graphData) {
 
   if (sourceNode) {
     const baseColor = getNodeColor(sourceNode);
-    return baseColor + '66'; // 40% opacity
+    return baseColor; // Full color for better visibility
   }
   return 'rgba(255,255,255,0.2)';
 }
@@ -2645,19 +2645,19 @@ function getLinkColor(link, graphData) {
 function getLinkWidth(link, graphData) {
   // Blocked links are thicker for visibility
   if (link.type === 'blocked') {
-    return 3;
+    return 4;
   }
 
   const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
   const sourceNode = graphData.nodes.find(n => n.id === sourceId);
   if (sourceNode) {
-    if (sourceNode.type === 'root') return 2.5;
-    if (sourceNode.type === 'phase') return 2;
-    if (sourceNode.type === 'plan') return 1.5;
-    if (sourceNode.type === 'directory') return 1;
-    return 1;
+    if (sourceNode.type === 'root') return 4;
+    if (sourceNode.type === 'phase') return 3;
+    if (sourceNode.type === 'plan') return 2.5;
+    if (sourceNode.type === 'directory') return 2;
+    return 1.5;
   }
-  return 1;
+  return 1.5;
 }
 
 // Initialize 3D force graph
@@ -2841,7 +2841,8 @@ const Graph = ForceGraph3D()(container)
   })
   .linkColor(link => getLinkColor(link, currentGraphData))
   .linkWidth(link => getLinkWidth(link, currentGraphData))
-  .linkOpacity(0.6)
+  .linkOpacity(0.85)
+  .linkCurvature(0.1)
   .linkDirectionalArrowLength(3.5)
   .linkDirectionalArrowRelPos(1)
   .backgroundColor('#1a1a2e')
