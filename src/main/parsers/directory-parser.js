@@ -218,4 +218,4 @@ function flattenTree(tree) {
   return { nodes, links };
 }
 
-module.exports = { parseDirectory, parseDirectories, flattenTree, DEFAULT_SRC_IGNORE_PATTERNS };
+module.exports = { parseDirectory, parseDirectories, parseDirectoryWithSource, flattenTree, DEFAULT_SRC_IGNORE_PATTERNS };
