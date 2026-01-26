@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 Phase: —
 Plan: —
 Status: Ready for next milestone
-Last activity: 2026-01-26 — Completed quick task 017: Make links between nodes more visible
+Last activity: 2026-01-26 — Completed quick task 018: Move legend to graph screen
 
 Progress: No active milestone
 
@@ -258,6 +258,8 @@ Recent decisions affecting current work:
 - Link colors use full node color without '66' opacity suffix for brightness (quick-017)
 - Link widths increased: root 4, phase 3, plan 2.5, directory 2, default 1.5, blocked 4 (quick-017)
 - Link curvature 0.1 for subtle curves that distinguish overlapping connections (quick-017)
+- Legend positioned absolute inside graph-container for viewport-relative positioning (quick-018)
+- Legend moves with graph when tree panel toggles, preventing overlap (quick-018)
 
 ### Pending Todos
 
@@ -288,10 +290,11 @@ None.
 | 015 | Add legend to graph - show shapes, flash animations, source types | 2026-01-26 | [015-add-legend-to-graph](./quick/015-add-legend-to-graph/) |
 | 016 | Add particle effects to flash animations | 2026-01-26 | [016-add-particle-effects-to-flash-animations](./quick/016-add-particle-effects-to-flash-animations/) |
 | 017 | Make links between nodes more visible | 2026-01-26 | [017-make-links-between-nodes-more-visible](./quick/017-make-links-between-nodes-more-visible/) |
+| 018 | Move legend to graph screen - position relative to viewport | 2026-01-26 | [018-move-legend-to-graph-screen](./quick/018-move-legend-to-graph-screen/) |
 
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Completed quick task 017
+Stopped at: Completed quick task 018
 Resume file: None
 Next action: Run /gsd:new-milestone to define v1.5
