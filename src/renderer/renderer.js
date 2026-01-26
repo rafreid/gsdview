@@ -168,7 +168,7 @@ const changeTypeColors = {
 
 // Flash animation configuration
 let flashDuration = 2000;  // Default flash duration in ms
-let flashIntensity = 1.0;  // Intensity multiplier for glow and scale effects
+let flashIntensity = 1.5;  // Intensity multiplier for glow and scale effects (increased from 1.0)
 let particleEffectsEnabled = true;  // Enable/disable particle burst effects
 
 // Particle system tracking
@@ -1603,10 +1603,11 @@ function flashNodeWithType(nodeId, changeType) {
     const intensity = patternedPulse * decay;
 
     materials.forEach((material, i) => {
-      // Color pulse
-      material.color.setHex(lerpColor(originalColors[i], flashColor, intensity));
+      // Color pulse - boosted for more dramatic effect (use squared intensity for snappier response)
+      const colorIntensity = Math.min(1, intensity * 1.5);  // Boost color change by 50%
+      material.color.setHex(lerpColor(originalColors[i], flashColor, colorIntensity));
 
-      // Emissive glow effect
+      // Emissive glow effect (only works with MeshStandardMaterial)
       if (material.emissive) {
         const emissiveIntensity = intensity * flashIntensity * 3.5;
         material.emissive.setHex(flashColor);
@@ -1620,8 +1621,8 @@ function flashNodeWithType(nodeId, changeType) {
       }
     });
 
-    // Scale pulse effect
-    const scaleMultiplier = 1 + (intensity * 0.8 * flashIntensity);
+    // Scale pulse effect - enhanced for visibility (1.5x base multiplier)
+    const scaleMultiplier = 1 + (intensity * 1.5 * flashIntensity);
     threeObj.scale.set(
       originalScale.x * scaleMultiplier,
       originalScale.y * scaleMultiplier,
@@ -2696,24 +2697,20 @@ const Graph = ForceGraph3D()(container)
 
       // Main folder body (slightly flattened box)
       const bodyGeometry = new THREE.BoxGeometry(size * 1.5, size * 1.2, size * 0.8);
-      const bodyMaterial = new THREE.MeshStandardMaterial({
+      const bodyMaterial = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
-        opacity: 0.85,
-        metalness: 0,
-        roughness: 0.8
+        opacity: 0.85
       });
       const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
       body.name = node.id + '-body';
 
       // Folder tab (small box on top)
       const tabGeometry = new THREE.BoxGeometry(size * 0.6, size * 0.3, size * 0.8);
-      const tabMaterial = new THREE.MeshStandardMaterial({
+      const tabMaterial = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
-        opacity: 0.95,
-        metalness: 0,
-        roughness: 0.8
+        opacity: 0.95
       });
       const tab = new THREE.Mesh(tabGeometry, tabMaterial);
       tab.position.set(-size * 0.4, size * 0.75, 0);
@@ -2744,12 +2741,10 @@ const Graph = ForceGraph3D()(container)
         geometry = new THREE.OctahedronGeometry(size * 0.8);
       }
 
-      const material = new THREE.MeshStandardMaterial({
+      const material = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
-        opacity: 0.85,
-        metalness: 0.1,
-        roughness: 0.7
+        opacity: 0.85
       });
       const mesh = new THREE.Mesh(geometry, material);
       mesh.name = node.id;
@@ -2768,13 +2763,11 @@ const Graph = ForceGraph3D()(container)
       const gitStatus = getNodeGitStatus(node);
       if (gitStatus && gitStatusColors[gitStatus]) {
         const ringGeometry = new THREE.RingGeometry(size * 1.1, size * 1.4, 16);
-        const ringMaterial = new THREE.MeshStandardMaterial({
+        const ringMaterial = new THREE.MeshBasicMaterial({
           color: gitStatusColors[gitStatus],
           transparent: true,
           opacity: 0.7,
-          side: THREE.DoubleSide,
-          metalness: 0,
-          roughness: 0.9
+          side: THREE.DoubleSide
         });
         const ring = new THREE.Mesh(ringGeometry, ringMaterial);
 
@@ -2794,24 +2787,20 @@ const Graph = ForceGraph3D()(container)
       if (phaseNum === currentState.currentPhase && node.status !== 'complete') {
         // Create glowing sphere for current phase
         const geometry = new THREE.SphereGeometry(size);
-        const material = new THREE.MeshStandardMaterial({
+        const material = new THREE.MeshBasicMaterial({
           color: statusColors['in-progress'],
           transparent: true,
-          opacity: 0.8,
-          metalness: 0,
-          roughness: 0.8
+          opacity: 0.8
         });
         const sphere = new THREE.Mesh(geometry, material);
 
         // Add outer glow ring
         const ringGeometry = new THREE.RingGeometry(size * 1.2, size * 1.8, 32);
-        const ringMaterial = new THREE.MeshStandardMaterial({
+        const ringMaterial = new THREE.MeshBasicMaterial({
           color: statusColors['in-progress'],
           transparent: true,
           opacity: 0.4,
-          side: THREE.DoubleSide,
-          metalness: 0,
-          roughness: 0.9
+          side: THREE.DoubleSide
         });
         const ring = new THREE.Mesh(ringGeometry, ringMaterial);
         sphere.add(ring);
@@ -2823,12 +2812,10 @@ const Graph = ForceGraph3D()(container)
     // Commit nodes: small hexagonal shape
     if (node.type === 'commit') {
       const geometry = new THREE.CylinderGeometry(size * 0.6, size * 0.6, size * 0.4, 6);
-      const material = new THREE.MeshStandardMaterial({
+      const material = new THREE.MeshBasicMaterial({
         color: nodeColors.commit,
         transparent: true,
-        opacity: 0.85,
-        metalness: 0.1,
-        roughness: 0.7
+        opacity: 0.85
       });
       const mesh = new THREE.Mesh(geometry, material);
       mesh.name = node.id;
@@ -2853,12 +2840,10 @@ const Graph = ForceGraph3D()(container)
     // Root node: larger icosahedron
     if (node.type === 'root') {
       const geometry = new THREE.IcosahedronGeometry(size * 1.2);
-      const material = new THREE.MeshStandardMaterial({
+      const material = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
-        opacity: 0.9,
-        metalness: 0,
-        roughness: 0.8
+        opacity: 0.9
       });
       return new THREE.Mesh(geometry, material);
     }
@@ -2992,13 +2977,6 @@ function handleResize() {
 
 window.addEventListener('resize', handleResize);
 handleResize();
-
-// Add lights for MeshStandardMaterial to enable emissive glow effects
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-Graph.scene().add(ambientLight);
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-directionalLight.position.set(100, 100, 100);
-Graph.scene().add(directionalLight);
 
 // Build graph from parsed project data
 function buildGraphFromProject(projectData) {
@@ -3308,14 +3286,15 @@ async function loadProject(projectPath) {
   }
 
   console.log('Loading project:', projectPath);
-  document.getElementById('selected-path').textContent = 'Loading...';
+  const selectedPathEl = document.getElementById('selected-path');
+  if (selectedPathEl) selectedPathEl.textContent = 'Loading...';
 
   try {
     const projectData = await window.electronAPI.parseProject(projectPath);
 
     if (projectData.error) {
       console.error('Error loading project:', projectData.error);
-      document.getElementById('selected-path').textContent = `Error: ${projectData.error}`;
+      if (selectedPathEl) selectedPathEl.textContent = `Error: ${projectData.error}`;
       return;
     }
 
@@ -3331,7 +3310,7 @@ async function loadProject(projectPath) {
 
     updateGraph(graphData);
 
-    document.getElementById('selected-path').textContent = projectPath;
+    if (selectedPathEl) selectedPathEl.textContent = projectPath;
     selectedProjectPath = projectPath;
 
     // Start file watching
@@ -3350,12 +3329,12 @@ async function loadProject(projectPath) {
 
   } catch (error) {
     console.error('Error loading project:', error);
-    document.getElementById('selected-path').textContent = `Error: ${error.message}`;
+    if (selectedPathEl) selectedPathEl.textContent = `Error: ${error.message}`;
   }
 }
 
 // Folder selection handler
-document.getElementById('select-folder-btn').addEventListener('click', async () => {
+document.getElementById('select-folder-btn')?.addEventListener('click', async () => {
   console.log('Select folder button clicked');
   console.log('electronAPI:', window.electronAPI);
 
@@ -3600,9 +3579,9 @@ function populateColorLegend() {
 populateColorLegend();
 
 // Legend toggle handler
-document.getElementById('legend-header').addEventListener('click', () => {
+document.getElementById('legend-header')?.addEventListener('click', () => {
   const legend = document.getElementById('color-legend');
-  legend.classList.toggle('collapsed');
+  legend?.classList.toggle('collapsed');
 });
 
 // Track mouse for tooltip positioning
@@ -5310,11 +5289,11 @@ async function refreshDiffSection() {
 }
 
 // Close panel button handler
-document.getElementById('close-panel').addEventListener('click', hideDetailsPanel);
+document.getElementById('close-panel')?.addEventListener('click', hideDetailsPanel);
 
 // File inspector modal event listeners
-document.getElementById('inspector-close').addEventListener('click', closeFileInspector);
-document.getElementById('file-inspector-overlay').addEventListener('click', closeFileInspector);
+document.getElementById('inspector-close')?.addEventListener('click', closeFileInspector);
+document.getElementById('file-inspector-overlay')?.addEventListener('click', closeFileInspector);
 
 // Collapsible section toggle
 document.querySelectorAll('.collapsible-section .section-header').forEach(header => {
@@ -5344,7 +5323,7 @@ document.querySelectorAll('.diff-mode-toggle .mode-btn').forEach(btn => {
 });
 
 // Line number click-to-jump handler (event delegation)
-document.querySelector('#section-diff .section-content').addEventListener('click', (e) => {
+document.querySelector('#section-diff .section-content')?.addEventListener('click', (e) => {
   if (e.target.classList.contains('diff-line-number')) {
     const container = e.target.closest('.diff-line-container');
     if (container) {
@@ -5354,7 +5333,7 @@ document.querySelector('#section-diff .section-content').addEventListener('click
 });
 
 // Structure tree event delegation for clicks and collapse/expand
-document.querySelector('#section-structure .section-content').addEventListener('click', (e) => {
+document.querySelector('#section-structure .section-content')?.addEventListener('click', (e) => {
   const structureItem = e.target.closest('.structure-item');
   if (!structureItem) return;
 
@@ -5489,7 +5468,7 @@ document.addEventListener('keydown', (e) => {
 document.getElementById('path-play')?.addEventListener('click', togglePathPlayback);
 
 // Refresh button handler
-document.getElementById('refresh-btn').addEventListener('click', async () => {
+document.getElementById('refresh-btn')?.addEventListener('click', async () => {
   if (selectedProjectPath) {
     const btn = document.getElementById('refresh-btn');
     btn.disabled = true;
@@ -5534,7 +5513,7 @@ async function updateRecentProjects() {
 }
 
 // Recent projects dropdown handler
-document.getElementById('recent-projects').addEventListener('change', async (e) => {
+document.getElementById('recent-projects')?.addEventListener('change', async (e) => {
   const projectPath = e.target.value;
   if (projectPath) {
     await loadProject(projectPath);
@@ -5906,7 +5885,7 @@ function highlightTreeItem(nodeId) {
 }
 
 // Tree toggle button handler
-document.getElementById('tree-toggle').addEventListener('click', () => {
+document.getElementById('tree-toggle')?.addEventListener('click', () => {
   const panel = document.getElementById('tree-panel');
   const toggle = document.getElementById('tree-toggle');
   const graphContainer = document.getElementById('graph-container');
@@ -6085,7 +6064,7 @@ function scrollActivityToTop() {
 }
 
 // Activity feed toggle button handler
-document.getElementById('activity-toggle').addEventListener('click', () => {
+document.getElementById('activity-toggle')?.addEventListener('click', () => {
   const panel = document.getElementById('activity-panel');
   const toggle = document.getElementById('activity-toggle');
   const graphContainer = document.getElementById('graph-container');
@@ -6105,7 +6084,7 @@ document.getElementById('activity-toggle').addEventListener('click', () => {
 });
 
 // Clear button handler
-document.getElementById('activity-clear').addEventListener('click', () => {
+document.getElementById('activity-clear')?.addEventListener('click', () => {
   activityEntries = [];
   activityUnreadCount = 0;
   updateActivityBadge();
@@ -6113,7 +6092,7 @@ document.getElementById('activity-clear').addEventListener('click', () => {
 });
 
 // Statistics panel toggle button handler
-document.getElementById('statistics-toggle').addEventListener('click', () => {
+document.getElementById('statistics-toggle')?.addEventListener('click', () => {
   const panel = document.getElementById('statistics-panel');
   const toggle = document.getElementById('statistics-toggle');
   const graphContainer = document.getElementById('graph-container');
@@ -6144,7 +6123,7 @@ setInterval(() => {
 }, 30000);
 
 // Dimension toggle button handler
-document.getElementById('dimension-toggle').addEventListener('click', () => {
+document.getElementById('dimension-toggle')?.addEventListener('click', () => {
   const toggle = document.getElementById('dimension-toggle');
 
   // Toggle dimension state
@@ -7566,22 +7545,30 @@ async function showHookHelp() {
   dismissHookNotification();
 }
 
-// Hook notification button event listeners using event delegation
-// This is more robust than attaching to individual buttons
+// Hook notification button event listeners
+console.log('[HookNotification] Setting up click listener on document');
+
 document.addEventListener('click', (e) => {
-  // Check if dismiss button was clicked
-  if (e.target.id === 'hook-dismiss-btn' || e.target.closest('#hook-dismiss-btn')) {
-    console.log('[HookNotification] Dismiss button clicked');
+  // Log every click for debugging
+  console.log('[HookNotification] Click on:', e.target.tagName, e.target.id || e.target.className);
+
+  const dismissBtn = e.target.closest('#hook-dismiss-btn');
+  const helpBtn = e.target.closest('#hook-help-btn');
+
+  if (dismissBtn) {
+    console.log('[HookNotification] Dismiss button matched!');
+    e.preventDefault();
+    e.stopPropagation();
     dismissHookNotification();
-    return;
-  }
-  // Check if help button was clicked
-  if (e.target.id === 'hook-help-btn' || e.target.closest('#hook-help-btn')) {
-    console.log('[HookNotification] Help button clicked');
+  } else if (helpBtn) {
+    console.log('[HookNotification] Help button matched!');
+    e.preventDefault();
+    e.stopPropagation();
     showHookHelp();
-    return;
   }
 });
+
+console.log('[HookNotification] Click listener setup complete');
 
 // Debug mode toggle handler
 document.getElementById('debug-toggle')?.addEventListener('click', (e) => {
