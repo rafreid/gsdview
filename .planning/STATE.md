@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 Phase: —
 Plan: —
 Status: Ready for next milestone
-Last activity: 2026-01-26 — Completed quick task 016: Add particle effects to flash animations
+Last activity: 2026-01-26 — Completed quick task 017: Make links between nodes more visible
 
 Progress: No active milestone
 
@@ -254,6 +254,10 @@ Recent decisions affecting current work:
 - AdditiveBlending for glowing particle overlap effect (quick-016)
 - Separate RAF loop for particle animation, runs only when particles active (quick-016)
 - particleEffectsEnabled setting defaults to true, persisted via electron-store (quick-016)
+- Link opacity increased from 0.6 to 0.85 for better visibility at all zoom levels (quick-017)
+- Link colors use full node color without '66' opacity suffix for brightness (quick-017)
+- Link widths increased: root 4, phase 3, plan 2.5, directory 2, default 1.5, blocked 4 (quick-017)
+- Link curvature 0.1 for subtle curves that distinguish overlapping connections (quick-017)
 
 ### Pending Todos
 
@@ -283,10 +287,11 @@ None.
 | 014 | Fix Claude Code hooks detection - add diagnostic logging and verify end-to-end flow | 2026-01-25 | [014-fix-claude-code-hooks-not-detected](./quick/014-fix-claude-code-hooks-not-detected/) |
 | 015 | Add legend to graph - show shapes, flash animations, source types | 2026-01-26 | [015-add-legend-to-graph](./quick/015-add-legend-to-graph/) |
 | 016 | Add particle effects to flash animations | 2026-01-26 | [016-add-particle-effects-to-flash-animations](./quick/016-add-particle-effects-to-flash-animations/) |
+| 017 | Make links between nodes more visible | 2026-01-26 | [017-make-links-between-nodes-more-visible](./quick/017-make-links-between-nodes-more-visible/) |
 
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Completed quick task 016
+Stopped at: Completed quick task 017
 Resume file: None
 Next action: Run /gsd:new-milestone to define v1.5
