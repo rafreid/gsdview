@@ -158,6 +158,14 @@ function startClaudeEventWatcher(projectPath) {
     depth: 0
   });
 
+  claudeEventWatcher.on('ready', () => {
+    console.log('[ClaudeEvents] Watcher ready, monitoring:', eventsPath);
+  });
+
+  claudeEventWatcher.on('error', (err) => {
+    console.error('[ClaudeEvents] Watcher error:', err.message);
+  });
+
   claudeEventWatcher.on('add', (filePath) => {
     handleClaudeEvent(filePath);
   });
