@@ -2468,23 +2468,33 @@ function updatePathProgress() {
 
 // Flash a tree item with change-type-specific color
 function flashTreeItem(nodeId, changeType = 'modified') {
-  const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);
-  if (!treeItem) return;
+  // Expand parent directories to reveal the flashing file
+  expandParentsOf(nodeId);
+  updateTreePanel();
 
-  // Remove existing animation classes
-  treeItem.classList.remove('tree-flash', 'tree-flash-created', 'tree-flash-modified', 'tree-flash-deleted');
-
-  // Force reflow to restart animation
-  void treeItem.offsetWidth;
-
-  // Add type-specific animation class
-  const className = `tree-flash-${changeType}`;
-  treeItem.classList.add(className);
-
-  // Remove class after animation completes
+  // Use setTimeout to ensure DOM is updated before querying
   setTimeout(() => {
-    treeItem.classList.remove(className);
-  }, 2000);
+    const treeItem = document.querySelector(`.tree-item[data-node-id="${nodeId}"]`);
+    if (!treeItem) return;
+
+    // Remove existing animation classes
+    treeItem.classList.remove('tree-flash', 'tree-flash-created', 'tree-flash-modified', 'tree-flash-deleted', 'tree-flash-read');
+
+    // Force reflow to restart animation
+    void treeItem.offsetWidth;
+
+    // Add type-specific animation class
+    const className = `tree-flash-${changeType}`;
+    treeItem.classList.add(className);
+
+    // Scroll into view if not visible
+    treeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Remove class after animation completes
+    setTimeout(() => {
+      treeItem.classList.remove(className);
+    }, 2000);
+  }, 50);
 }
 
 // Fade out a tree item when deleted
@@ -2686,20 +2696,24 @@ const Graph = ForceGraph3D()(container)
 
       // Main folder body (slightly flattened box)
       const bodyGeometry = new THREE.BoxGeometry(size * 1.5, size * 1.2, size * 0.8);
-      const bodyMaterial = new THREE.MeshBasicMaterial({
+      const bodyMaterial = new THREE.MeshStandardMaterial({
         color: color,
         transparent: true,
-        opacity: 0.85
+        opacity: 0.85,
+        metalness: 0,
+        roughness: 0.8
       });
       const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
       body.name = node.id + '-body';
 
       // Folder tab (small box on top)
       const tabGeometry = new THREE.BoxGeometry(size * 0.6, size * 0.3, size * 0.8);
-      const tabMaterial = new THREE.MeshBasicMaterial({
+      const tabMaterial = new THREE.MeshStandardMaterial({
         color: color,
         transparent: true,
-        opacity: 0.95
+        opacity: 0.95,
+        metalness: 0,
+        roughness: 0.8
       });
       const tab = new THREE.Mesh(tabGeometry, tabMaterial);
       tab.position.set(-size * 0.4, size * 0.75, 0);
@@ -2730,10 +2744,12 @@ const Graph = ForceGraph3D()(container)
         geometry = new THREE.OctahedronGeometry(size * 0.8);
       }
 
-      const material = new THREE.MeshBasicMaterial({
+      const material = new THREE.MeshStandardMaterial({
         color: color,
         transparent: true,
-        opacity: 0.85
+        opacity: 0.85,
+        metalness: 0.1,
+        roughness: 0.7
       });
       const mesh = new THREE.Mesh(geometry, material);
       mesh.name = node.id;
@@ -2752,11 +2768,13 @@ const Graph = ForceGraph3D()(container)
       const gitStatus = getNodeGitStatus(node);
       if (gitStatus && gitStatusColors[gitStatus]) {
         const ringGeometry = new THREE.RingGeometry(size * 1.1, size * 1.4, 16);
-        const ringMaterial = new THREE.MeshBasicMaterial({
+        const ringMaterial = new THREE.MeshStandardMaterial({
           color: gitStatusColors[gitStatus],
           transparent: true,
           opacity: 0.7,
-          side: THREE.DoubleSide
+          side: THREE.DoubleSide,
+          metalness: 0,
+          roughness: 0.9
         });
         const ring = new THREE.Mesh(ringGeometry, ringMaterial);
 
@@ -2776,20 +2794,24 @@ const Graph = ForceGraph3D()(container)
       if (phaseNum === currentState.currentPhase && node.status !== 'complete') {
         // Create glowing sphere for current phase
         const geometry = new THREE.SphereGeometry(size);
-        const material = new THREE.MeshBasicMaterial({
+        const material = new THREE.MeshStandardMaterial({
           color: statusColors['in-progress'],
           transparent: true,
-          opacity: 0.8
+          opacity: 0.8,
+          metalness: 0,
+          roughness: 0.8
         });
         const sphere = new THREE.Mesh(geometry, material);
 
         // Add outer glow ring
         const ringGeometry = new THREE.RingGeometry(size * 1.2, size * 1.8, 32);
-        const ringMaterial = new THREE.MeshBasicMaterial({
+        const ringMaterial = new THREE.MeshStandardMaterial({
           color: statusColors['in-progress'],
           transparent: true,
           opacity: 0.4,
-          side: THREE.DoubleSide
+          side: THREE.DoubleSide,
+          metalness: 0,
+          roughness: 0.9
         });
         const ring = new THREE.Mesh(ringGeometry, ringMaterial);
         sphere.add(ring);
@@ -2801,10 +2823,12 @@ const Graph = ForceGraph3D()(container)
     // Commit nodes: small hexagonal shape
     if (node.type === 'commit') {
       const geometry = new THREE.CylinderGeometry(size * 0.6, size * 0.6, size * 0.4, 6);
-      const material = new THREE.MeshBasicMaterial({
+      const material = new THREE.MeshStandardMaterial({
         color: nodeColors.commit,
         transparent: true,
-        opacity: 0.85
+        opacity: 0.85,
+        metalness: 0.1,
+        roughness: 0.7
       });
       const mesh = new THREE.Mesh(geometry, material);
       mesh.name = node.id;
@@ -2829,10 +2853,12 @@ const Graph = ForceGraph3D()(container)
     // Root node: larger icosahedron
     if (node.type === 'root') {
       const geometry = new THREE.IcosahedronGeometry(size * 1.2);
-      const material = new THREE.MeshBasicMaterial({
+      const material = new THREE.MeshStandardMaterial({
         color: color,
         transparent: true,
-        opacity: 0.9
+        opacity: 0.9,
+        metalness: 0,
+        roughness: 0.8
       });
       return new THREE.Mesh(geometry, material);
     }
@@ -2966,6 +2992,13 @@ function handleResize() {
 
 window.addEventListener('resize', handleResize);
 handleResize();
+
+// Add lights for MeshStandardMaterial to enable emissive glow effects
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+Graph.scene().add(ambientLight);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+directionalLight.position.set(100, 100, 100);
+Graph.scene().add(directionalLight);
 
 // Build graph from parsed project data
 function buildGraphFromProject(projectData) {
@@ -7533,18 +7566,22 @@ async function showHookHelp() {
   dismissHookNotification();
 }
 
-// Hook notification button event listeners (CSP blocks inline onclick)
-// Wrap in DOMContentLoaded to ensure elements exist
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('hook-dismiss-btn')?.addEventListener('click', dismissHookNotification);
-    document.getElementById('hook-help-btn')?.addEventListener('click', showHookHelp);
-  });
-} else {
-  // DOM already loaded, attach immediately
-  document.getElementById('hook-dismiss-btn')?.addEventListener('click', dismissHookNotification);
-  document.getElementById('hook-help-btn')?.addEventListener('click', showHookHelp);
-}
+// Hook notification button event listeners using event delegation
+// This is more robust than attaching to individual buttons
+document.addEventListener('click', (e) => {
+  // Check if dismiss button was clicked
+  if (e.target.id === 'hook-dismiss-btn' || e.target.closest('#hook-dismiss-btn')) {
+    console.log('[HookNotification] Dismiss button clicked');
+    dismissHookNotification();
+    return;
+  }
+  // Check if help button was clicked
+  if (e.target.id === 'hook-help-btn' || e.target.closest('#hook-help-btn')) {
+    console.log('[HookNotification] Help button clicked');
+    showHookHelp();
+    return;
+  }
+});
 
 // Debug mode toggle handler
 document.getElementById('debug-toggle')?.addEventListener('click', (e) => {
