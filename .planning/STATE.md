@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 Phase: —
 Plan: —
 Status: Ready for next mileston
-Last activity: 2026-01-26 — Completed quick task 021: Enhance flash visibility with intensity and null-safe DOM queries
+Last activity: 2026-01-26 — Completed quick task 022: Simplify node hover tooltip to 2 items
 
 Progress: No active milestone
 
