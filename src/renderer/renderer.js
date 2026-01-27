@@ -5622,6 +5622,65 @@ if (window.electronAPI && window.electronAPI.onClaudeOperation) {
 // Load recent projects on startup
 updateRecentProjects();
 
+// Listen for menu Open Folder command
+if (window.electronAPI && window.electronAPI.onMenuOpenFolder) {
+  window.electronAPI.onMenuOpenFolder(async (folderPath) => {
+    console.log('[Menu] Open folder:', folderPath);
+    if (folderPath) {
+      await loadProject(folderPath);
+    }
+  });
+}
+
+// Listen for menu Close Folder command
+if (window.electronAPI && window.electronAPI.onMenuCloseFolder) {
+  window.electronAPI.onMenuCloseFolder(() => {
+    console.log('[Menu] Close folder');
+
+    // Stop watching
+    if (window.electronAPI && window.electronAPI.stopWatching) {
+      window.electronAPI.stopWatching();
+    }
+
+    // Clear graph
+    if (Graph) {
+      Graph.graphData({ nodes: [], links: [] });
+    }
+
+    // Reset state
+    selectedProjectPath = null;
+    currentGraphData = { nodes: [], links: [] };
+    connectionCounts = new Map();
+    storedDirectoryData = null;
+    storedRoadmapData = null;
+    storedRequirementsData = null;
+    treeData = null;
+    activityFeed = [];
+
+    // Clear UI elements
+    const selectedPathEl = document.getElementById('selected-path');
+    if (selectedPathEl) selectedPathEl.textContent = 'No project selected';
+
+    // Clear tree panel
+    updateTreePanel();
+
+    // Clear activity feed
+    const activityList = document.getElementById('activity-list');
+    if (activityList) activityList.innerHTML = '';
+
+    // Clear details panel
+    const detailsContent = document.getElementById('details-content');
+    if (detailsContent) {
+      detailsContent.innerHTML = '<p class="no-selection">Select a node to view details</p>';
+    }
+
+    // Dismiss hook notification if visible
+    dismissHookNotification();
+
+    console.log('[Menu] Folder closed, view reset');
+  });
+}
+
 // =====================================================
 // TREE PANEL FUNCTIONALITY
 // =====================================================

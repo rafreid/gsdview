@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { execSync } = require('child_process');
@@ -27,6 +27,103 @@ function runGitCommand(command, cwd) {
   }
 }
 
+// Create application menu
+function createApplicationMenu() {
+  const isMac = process.platform === 'darwin';
+
+  const template = [
+    // App menu (macOS only)
+    ...(isMac ? [{
+      label: app.name,
+      submenu: [
+        { role: 'about' },
+        { type: 'separator' },
+        { role: 'services' },
+        { type: 'separator' },
+        { role: 'hide' },
+        { role: 'hideOthers' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        { role: 'quit' }
+      ]
+    }] : []),
+    // File menu
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Open Folder...',
+          accelerator: 'CmdOrCtrl+O',
+          click: async () => {
+            const result = await dialog.showOpenDialog(mainWindow, {
+              properties: ['openDirectory'],
+              title: 'Select GSD Project Folder'
+            });
+            if (!result.canceled && result.filePaths.length > 0) {
+              mainWindow.webContents.send('menu-open-folder', result.filePaths[0]);
+            }
+          }
+        },
+        {
+          label: 'Close Folder',
+          accelerator: 'CmdOrCtrl+W',
+          click: () => {
+            stopWatching();
+            mainWindow.webContents.send('menu-close-folder');
+          }
+        },
+        { type: 'separator' },
+        isMac ? { role: 'close' } : { role: 'quit' }
+      ]
+    },
+    // Edit menu
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'selectAll' }
+      ]
+    },
+    // View menu
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { role: 'toggleDevTools' },
+        { type: 'separator' },
+        { role: 'resetZoom' },
+        { role: 'zoomIn' },
+        { role: 'zoomOut' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' }
+      ]
+    },
+    // Window menu
+    {
+      label: 'Window',
+      submenu: [
+        { role: 'minimize' },
+        { role: 'zoom' },
+        ...(isMac ? [
+          { type: 'separator' },
+          { role: 'front' }
+        ] : [
+          { role: 'close' }
+        ])
+      ]
+    }
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+}
+
 function createWindow() {
   // Restore window state from previous session
   const windowState = store.get('windowState', {
@@ -47,9 +144,6 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
-
-  // Open DevTools for debugging
-  mainWindow.webContents.openDevTools();
 
   // Log renderer errors
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
@@ -620,6 +714,9 @@ app.whenReady().then(() => {
 
   // Create window AFTER all IPC handlers are registered
   createWindow();
+
+  // Set up application menu
+  createApplicationMenu();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
