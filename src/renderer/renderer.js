@@ -2677,13 +2677,7 @@ let connectionCounts = calculateConnectionCounts(currentGraphData);
 
 const Graph = ForceGraph3D()(container)
   .graphData(currentGraphData)
-  .nodeLabel(node => {
-    // Single-line tooltip with essential info
-    if (node.type === 'directory') return `${node.name}/`;
-    if (node.type === 'commit') return node.name.length > 50 ? node.name.slice(0, 47) + '...' : node.name;
-    if (node.status) return `${node.name} [${node.status}]`;
-    return node.name;
-  })
+  .nodeLabel(() => null) // Disable built-in tooltip, use custom #tooltip instead
   .nodeColor(node => getNodeColor(node))
   .nodeVal(node => getNodeSize(node, connectionCounts))
   .nodeThreeObject(node => {
@@ -2910,25 +2904,42 @@ const Graph = ForceGraph3D()(container)
     // Show details panel
     showDetailsPanel(node);
   })
-  // Hover tooltips
+  // Hover tooltips - show all essential info for each node type
   .onNodeHover(node => {
     const tooltip = document.getElementById('tooltip');
     if (node) {
-      // Line 1: Node name (bold)
-      let content = `<strong>${node.name}</strong><br>`;
+      const lines = [];
 
-      // Line 2: Type icon + type label (in node color)
-      content += `<span style="color: ${getNodeColor(node)};">`;
+      // Line 1: Name with type indicator
       if (node.type === 'directory') {
-        content += '📁 Directory';
+        lines.push(`📁 ${node.name}/`);
       } else if (node.type === 'commit') {
-        content += '📝 Commit';
+        const msg = node.name.length > 50 ? node.name.slice(0, 47) + '...' : node.name;
+        lines.push(`📝 ${msg}`);
+      } else if (node.type === 'phase') {
+        lines.push(`🎯 ${node.name}`);
+      } else if (node.type === 'plan') {
+        lines.push(`📋 ${node.name}`);
       } else {
-        content += '📄 File';
+        lines.push(`📄 ${node.name}`);
       }
-      content += '</span>';
 
-      tooltip.innerHTML = content;
+      // Line 2: Path (if available and different from name)
+      if (node.path && node.path !== node.name) {
+        lines.push(`${node.path}`);
+      }
+
+      // Line 3: Source type (planning vs src)
+      if (node.sourceType) {
+        lines.push(`[${node.sourceType}]`);
+      }
+
+      // Line 4: Status (if available)
+      if (node.status) {
+        lines.push(`Status: ${node.status}`);
+      }
+
+      tooltip.innerHTML = lines.join('<br>');
       tooltip.classList.add('visible');
       container.style.cursor = 'pointer';
     } else {
