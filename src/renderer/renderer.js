@@ -2914,43 +2914,19 @@ const Graph = ForceGraph3D()(container)
   .onNodeHover(node => {
     const tooltip = document.getElementById('tooltip');
     if (node) {
+      // Line 1: Node name (bold)
       let content = `<strong>${node.name}</strong><br>`;
-      content += `<span style="color: ${getNodeColor(node)}; text-transform: capitalize;">`;
 
-      // Show type with icon
+      // Line 2: Type icon + type label (in node color)
+      content += `<span style="color: ${getNodeColor(node)};">`;
       if (node.type === 'directory') {
         content += '📁 Directory';
-      } else if (node.type === 'file') {
-        content += '📄 File';
-        if (node.extension) {
-          content += ` (${node.extension})`;
-        }
       } else if (node.type === 'commit') {
         content += '📝 Commit';
-        if (node.hash) {
-          content += `<br><code style="font-family: monospace;">${node.hash.substring(0, 7)}</code>`;
-        }
       } else {
-        content += `Type: ${node.type}`;
+        content += '📄 File';
       }
       content += '</span>';
-
-      if (node.status) {
-        const statusColor = statusColors[node.status] || '#888';
-        content += `<br><span style="color: ${statusColor}">Status: ${node.status}</span>`;
-      }
-      if (node.category) content += `<br>Category: ${node.category}`;
-      if (node.path) content += `<br><span style="color: #888; font-size: 10px;">${node.path}</span>`;
-
-      // Show git status in tooltip
-      const gitStatus = getNodeGitStatus(node);
-      if (gitStatus) {
-        const statusColor = '#' + gitStatusColors[gitStatus].toString(16).padStart(6, '0');
-        const statusLabel = gitStatus === 'staged' ? 'Staged' :
-                            gitStatus === 'modified' ? 'Modified (uncommitted)' :
-                            'Untracked';
-        content += `<br><span style="color: ${statusColor}">Git: ${statusLabel}</span>`;
-      }
 
       tooltip.innerHTML = content;
       tooltip.classList.add('visible');
