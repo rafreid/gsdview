@@ -298,10 +298,11 @@ None.
 | 019 | Fix hooks notification X button not closing | 2026-01-26 | [019-fix-hooks-notification-x-button-not-clos](./quick/019-fix-hooks-notification-x-button-not-clos/) |
 | 020 | Fix tree auto-expand and graph flash visibility | 2026-01-26 | [020-fix-tree-auto-expand-and-graph-flash-vis](./quick/020-fix-tree-auto-expand-and-graph-flash-vis/) |
 | 021 | Enhance flash visibility with intensity and null-safe DOM queries | 2026-01-26 | [021-enhance-flash-visibility](./quick/021-enhance-flash-visibility/) |
+| 022 | Simplify node hover tooltip to 2 items (name + type) | 2026-01-26 | [022-when-hovering-over-nodes-tip-display-2-i](./quick/022-when-hovering-over-nodes-tip-display-2-i/) |
 
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Completed quick task 021
+Stopped at: Completed quick task 022
 Resume file: None
 Next action: Run /gsd:new-milestone to define v1.5
