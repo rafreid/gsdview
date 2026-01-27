@@ -2,7 +2,7 @@
 
 # GSD Viewer
 
-A desktop application that visualizes GSD project structure as an interactive 3D force-directed graph. Fly through your project's phases, plans, tasks, requirements, and files — seeing relationships, progress, and blockers at a glance.
+A desktop application that visualizes ![GSD](https://github.com/glittercowboy/get-shit-done) project structure as an interactive 3D force-directed graph. Fly through your project's phases, plans, tasks, requirements, and files — seeing relationships, progress, and blockers at a glance.
 
 ![Electron](https://img.shields.io/badge/Electron-31-47848F?logo=electron&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js-r152-black?logo=three.js&logoColor=white)
