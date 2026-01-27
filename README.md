@@ -1,3 +1,5 @@
+![Example Image](gsdView.png).
+
 # GSD Viewer
 
 A desktop application that visualizes GSD project structure as an interactive 3D force-directed graph. Fly through your project's phases, plans, tasks, requirements, and files — seeing relationships, progress, and blockers at a glance.
