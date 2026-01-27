@@ -2678,11 +2678,11 @@ let connectionCounts = calculateConnectionCounts(currentGraphData);
 const Graph = ForceGraph3D()(container)
   .graphData(currentGraphData)
   .nodeLabel(node => {
-    let label = node.name;
-    if (node.status) label += ` [${node.status}]`;
-    if (node.description) label += `\n${node.description}`;
-    if (node.goal) label += `\n${node.goal}`;
-    return label;
+    // Single-line tooltip with essential info
+    if (node.type === 'directory') return `${node.name}/`;
+    if (node.type === 'commit') return node.name.length > 50 ? node.name.slice(0, 47) + '...' : node.name;
+    if (node.status) return `${node.name} [${node.status}]`;
+    return node.name;
   })
   .nodeColor(node => getNodeColor(node))
   .nodeVal(node => getNodeSize(node, connectionCounts))
