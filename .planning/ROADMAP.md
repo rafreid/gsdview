@@ -51,6 +51,13 @@ Plans:
 
 **Requirements:** VIEW-01, VIEW-02, VIEW-03, VIEW-04
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 31-01-PLAN.md — View infrastructure (tab controls, diagram container, view-controller.js)
+- [ ] 31-02-PLAN.md — Selection persistence and keyboard routing
+- [ ] 31-03-PLAN.md — Verification checkpoint
+
 **Success Criteria:**
 1. User can click tab controls to switch between Graph and Diagram views
 2. User sees their selected node remains highlighted when switching between views
@@ -139,9 +146,9 @@ Plans:
 | v1.2 | 5 | 7 | Shipped 2026-01-24 |
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
 | v1.4 | 4 | 5 | Shipped 2026-01-25 |
-| v1.5 | 6 | 3+ | Phase 30 ✓ |
-| **Total** | **35** | **69+** | |
+| v1.5 | 6 | 6+ | Phase 30 ✓ |
+| **Total** | **35** | **72+** | |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-28 (Phase 30 complete)*
+*Last updated: 2026-01-28 (Phase 31 planned)*
