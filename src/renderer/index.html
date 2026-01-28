@@ -55,6 +55,36 @@
       background: #45b7d1;
     }
 
+    /* View Tab Controls */
+    .view-tabs {
+      display: flex;
+      gap: 4px;
+      margin-right: 16px;
+      border-right: 1px solid #333;
+      padding-right: 16px;
+    }
+
+    .view-tab {
+      background: transparent;
+      color: #888;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .view-tab:hover {
+      background: rgba(78, 205, 196, 0.1);
+      color: #eee;
+    }
+
+    .view-tab.active {
+      color: #4ECDC4;
+      border-bottom-color: #4ECDC4;
+    }
+
     #selected-path {
       color: #888;
       font-size: 0.9rem;
@@ -70,6 +100,48 @@
       top: 50px;
       left: 0;
       bottom: 0;
+    }
+
+    #graph-container.hidden {
+      display: none;
+    }
+
+    /* Diagram Container */
+    #diagram-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 50px;
+      left: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 1.2rem;
+    }
+
+    #diagram-container.hidden {
+      display: none;
+    }
+
+    #diagram-container.tree-open {
+      left: 280px;
+      width: calc(100% - 280px);
+    }
+
+    #diagram-container.activity-open {
+      bottom: 180px;
+      height: calc(100% - 50px - 180px);
+    }
+
+    #diagram-container.statistics-open {
+      right: 320px;
+      width: calc(100% - 320px);
+    }
+
+    #diagram-container.tree-open.statistics-open {
+      width: calc(100% - 280px - 320px);
     }
 
     #color-legend {
@@ -3246,6 +3318,10 @@
       <option value="">Recent Projects...</option>
     </select>
     <button id="refresh-btn" title="Refresh graph">↻ Refresh</button>
+    <div class="view-tabs">
+      <button id="tab-graph" class="view-tab active" onclick="switchToView('graph')" title="Graph view">Graph</button>
+      <button id="tab-diagram" class="view-tab" onclick="switchToView('diagram')" title="Diagram view">Diagram</button>
+    </div>
     <button id="dimension-toggle" title="Toggle between 2D and 3D view">3D</button>
     <div id="zoom-presets" title="Quick zoom presets">
       <button id="zoom-overview" class="zoom-btn" title="Zoom out to see entire graph">
@@ -3382,6 +3458,9 @@
       </div>
       <div id="legend-content"></div>
     </div>
+  </div>
+  <div id="diagram-container" class="tree-open hidden">
+    <p>Diagram view coming in Phase 32</p>
   </div>
   <div id="minimap-panel">
     <div id="minimap-header">
