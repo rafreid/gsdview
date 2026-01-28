@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.5 GSD Workflow Diagram — defining requirements
+**Current focus:** v1.5 GSD Workflow Diagram — Phase 30 (Architecture Foundation)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 30 - Architecture Foundation
 Plan: —
-Status: Defining requirements
-Last activity: 2026-01-28 — Milestone v1.5 started
+Status: Ready to plan
+Last activity: 2026-01-28 — Roadmap created for v1.5
 
-Progress: Requirements definition in progress
+Progress: [██░░░░░░░░░░░░░░░░░░] 1/6 phases (17%)
 
 ## Performance Metrics
 
@@ -44,6 +44,10 @@ Progress: Requirements definition in progress
 *v1.4 (Complete):*
 - 4 phases, 5 plans complete
 - Status: Shipped 2026-01-25 (All phases complete)
+
+*v1.5 (In Progress):*
+- 6 phases, 0 plans complete
+- Status: Phase 30 - Ready to plan
 
 ## Accumulated Context
 
@@ -265,6 +269,15 @@ Recent decisions affecting current work:
 - Scene lighting: AmbientLight 0.6 + DirectionalLight 0.8 from (100,100,100) (quick-020)
 - Node metalness 0-0.1, roughness 0.7-0.9 to maintain visual appearance (quick-020)
 
+**v1.5 Architecture Decision (Phase 30):**
+- State management centralized in state-manager.js using Proxy pattern for reactivity
+- Separate DOM containers for graph (Canvas/WebGL) and diagram (SVG)
+- CSS hide/show view switching to preserve state between toggles
+- Explicit mount/unmount lifecycle methods to prevent memory leaks
+- View-specific animation loops with cancel on switch
+- D3.js ^7.9.0 for SVG manipulation and interactivity
+- @dagrejs/dagre ^2.0.0 for hierarchical workflow layout computation
+
 ### Pending Todos
 
 None.
@@ -302,7 +315,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-26
-Stopped at: Completed quick task 022
+Last session: 2026-01-28
+Stopped at: Roadmap created for v1.5
 Resume file: None
-Next action: Run /gsd:new-milestone to define v1.5
+Next action: Run /gsd:plan-phase 30

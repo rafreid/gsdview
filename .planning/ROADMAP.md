@@ -14,9 +14,112 @@ Transform a GSD project's .planning/ folder into an explorable 3D force-directed
 | v1.3 | Enhanced Navigation + Smooth Activity | 18-25 | [v1.3-ROADMAP.md](./milestones/v1.3-ROADMAP.md) |
 | v1.4 | Live Activity Sync | 26-29 | [v1.4-ROADMAP.md](./milestones/v1.4-ROADMAP.md) |
 
-## Current Milestone
+## Current Milestone: v1.5 GSD Workflow Diagram
 
-None active. Run `/gsd:new-milestone` to start v1.5.
+**Goal:** Add a workflow-oriented diagram view that maps the .planning/ folder onto the GSD process model, showing both how the workflow operates and why it's effective through visual indicators.
+
+### Phase 30: Architecture Foundation
+
+**Goal:** Establish clean separation and lifecycle patterns to prevent memory leaks, stale closures, and animation conflicts
+
+**Dependencies:** None (refactors existing code)
+
+**Requirements:** ARCH-01, ARCH-02, ARCH-03, ARCH-04
+
+**Success Criteria:**
+1. User sees graph view working identically after state-manager extraction
+2. Developer can verify all selection state flows through single state-manager.js module
+3. Developer can mount/unmount graph renderer without memory leaks (verified by 20+ view switches in DevTools)
+4. Animation frame IDs properly canceled when switching away from graph view
+
+---
+
+### Phase 31: View Switching
+
+**Goal:** User can toggle between Graph and Diagram views while preserving selection and keyboard shortcuts
+
+**Dependencies:** Phase 30 (requires state-manager.js)
+
+**Requirements:** VIEW-01, VIEW-02, VIEW-03, VIEW-04
+
+**Success Criteria:**
+1. User can click tab controls to switch between Graph and Diagram views
+2. User sees their selected node remains highlighted when switching between views
+3. User presses keyboard shortcuts (1-9 bookmarks, arrow navigation) and correct view responds
+4. Developer sees file watcher updates route to both views without render conflicts
+5. User experiences smooth transitions without layout stuttering or flashing
+
+---
+
+### Phase 32: Diagram Layout + Artifact Visualization
+
+**Goal:** User sees workflow pipeline layout with nested phase artifacts showing completion status
+
+**Dependencies:** Phase 31 (requires view containers)
+
+**Requirements:** DIAG-01, DIAG-02, DIAG-03, DIAG-04, ARTF-01, ARTF-02, ARTF-03, ARTF-04
+
+**Success Criteria:**
+1. User sees 6 GSD stages (Initialize → Discuss → Plan → Execute → Verify → Complete) in left-to-right pipeline
+2. User sees stage containers display with distinct status indicators (green/yellow/gray)
+3. User sees connection lines showing sequential workflow flow
+4. User can scroll/pan horizontally to navigate the full pipeline
+5. User sees artifact blocks (CONTEXT.md, RESEARCH.md, PLANs, SUMMARYs) nested within stage containers
+6. User sees each artifact shows completion status using color coding (green=done, yellow=in-progress, gray=missing)
+7. User sees current stage/phase highlighted based on STATE.md
+
+---
+
+### Phase 33: Interactivity
+
+**Goal:** User can interact with diagram artifacts and sync selection between diagram and graph views
+
+**Dependencies:** Phase 32 (requires diagram rendering)
+
+**Requirements:** INTR-01, INTR-02, INTR-03, INTR-04, INTR-05, INTR-06
+
+**Success Criteria:**
+1. User clicks artifact in diagram and file inspector modal opens showing file contents
+2. User hovers over artifact and sees tooltip with file metadata (name, size, modified date)
+3. User clicks stage header and sees artifact detail expand/collapse smoothly
+4. User clicks artifact in diagram and corresponding node highlights in graph view
+5. User clicks node in graph view and corresponding artifact highlights in diagram view
+6. User presses bookmark shortcuts (1-9) in diagram view and camera flies to bookmarked phase
+
+---
+
+### Phase 34: Real-Time Updates
+
+**Goal:** Diagram view updates automatically when files change, with flash animations showing what changed
+
+**Dependencies:** Phase 33 (requires interactive diagram)
+
+**Requirements:** LIVE-01, LIVE-02, LIVE-03
+
+**Success Criteria:**
+1. User sees file changes detected by existing watcher trigger immediate diagram updates
+2. User sees flash animation highlighting changed artifacts in diagram (matching graph flash colors)
+3. User sees activity feed shows changes from both Graph and Diagram views
+4. User experiences smooth updates even during rapid file changes (debounced layout recalculation)
+
+---
+
+### Phase 35: Advanced Features & Polish
+
+**Goal:** Add workflow efficiency indicators showing why GSD process works (context usage, parallel lanes, commit markers)
+
+**Dependencies:** Phase 34 (requires stable diagram with updates)
+
+**Requirements:** DIAG-05, DIAG-06, ARTF-05
+
+**Success Criteria:**
+1. User sees "Why it works" context usage bars showing utilization percentage per stage
+2. User sees parallel agent lanes visualizing concurrent research/execution work during multi-agent stages
+3. User sees atomic commit markers on executed tasks in Execute stage
+4. User experiences polished diagram with responsive layout adjustments
+5. Developer verifies no performance degradation with advanced features enabled
+
+---
 
 ## Progress Summary
 
@@ -27,8 +130,9 @@ None active. Run `/gsd:new-milestone` to start v1.5.
 | v1.2 | 5 | 7 | Shipped 2026-01-24 |
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
 | v1.4 | 4 | 5 | Shipped 2026-01-25 |
-| **Total** | **29** | **66** | |
+| v1.5 | 6 | - | Planning |
+| **Total** | **35** | **66+** | |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-25 (v1.4 milestone archived)*
+*Last updated: 2026-01-28 (v1.5 milestone roadmap created)*
