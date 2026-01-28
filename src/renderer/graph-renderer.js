@@ -398,7 +398,11 @@ let orbitSpeed = 0.5; // Radians per second (configurable)
 let orbitAngle = 0; // Current orbit angle
 let orbitAnimationId = null; // RAF reference
 let orbitCenterNode = null; // Node being orbited
+let orbitRadius = 0; // Current orbit radius (adjustable via zoom)
 const ORBIT_RADIUS_MULTIPLIER = 1.5; // Distance from node (multiplied by node's current camera distance)
+const ORBIT_ZOOM_SENSITIVITY = 0.002; // How much wheel affects orbit radius
+const ORBIT_MIN_RADIUS = 50; // Minimum zoom distance
+const ORBIT_MAX_RADIUS = 2000; // Maximum zoom distance
 
 // Hook status detection
 let hookStatusTimeout = null;
@@ -1981,7 +1985,7 @@ function startOrbitMode() {
     Math.pow(cameraPos.y - nodePos.y, 2) +
     Math.pow(cameraPos.z - nodePos.z, 2)
   );
-  const orbitRadius = currentDistance * ORBIT_RADIUS_MULTIPLIER;
+  orbitRadius = currentDistance * ORBIT_RADIUS_MULTIPLIER; // Use module-level variable
 
   // Calculate initial angle from current camera position
   orbitAngle = Math.atan2(cameraPos.x - nodePos.x, cameraPos.z - nodePos.z);
@@ -2074,6 +2078,17 @@ function updateOrbitSpeed(value) {
   orbitSpeed = value / 10;
   const label = document.getElementById('orbit-speed-value');
   if (label) label.textContent = value.toFixed(1);
+}
+
+// Handle zoom (mouse wheel) during orbit mode
+function handleOrbitZoom(deltaY) {
+  if (!orbitModeEnabled) return false;
+
+  // Adjust orbit radius based on wheel delta
+  const zoomAmount = deltaY * ORBIT_ZOOM_SENSITIVITY * orbitRadius;
+  orbitRadius = Math.max(ORBIT_MIN_RADIUS, Math.min(ORBIT_MAX_RADIUS, orbitRadius + zoomAmount));
+
+  return true; // Indicate event was handled
 }
 
 // Load orbit speed setting from store
@@ -7167,6 +7182,15 @@ document.getElementById('orbit-speed-slider')?.addEventListener('change', async 
 
 // Load orbit speed setting on startup
 loadOrbitSpeedSetting();
+
+// Orbit zoom (mouse wheel during orbit mode)
+document.getElementById('graph-container')?.addEventListener('wheel', (e) => {
+  if (orbitModeEnabled) {
+    e.preventDefault();
+    e.stopPropagation();
+    handleOrbitZoom(e.deltaY);
+  }
+}, { passive: false });
 
 // Navigation history controls
 document.getElementById('nav-back')?.addEventListener('click', () => {
