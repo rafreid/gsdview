@@ -7705,6 +7705,20 @@ export function mount(containerEl) {
     startMinimapUpdateLoop();
   }
 
+  // Restore selection state if a node was selected before unmount
+  const selectedNodeId = state.selectedNode?.id || state.selectedNode;
+  if (selectedNodeId && Graph) {
+    console.log('[Lifecycle] Restoring selection:', selectedNodeId);
+
+    // Find the node in current graph data
+    const node = state.currentGraphData.nodes.find(n => n.id === selectedNodeId);
+    if (node) {
+      // Re-highlight the node visually
+      // The details panel should already be visible via state
+      highlightNodeInGraph(selectedNodeId);
+    }
+  }
+
   console.log('[Lifecycle] Graph renderer mounted');
 }
 
