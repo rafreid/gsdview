@@ -20,6 +20,9 @@ let pipelineData = null;
 let diagramGroup = null;
 let currentTransform = { x: 0, y: 0, scale: 1 };
 
+// Collapsed stages tracking
+const collapsedStages = new Set();
+
 // Layout constants
 const STAGE_WIDTH = 250;
 const STAGE_HEIGHT = 300;
@@ -158,12 +161,17 @@ function renderStages(g, layout) {
     .attr('stroke-width', 2)
     .attr('rx', 8);
 
-  // Stage header background
+  // Stage header background (clickable for collapse/expand)
   stageGroups.append('rect')
     .attr('width', d => d.width)
     .attr('height', STAGE_HEADER_HEIGHT)
     .attr('fill', d => STAGE_COLORS[d.stage.id] || '#34495E')
-    .attr('rx', 8);
+    .attr('rx', 8)
+    .style('cursor', 'pointer')
+    .on('click', (event, d) => {
+      event.stopPropagation();
+      toggleStageCollapse(d.stage.id);
+    });
 
   // Stage name text
   stageGroups.append('text')
@@ -184,6 +192,17 @@ function renderStages(g, layout) {
     .attr('fill', d => STATUS_COLORS[d.stage.status] || STATUS_COLORS.missing)
     .attr('stroke', 'white')
     .attr('stroke-width', 2);
+
+  // Collapse indicator (chevron)
+  stageGroups.append('text')
+    .attr('class', 'collapse-indicator')
+    .attr('x', d => d.width - 20)
+    .attr('y', STAGE_HEADER_HEIGHT / 2)
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'middle')
+    .attr('fill', 'white')
+    .attr('font-size', '14px')
+    .text(d => collapsedStages.has(d.stage.id) ? '+' : '-');
 
   // Add pulsing highlight for current stage
   stageGroups.filter(d => d.stage.isCurrent)
@@ -316,6 +335,7 @@ function renderArtifacts(stageGroups) {
 
     // Render artifacts (limit to fit in stage)
     const visibleArtifacts = artifacts.slice(0, maxArtifacts);
+    const isCollapsed = collapsedStages.has(stage.id);
 
     const artifactGroups = group.selectAll('.artifact')
       .data(visibleArtifacts)
@@ -364,6 +384,11 @@ function renderArtifacts(stageGroups) {
           tooltip.classList.add('hidden');
         }
       });
+
+    // Apply collapsed state if stage is collapsed
+    if (isCollapsed) {
+      artifactGroups.style('opacity', 0).style('pointer-events', 'none');
+    }
 
     // Artifact background
     artifactGroups.append('rect')
@@ -421,7 +446,8 @@ function renderArtifacts(stageGroups) {
         .attr('text-anchor', 'middle')
         .attr('fill', '#95A5A6')
         .attr('font-size', '11px')
-        .text(`+${artifacts.length - maxArtifacts} more`);
+        .text(`+${artifacts.length - maxArtifacts} more`)
+        .style('opacity', isCollapsed ? 0 : 1);
     }
   });
 }
@@ -478,6 +504,40 @@ function setupPanZoom() {
 
   // Set initial cursor
   svg.style('cursor', 'grab');
+}
+
+/**
+ * Toggle stage collapse/expand
+ */
+function toggleStageCollapse(stageId) {
+  if (collapsedStages.has(stageId)) {
+    collapsedStages.delete(stageId);
+  } else {
+    collapsedStages.add(stageId);
+  }
+
+  // Re-render to reflect collapsed state
+  // Find stage group and update artifact visibility
+  diagramGroup.selectAll('.stage').each(function(d) {
+    if (d.stage.id === stageId) {
+      const group = d3.select(this);
+      const artifacts = group.selectAll('.artifact');
+      const moreText = group.selectAll('text').filter(function() {
+        return this.textContent.includes('+') && this.textContent.includes('more');
+      });
+
+      if (collapsedStages.has(stageId)) {
+        artifacts.style('opacity', 0).style('pointer-events', 'none');
+        moreText.style('opacity', 0);
+      } else {
+        artifacts.style('opacity', 1).style('pointer-events', 'auto');
+        moreText.style('opacity', 1);
+      }
+
+      // Update indicator
+      group.select('.collapse-indicator').text(collapsedStages.has(stageId) ? '+' : '-');
+    }
+  });
 }
 
 /**
