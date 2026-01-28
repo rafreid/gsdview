@@ -26,6 +26,13 @@ Transform a GSD project's .planning/ folder into an explorable 3D force-directed
 
 **Requirements:** ARCH-01, ARCH-02, ARCH-03, ARCH-04
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 30-01-PLAN.md — Create state-manager.js with centralized state
+- [ ] 30-02-PLAN.md — Refactor renderer.js to graph-renderer.js with lifecycle methods
+- [ ] 30-03-PLAN.md — Verification checkpoint
+
 **Success Criteria:**
 1. User sees graph view working identically after state-manager extraction
 2. Developer can verify all selection state flows through single state-manager.js module
@@ -130,9 +137,9 @@ Transform a GSD project's .planning/ folder into an explorable 3D force-directed
 | v1.2 | 5 | 7 | Shipped 2026-01-24 |
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
 | v1.4 | 4 | 5 | Shipped 2026-01-25 |
-| v1.5 | 6 | - | Planning |
-| **Total** | **35** | **66+** | |
+| v1.5 | 6 | 3+ | Planning |
+| **Total** | **35** | **69+** | |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-28 (v1.5 milestone roadmap created)*
+*Last updated: 2026-01-28 (Phase 30 planned)*
