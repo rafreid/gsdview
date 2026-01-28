@@ -848,6 +848,57 @@ function updateTransform() {
 }
 
 /**
+ * Flash artifact with type-appropriate animation
+ * @param {string} artifactPath - Path to the artifact file
+ * @param {string} changeType - Type of change (add, change, unlink)
+ */
+function flashArtifact(artifactPath, changeType) {
+  if (!diagramGroup) return;
+
+  console.log('[DiagramRenderer] Flashing artifact:', artifactPath, changeType);
+
+  // Map chokidar events to animation types
+  let flashClass = 'flashing-modified';
+  if (changeType === 'add') {
+    flashClass = 'flashing-created';
+  } else if (changeType === 'unlink') {
+    flashClass = 'flashing-deleted';
+  }
+
+  // Extract relative path from full path
+  const relativePath = artifactPath.replace(/.*\.planning\//, '');
+
+  // Find matching artifact group(s) by path
+  diagramGroup.selectAll('.artifact').each(function(d) {
+    const artifactRelPath = d.path.replace(/.*\.planning\//, '');
+
+    if (artifactRelPath === relativePath || d.path.includes(relativePath)) {
+      const group = d3.select(this);
+
+      // Remove any existing flash classes
+      group.classed('flashing-created', false)
+           .classed('flashing-modified', false)
+           .classed('flashing-deleted', false);
+
+      // Add new flash class
+      group.classed(flashClass, true);
+
+      // Get flash duration from CSS variable or use default
+      const flashDuration = parseInt(
+        getComputedStyle(document.documentElement).getPropertyValue('--flash-duration') || '2000'
+      );
+
+      // Remove flash class after animation completes
+      setTimeout(() => {
+        group.classed(flashClass, false);
+      }, flashDuration);
+
+      console.log('[DiagramRenderer] Applied flash class:', flashClass, 'to artifact:', d.name);
+    }
+  });
+}
+
+/**
  * Handle file changes when diagram view is active
  * Called from graph-renderer.js file change listener
  */
@@ -887,10 +938,12 @@ export function onFilesChanged(data) {
       // Apply transform to maintain current pan position
       updateTransform();
 
-      // Flash the changed artifact (will be handled in Task 2)
+      // Flash the changed artifact after render completes
       if (lastChangedArtifact && lastChangeType) {
-        // TODO: Task 2 - Call flashArtifact here
-        console.log('[DiagramRenderer] Would flash artifact:', lastChangedArtifact, lastChangeType);
+        // Small delay to ensure DOM is updated
+        setTimeout(() => {
+          flashArtifact(lastChangedArtifact, lastChangeType);
+        }, 50);
       }
     }
 

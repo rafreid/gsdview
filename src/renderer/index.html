@@ -931,6 +931,101 @@
       color: #1a1a2e !important;
     }
 
+    /* Diagram artifact flash animations */
+    @keyframes diagram-flash-created {
+      0% {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 20px rgba(0, 255, 136, 1)) drop-shadow(0 0 30px rgba(0, 255, 136, 0.7));
+      }
+      10% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 5px rgba(0, 255, 136, 0.3));
+      }
+      20% {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 22px rgba(0, 255, 136, 1)) drop-shadow(0 0 32px rgba(0, 255, 136, 0.6));
+      }
+      30% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 5px rgba(0, 255, 136, 0.3));
+      }
+      40% {
+        transform: scale(1.08);
+        filter: drop-shadow(0 0 18px rgba(0, 255, 136, 0.9)) drop-shadow(0 0 28px rgba(0, 255, 136, 0.5));
+      }
+      50% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 5px rgba(0, 255, 136, 0.3));
+      }
+      60% {
+        transform: scale(1.06);
+        filter: drop-shadow(0 0 15px rgba(0, 255, 136, 0.8)) drop-shadow(0 0 25px rgba(0, 255, 136, 0.4));
+      }
+      100% {
+        transform: scale(1);
+        filter: none;
+      }
+    }
+
+    @keyframes diagram-flash-modified {
+      0% {
+        transform: scale(1.08);
+        filter: drop-shadow(0 0 18px rgba(255, 170, 0, 1)) drop-shadow(0 0 28px rgba(255, 170, 0, 0.7));
+      }
+      15% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 5px rgba(255, 170, 0, 0.3));
+      }
+      30% {
+        transform: scale(1.08);
+        filter: drop-shadow(0 0 20px rgba(255, 170, 0, 1)) drop-shadow(0 0 30px rgba(255, 170, 0, 0.6));
+      }
+      45% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 5px rgba(255, 170, 0, 0.3));
+      }
+      60% {
+        transform: scale(1.06);
+        filter: drop-shadow(0 0 16px rgba(255, 170, 0, 0.9)) drop-shadow(0 0 26px rgba(255, 170, 0, 0.5));
+      }
+      100% {
+        transform: scale(1);
+        filter: none;
+      }
+    }
+
+    @keyframes diagram-flash-deleted {
+      0% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 15px rgba(255, 51, 51, 0.9)) drop-shadow(0 0 25px rgba(255, 51, 51, 0.6));
+      }
+      25% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 5px rgba(255, 51, 51, 0.3));
+      }
+      50% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 18px rgba(255, 51, 51, 0.8)) drop-shadow(0 0 28px rgba(255, 51, 51, 0.5));
+      }
+      100% {
+        transform: scale(1);
+        filter: none;
+        opacity: 0.3;
+      }
+    }
+
+    .artifact.flashing-created {
+      animation: diagram-flash-created var(--flash-duration, 2000ms) ease-out;
+    }
+
+    .artifact.flashing-modified {
+      animation: diagram-flash-modified var(--flash-duration, 2000ms) ease-out;
+    }
+
+    .artifact.flashing-deleted {
+      animation: diagram-flash-deleted var(--flash-duration, 2000ms) ease-out;
+    }
+
     .tree-toggle-icon {
       width: 16px;
       height: 16px;
