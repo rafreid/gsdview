@@ -153,6 +153,13 @@ Plans:
 
 **Requirements:** DIAG-05, DIAG-06, ARTF-05
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 35-01-PLAN.md — Context usage bars + responsive layout polish
+- [ ] 35-02-PLAN.md — Parallel agent lanes + atomic commit markers
+- [ ] 35-03-PLAN.md — Verification checkpoint (final v1.5 verification)
+
 **Success Criteria:**
 1. User sees "Why it works" context usage bars showing utilization percentage per stage
 2. User sees parallel agent lanes visualizing concurrent research/execution work during multi-agent stages
@@ -171,9 +178,9 @@ Plans:
 | v1.2 | 5 | 7 | Shipped 2026-01-24 |
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
 | v1.4 | 4 | 5 | Shipped 2026-01-25 |
-| v1.5 | 6 | 11+ | Phase 34 complete |
-| **Total** | **35** | **77+** | |
+| v1.5 | 6 | 14 | Phase 35 planning |
+| **Total** | **35** | **80** | |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-28 (Phase 34 complete)*
+*Last updated: 2026-01-28 (Phase 35 planned)*
