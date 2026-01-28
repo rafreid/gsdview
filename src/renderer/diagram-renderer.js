@@ -92,6 +92,16 @@ export function mount() {
     pipelineData = parsePipelineState(state.selectedProjectPath);
     renderPipeline(diagramGroup, pipelineData);
     setupPanZoom();
+
+    // Flash any artifacts that changed while diagram was unmounted
+    if (lastChangedArtifact && lastChangeType) {
+      setTimeout(() => {
+        flashArtifact(lastChangedArtifact, lastChangeType);
+        // Clear after flashing so we don't flash again on next mount
+        lastChangedArtifact = null;
+        lastChangeType = null;
+      }, 100);
+    }
   } else {
     renderPlaceholder(diagramGroup);
   }
@@ -1230,6 +1240,9 @@ export function onFilesChanged(data) {
         // Small delay to ensure DOM is updated
         setTimeout(() => {
           flashArtifact(lastChangedArtifact, lastChangeType);
+          // Clear after flashing so we don't flash again on next mount
+          lastChangedArtifact = null;
+          lastChangeType = null;
         }, 50);
       }
     }

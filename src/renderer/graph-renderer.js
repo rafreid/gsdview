@@ -5559,10 +5559,11 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
           // In live mode - just update UI to reflect new range
           updateTimelineUI();
         }
-      } else if (state.activeView === 'diagram') {
-        // Route file changes to diagram renderer for real-time updates
-        callDiagramFilesChangedHandler(data);
       }
+
+      // Always route file changes to diagram renderer (regardless of active view)
+      // This ensures diagram gets real-time updates and flash animations work when switching views
+      callDiagramFilesChangedHandler(data);
 
       // Always apply incremental graph update (update data regardless of view)
       applyIncrementalUpdate({
@@ -5628,8 +5629,11 @@ if (window.electronAPI && window.electronAPI.onClaudeOperation) {
       if (followActiveEnabled && changeType !== 'read') {
         flyToNodeSmooth(event.nodeId);
       }
-    } else if (state.activeView === 'diagram' && event.nodeId) {
-      // Route Claude operations to diagram renderer for flash animation
+    }
+
+    // Always route Claude operations to diagram renderer (regardless of active view)
+    // This ensures diagram flash animations work when switching views
+    if (event.nodeId) {
       // Map changeType values to chokidar event names that diagram expects
       let diagramEvent;
       if (changeType === 'created') {
