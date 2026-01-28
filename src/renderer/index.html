@@ -212,6 +212,31 @@
       pointer-events: none;
     }
 
+    /* Agent lanes styles */
+    .agent-lanes {
+      cursor: help;
+    }
+
+    .agent-lane {
+      transition: opacity 0.2s ease;
+    }
+
+    .agent-lane:hover {
+      opacity: 0.9;
+    }
+
+    .agent-lane rect {
+      transition: stroke-width 0.2s ease;
+    }
+
+    .agent-lane:hover rect {
+      stroke-width: 2;
+    }
+
+    .agent-lane text {
+      pointer-events: none;
+    }
+
     .connection {
       transition: stroke-width 0.2s ease;
     }

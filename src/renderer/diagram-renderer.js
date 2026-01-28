@@ -251,6 +251,83 @@ function renderContextBar(stageGroup, contextUsage) {
 }
 
 /**
+ * Get color for agent type
+ */
+function getAgentColor(agentType) {
+  const colors = {
+    researcher: '#9B59B6',    // Purple
+    executor: '#F39C12',      // Orange
+    discusser: '#3498DB'      // Blue
+  };
+  return colors[agentType] || '#95A5A6';
+}
+
+/**
+ * Render parallel agent lanes below context bar
+ */
+function renderAgentLanes(stageGroup, parallelAgents) {
+  // Only render if there are multiple agents
+  if (!parallelAgents || parallelAgents.length <= 1) return;
+
+  const laneY = STAGE_HEADER_HEIGHT + 5 + 8 + 5; // After header + context bar
+  const laneHeight = 24;
+  const lanePadding = 10;
+  const laneWidth = STAGE_WIDTH - (lanePadding * 2);
+
+  // Create agent lanes group
+  const agentLanesGroup = stageGroup.append('g')
+    .attr('class', 'agent-lanes')
+    .attr('transform', `translate(${lanePadding}, ${laneY})`);
+
+  // Calculate width per agent
+  const agentWidth = laneWidth / parallelAgents.length;
+
+  // Render each agent lane
+  parallelAgents.forEach((agent, index) => {
+    const agentX = index * agentWidth;
+    const agentColor = getAgentColor(agent.type);
+
+    // Agent lane group
+    const agentGroup = agentLanesGroup.append('g')
+      .attr('class', 'agent-lane')
+      .attr('transform', `translate(${agentX}, 0)`);
+
+    // Background rect
+    agentGroup.append('rect')
+      .attr('width', agentWidth - 2)
+      .attr('height', laneHeight)
+      .attr('fill', agentColor + '22') // 13% opacity
+      .attr('stroke', agentColor)
+      .attr('stroke-width', 1)
+      .attr('rx', 3);
+
+    // Agent icon
+    agentGroup.append('text')
+      .attr('x', 8)
+      .attr('y', laneHeight / 2)
+      .attr('text-anchor', 'start')
+      .attr('dominant-baseline', 'middle')
+      .attr('font-size', '14px')
+      .text(agent.icon || '👤');
+
+    // Agent label
+    agentGroup.append('text')
+      .attr('x', 28)
+      .attr('y', laneHeight / 2)
+      .attr('text-anchor', 'start')
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', '#ccc')
+      .attr('font-size', '10px')
+      .attr('font-weight', 'bold')
+      .text(agent.label);
+
+    // Tooltip
+    agentGroup.append('title')
+      .text(`${agent.label} (parallel work)`);
+  });
+}
+
+/**
  * Render stage containers with headers and status indicators
  */
 function renderStages(g, layout) {
@@ -320,6 +397,13 @@ function renderStages(g, layout) {
     const group = d3.select(this);
     const contextUsage = d.stage.contextUsage || 0;
     renderContextBar(group, contextUsage);
+  });
+
+  // Render parallel agent lanes
+  stageGroups.each(function(d) {
+    const group = d3.select(this);
+    const parallelAgents = d.stage.parallelAgents || [];
+    renderAgentLanes(group, parallelAgents);
   });
 
   // Add pulsing highlight for current stage
@@ -486,8 +570,13 @@ function renderArtifacts(stageGroups) {
     const group = d3.select(this);
     // Adjust contentY to account for context bar (STAGE_HEADER_HEIGHT + 5px margin + 8px bar + 5px margin)
     const contextBarHeight = 18; // 5 + 8 + 5
-    const contentY = STAGE_HEADER_HEIGHT + contextBarHeight + ARTIFACT_SPACING;
-    const maxArtifacts = Math.floor((STAGE_HEIGHT - STAGE_HEADER_HEIGHT - contextBarHeight - ARTIFACT_SPACING * 2) / (ARTIFACT_HEIGHT + ARTIFACT_SPACING));
+
+    // Account for agent lanes if present (24px height + 5px margin)
+    const parallelAgents = stage.parallelAgents || [];
+    const agentLanesHeight = (parallelAgents.length > 1) ? 24 + 5 : 0;
+
+    const contentY = STAGE_HEADER_HEIGHT + contextBarHeight + agentLanesHeight + ARTIFACT_SPACING;
+    const maxArtifacts = Math.floor((STAGE_HEIGHT - STAGE_HEADER_HEIGHT - contextBarHeight - agentLanesHeight - ARTIFACT_SPACING * 2) / (ARTIFACT_HEIGHT + ARTIFACT_SPACING));
 
     // Render artifacts (limit to fit in stage)
     const visibleArtifacts = artifacts.slice(0, maxArtifacts);
