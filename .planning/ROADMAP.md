@@ -69,7 +69,7 @@ Plans:
 
 ---
 
-### Phase 32: Diagram Layout + Artifact Visualization
+### Phase 32: Diagram Layout + Artifact Visualization ✓
 
 **Goal:** User sees workflow pipeline layout with nested phase artifacts showing completion status
 
@@ -77,20 +77,22 @@ Plans:
 
 **Requirements:** DIAG-01, DIAG-02, DIAG-03, DIAG-04, ARTF-01, ARTF-02, ARTF-03, ARTF-04
 
-**Plans:** 2 plans
+**Plans:** 2 plans ✓
 
 Plans:
-- [ ] 32-01-PLAN.md — Foundation: Dependencies + Parser + Renderer Skeleton
-- [ ] 32-02-PLAN.md — SVG Pipeline Layout + Artifact Blocks
+- [x] 32-01-PLAN.md — Foundation: Dependencies + Parser + Renderer Skeleton
+- [x] 32-02-PLAN.md — SVG Pipeline Layout + Artifact Blocks
 
 **Success Criteria:**
-1. User sees 6 GSD stages (Initialize → Discuss → Plan → Execute → Verify → Complete) in left-to-right pipeline
-2. User sees stage containers display with distinct status indicators (green/yellow/gray)
-3. User sees connection lines showing sequential workflow flow
-4. User can scroll/pan horizontally to navigate the full pipeline
-5. User sees artifact blocks (CONTEXT.md, RESEARCH.md, PLANs, SUMMARYs) nested within stage containers
-6. User sees each artifact shows completion status using color coding (green=done, yellow=in-progress, gray=missing)
-7. User sees current stage/phase highlighted based on STATE.md
+1. ✓ User sees 6 GSD stages (Initialize → Discuss → Plan → Execute → Verify → Complete) in left-to-right pipeline
+2. ✓ User sees stage containers display with distinct status indicators (green/yellow/gray)
+3. ✓ User sees connection lines showing sequential workflow flow
+4. ✓ User can scroll/pan horizontally to navigate the full pipeline
+5. ✓ User sees artifact blocks (CONTEXT.md, RESEARCH.md, PLANs, SUMMARYs) nested within stage containers
+6. ✓ User sees each artifact shows completion status using color coding (green=done, yellow=in-progress, gray=missing)
+7. ✓ User sees current stage/phase highlighted based on STATE.md
+
+**Completed:** 2026-01-28
 
 ---
 
@@ -154,9 +156,9 @@ Plans:
 | v1.2 | 5 | 7 | Shipped 2026-01-24 |
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
 | v1.4 | 4 | 5 | Shipped 2026-01-25 |
-| v1.5 | 6 | 8+ | Phase 32 planned |
+| v1.5 | 6 | 8+ | Phase 32 complete |
 | **Total** | **35** | **74+** | |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-28 (Phase 32 planned)*
+*Last updated: 2026-01-28 (Phase 32 complete)*

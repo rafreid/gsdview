@@ -21,21 +21,21 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 - [x] **VIEW-03**: Keyboard shortcuts route correctly per active view
 - [x] **VIEW-04**: File watcher updates route to both views without race conditions
 
-### Diagram Layout
+### Diagram Layout ✓
 
-- [ ] **DIAG-01**: Pipeline shows 6 GSD stages (Initialize → Discuss → Plan → Execute → Verify → Complete)
-- [ ] **DIAG-02**: Stages display as distinct containers with status indicators
-- [ ] **DIAG-03**: Connection lines show sequential workflow flow
-- [ ] **DIAG-04**: Layout supports horizontal scroll/pan for navigation
+- [x] **DIAG-01**: Pipeline shows 6 GSD stages (Initialize → Discuss → Plan → Execute → Verify → Complete)
+- [x] **DIAG-02**: Stages display as distinct containers with status indicators
+- [x] **DIAG-03**: Connection lines show sequential workflow flow
+- [x] **DIAG-04**: Layout supports horizontal scroll/pan for navigation
 - [ ] **DIAG-05**: "Why it works" context usage bars show utilization per stage
 - [ ] **DIAG-06**: Parallel agent lanes visualize concurrent research/execution work
 
-### Artifact Visualization
+### Artifact Visualization ✓
 
-- [ ] **ARTF-01**: Artifact blocks nest within stage containers (CONTEXT.md, RESEARCH.md, PLANs, SUMMARYs)
-- [ ] **ARTF-02**: Each artifact shows completion status (done/in-progress/missing)
-- [ ] **ARTF-03**: Status colors: green (done), yellow (in-progress), gray (missing)
-- [ ] **ARTF-04**: Current stage/phase highlighted based on STATE.md
+- [x] **ARTF-01**: Artifact blocks nest within stage containers (CONTEXT.md, RESEARCH.md, PLANs, SUMMARYs)
+- [x] **ARTF-02**: Each artifact shows completion status (done/in-progress/missing)
+- [x] **ARTF-03**: Status colors: green (done), yellow (in-progress), gray (missing)
+- [x] **ARTF-04**: Current stage/phase highlighted based on STATE.md
 - [ ] **ARTF-05**: Execute stage shows atomic commit markers on completed tasks
 
 ### Interactivity
@@ -90,16 +90,16 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 | VIEW-02 | Phase 31 | Complete |
 | VIEW-03 | Phase 31 | Complete |
 | VIEW-04 | Phase 31 | Complete |
-| DIAG-01 | Phase 32 | Pending |
-| DIAG-02 | Phase 32 | Pending |
-| DIAG-03 | Phase 32 | Pending |
-| DIAG-04 | Phase 32 | Pending |
+| DIAG-01 | Phase 32 | Complete |
+| DIAG-02 | Phase 32 | Complete |
+| DIAG-03 | Phase 32 | Complete |
+| DIAG-04 | Phase 32 | Complete |
 | DIAG-05 | Phase 35 | Pending |
 | DIAG-06 | Phase 35 | Pending |
-| ARTF-01 | Phase 32 | Pending |
-| ARTF-02 | Phase 32 | Pending |
-| ARTF-03 | Phase 32 | Pending |
-| ARTF-04 | Phase 32 | Pending |
+| ARTF-01 | Phase 32 | Complete |
+| ARTF-02 | Phase 32 | Complete |
+| ARTF-03 | Phase 32 | Complete |
+| ARTF-04 | Phase 32 | Complete |
 | ARTF-05 | Phase 35 | Pending |
 | INTR-01 | Phase 33 | Pending |
 | INTR-02 | Phase 33 | Pending |
@@ -118,4 +118,4 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-01-28*
-*Last updated: 2026-01-28 (Phase 31 requirements complete)*
+*Last updated: 2026-01-28 (Phase 32 requirements complete)*
