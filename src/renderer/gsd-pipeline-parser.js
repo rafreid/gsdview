@@ -25,7 +25,7 @@ export const GSD_STAGES = [
  * Parse GSD project state and extract pipeline data
  *
  * @param {string} projectPath - Absolute path to project root
- * @returns {Object} Pipeline data with stages, currentPhase, and phases
+ * @returns {Object} Pipeline data with stages, currentPhase, phases, and allFiles
  */
 export function parsePipelineState(projectPath) {
   console.log('[GSD Parser] Parsing project:', projectPath);
@@ -37,13 +37,17 @@ export function parsePipelineState(projectPath) {
   const phasesDir = path.join(projectPath, '.planning', 'phases');
   const phases = parsePhases(phasesDir);
 
+  // Collect ALL project files (not just phase artifacts)
+  const allFiles = collectAllProjectFiles(projectPath);
+
   // Build stage summary
-  const stages = buildStagesSummary(phases, currentPhase);
+  const stages = buildStagesSummary(phases, currentPhase, allFiles);
 
   return {
     stages,
     currentPhase,
-    phases
+    phases,
+    allFiles
   };
 }
 
@@ -410,6 +414,68 @@ function extractCommitMarkers(summaryPath) {
 }
 
 /**
+ * Collect ALL project files from .planning and src directories
+ *
+ * @param {string} projectPath - Absolute path to project root
+ * @returns {Array} Array of all file objects
+ */
+function collectAllProjectFiles(projectPath) {
+  const allFiles = [];
+
+  // Helper function to recursively scan directory
+  function scanDirectory(dirPath, sourceType) {
+    if (!fs.existsSync(dirPath)) return;
+
+    try {
+      const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+      for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name);
+
+        // Skip node_modules, .git, and other common ignore patterns
+        if (entry.name === 'node_modules' || entry.name === '.git' ||
+            entry.name === 'dist' || entry.name === 'build' || entry.name === 'coverage') {
+          continue;
+        }
+
+        if (entry.isDirectory()) {
+          // Recursively scan subdirectories
+          scanDirectory(fullPath, sourceType);
+        } else if (entry.isFile()) {
+          // Add file to list
+          const relativePath = path.relative(projectPath, fullPath);
+          const status = getArtifactStatus(fullPath);
+
+          allFiles.push({
+            name: entry.name,
+            path: fullPath,
+            relativePath: relativePath,
+            status,
+            sourceType: sourceType,
+            commits: [] // Could extract commits for SUMMARY files if needed
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[GSD Parser] Error scanning directory:', dirPath, err);
+    }
+  }
+
+  // Scan .planning directory
+  const planningPath = path.join(projectPath, '.planning');
+  scanDirectory(planningPath, 'planning');
+
+  // Scan src directory
+  const srcPath = path.join(projectPath, 'src');
+  scanDirectory(srcPath, 'src');
+
+  // Sort files alphabetically
+  allFiles.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+
+  return allFiles;
+}
+
+/**
  * Collect artifacts from a phase directory
  *
  * @param {string} phaseDir - Path to phase directory
@@ -486,9 +552,10 @@ export function getArtifactStatus(artifactPath) {
  *
  * @param {Array} phases - Array of phase objects
  * @param {Object} currentPhase - Current phase info
+ * @param {Array} allFiles - Array of all project files
  * @returns {Array} Array of stage objects with status
  */
-function buildStagesSummary(phases, currentPhase) {
+function buildStagesSummary(phases, currentPhase, allFiles = []) {
   const stageSummary = GSD_STAGES.map(stage => ({
     id: stage.id,
     name: stage.name,
@@ -528,6 +595,15 @@ function buildStagesSummary(phases, currentPhase) {
           stageAgents[phase.stage].push(agent);
         }
       }
+    }
+  }
+
+  // Add ALL project files to the "Initialize" stage (as a general container)
+  // This makes all files visible in the diagram view
+  if (allFiles && allFiles.length > 0) {
+    const initStageIndex = GSD_STAGES.findIndex(s => s.id === 'initialize');
+    if (initStageIndex !== -1) {
+      stageSummary[initStageIndex].artifacts.push(...allFiles);
     }
   }
 

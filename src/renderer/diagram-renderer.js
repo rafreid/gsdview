@@ -545,10 +545,24 @@ function renderPipeline(g, data) {
  * Get icon for artifact based on file type
  */
 function getArtifactIcon(filename) {
+  // Planning file types
   if (filename.includes('CONTEXT')) return '📋';
   if (filename.includes('RESEARCH')) return '🔬';
   if (filename.includes('PLAN')) return '📝';
   if (filename.includes('SUMMARY')) return '✅';
+
+  // Source code file types
+  if (filename.endsWith('.js')) return '📜';
+  if (filename.endsWith('.ts')) return '📘';
+  if (filename.endsWith('.jsx') || filename.endsWith('.tsx')) return '⚛️';
+  if (filename.endsWith('.html')) return '🌐';
+  if (filename.endsWith('.css') || filename.endsWith('.scss')) return '🎨';
+  if (filename.endsWith('.json')) return '📋';
+  if (filename.endsWith('.md')) return '📝';
+  if (filename.endsWith('.py')) return '🐍';
+  if (filename.endsWith('.java')) return '☕';
+  if (filename.endsWith('.cpp') || filename.endsWith('.c')) return '⚙️';
+
   return '📄';
 }
 
@@ -668,14 +682,28 @@ function renderArtifacts(stageGroups) {
       .on('click', (event, artifact) => {
         event.stopPropagation();
 
+        // Determine sourceType and build appropriate node ID
+        let nodeId, relativePath, sourceType;
+
+        if (artifact.relativePath) {
+          // New format with relativePath (from collectAllProjectFiles)
+          relativePath = artifact.relativePath;
+          sourceType = artifact.sourceType || 'planning';
+          nodeId = `${sourceType}:${relativePath}`;
+        } else {
+          // Old format (from phase artifacts)
+          sourceType = 'planning';
+          relativePath = artifact.path.replace(/.*\.planning\//, '');
+          nodeId = `planning:${relativePath}`;
+        }
+
         // Build node object matching what openFileInspector expects
-        const nodeId = 'planning:' + artifact.path.replace(/.*\.planning\//, '');
         const node = {
           id: nodeId,
           name: artifact.name,
           type: 'file',
-          path: artifact.path.replace(/.*\.planning\//, ''),
-          sourceType: 'planning'
+          path: relativePath,
+          sourceType: sourceType
         };
 
         // Set selection state (triggers cross-view sync)
@@ -802,8 +830,18 @@ function updateArtifactSelection() {
 
   // Update all artifact groups with selection class
   diagramGroup.selectAll('.artifact').each(function(d) {
-    const artifactPath = d.path.replace(/.*\.planning\//, '');
-    const artifactNodeId = 'planning:' + artifactPath;
+    let artifactNodeId;
+
+    if (d.relativePath) {
+      // New format with relativePath
+      const sourceType = d.sourceType || 'planning';
+      artifactNodeId = `${sourceType}:${d.relativePath}`;
+    } else {
+      // Old format (planning files only)
+      const artifactPath = d.path.replace(/.*\.planning\//, '');
+      artifactNodeId = 'planning:' + artifactPath;
+    }
+
     const isSelected = selectedNodeId === artifactNodeId;
 
     const group = d3.select(this);
@@ -844,17 +882,39 @@ function highlightArtifactInDiagram(node) {
 
   if (!node) return;
 
-  // Extract path from node ID (format: 'planning:/phases/XX-name/file.md')
+  // Extract path from node ID (format: 'planning:/phases/XX-name/file.md' or 'src:/path/to/file.js')
   const nodeId = node?.id || node;
-  if (!nodeId || !nodeId.startsWith('planning:')) return;
+  if (!nodeId) return;
 
-  const relativePath = nodeId.replace('planning:', '');
+  // Handle both planning: and src: prefixes
+  let relativePath, sourceType;
+  if (nodeId.startsWith('planning:')) {
+    relativePath = nodeId.replace('planning:', '');
+    sourceType = 'planning';
+  } else if (nodeId.startsWith('src:')) {
+    relativePath = nodeId.replace('src:', '');
+    sourceType = 'src';
+  } else {
+    return; // Unknown prefix
+  }
 
   // Find matching artifact and highlight
   let foundArtifact = null;
   diagramGroup.selectAll('.artifact').each(function(d) {
-    const artifactPath = d.path.replace(/.*\.planning\//, '');
-    if (artifactPath === relativePath || d.path.includes(relativePath)) {
+    let matches = false;
+
+    if (d.relativePath) {
+      // New format - compare relativePath and sourceType
+      matches = (d.relativePath === relativePath || d.relativePath.includes(relativePath)) &&
+                (d.sourceType === sourceType);
+    } else {
+      // Old format - only planning files
+      const artifactPath = d.path.replace(/.*\.planning\//, '');
+      matches = (artifactPath === relativePath || d.path.includes(relativePath)) &&
+                sourceType === 'planning';
+    }
+
+    if (matches) {
       const group = d3.select(this);
       group.classed('selected', true);
 
@@ -1162,14 +1222,32 @@ function flashArtifact(artifactPath, changeType) {
     flashClass = 'flashing-deleted';
   }
 
-  // Extract relative path from full path
-  const relativePath = artifactPath.replace(/.*\.planning\//, '');
+  // Extract relative path from full path - handle both .planning/ and src/
+  let relativePath = artifactPath;
+  if (artifactPath.includes('.planning/')) {
+    relativePath = artifactPath.replace(/.*\.planning\//, '.planning/');
+  } else if (artifactPath.includes('src/')) {
+    relativePath = artifactPath.replace(/.*src\//, 'src/');
+  }
 
   // Find matching artifact group(s) by path
   diagramGroup.selectAll('.artifact').each(function(d) {
-    const artifactRelPath = d.path.replace(/.*\.planning\//, '');
+    let artifactRelPath = d.path;
 
-    if (artifactRelPath === relativePath || d.path.includes(relativePath)) {
+    // Handle both old format (path only) and new format (relativePath property)
+    if (d.relativePath) {
+      artifactRelPath = d.relativePath;
+    } else if (d.path.includes('.planning/')) {
+      artifactRelPath = d.path.replace(/.*\.planning\//, '.planning/');
+    } else if (d.path.includes('src/')) {
+      artifactRelPath = d.path.replace(/.*src\//, 'src/');
+    }
+
+    // Check if paths match (exact match or substring match)
+    if (artifactRelPath === relativePath ||
+        d.path === artifactPath ||
+        d.path.includes(relativePath) ||
+        relativePath.includes(artifactRelPath)) {
       const group = d3.select(this);
 
       // Remove any existing flash classes
@@ -1202,12 +1280,7 @@ function flashArtifact(artifactPath, changeType) {
 export function onFilesChanged(data) {
   console.log('[DiagramRenderer] File changed:', data.event, data.path, 'sourceType:', data.sourceType);
 
-  // Only handle planning file changes (src/ changes don't affect diagram)
-  if (data.sourceType !== 'planning') {
-    console.log('[DiagramRenderer] Skipping non-planning file change');
-    return;
-  }
-
+  // Now we handle BOTH planning and src file changes (since diagram shows all files)
   // Store changed artifact info for flash animation
   lastChangedArtifact = data.path;
   lastChangeType = data.event;
