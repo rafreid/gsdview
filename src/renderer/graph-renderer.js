@@ -1,6 +1,7 @@
 import ForceGraph3D from '3d-force-graph';
 import * as THREE from 'three';
-import { state, subscribe, setState, getState, initializeState, resetViewState, callDiagramFilesChangedHandler } from './state-manager.js';
+import { state, subscribe, setState, getState, initializeState, resetViewState, callDiagramFilesChangedHandler, registerHighlightNodeHandler, registerOpenFileInspectorHandler } from './state-manager.js';
+import { formatFileSize, formatRelativeTime } from './shared-utils.js';
 
 // Color palette by node type (WCAG AA compliant against #1a1a2e background)
 const nodeColors = {
@@ -3597,13 +3598,6 @@ container.addEventListener('mousemove', (e) => {
   tooltip.style.top = e.clientY + 15 + 'px';
 });
 
-// Format file size for display
-export function formatFileSize(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-}
-
 // Format date for display
 function formatDate(date) {
   return new Date(date).toLocaleString();
@@ -5088,24 +5082,6 @@ function renderRecentActivity(filePath) {
   }).join('');
 
   return html;
-}
-
-// Format timestamp as relative time
-export function formatRelativeTime(timestamp) {
-  const diff = Date.now() - timestamp;
-  const seconds = Math.floor(diff / 1000);
-
-  if (seconds < 60) {
-    return 'Just now';
-  } else if (seconds < 3600) {
-    const minutes = Math.floor(seconds / 60);
-    return `${minutes} min ago`;
-  } else if (seconds < 86400) {
-    const hours = Math.floor(seconds / 3600);
-    return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-  } else {
-    return new Date(timestamp).toLocaleDateString();
-  }
 }
 
 // Render related files that import or reference current file
@@ -7832,5 +7808,10 @@ export function getGraph() {
  * @param {string} nodeId - Node ID to highlight
  */
 export { highlightNodeInGraph };
+
+// Register handlers with state-manager to break circular dependencies
+// This allows diagram-renderer to call these functions without importing from graph-renderer
+registerHighlightNodeHandler(highlightNodeInGraph);
+registerOpenFileInspectorHandler(openFileInspector);
 
 console.log('GSD Viewer initialized - select a project folder to visualize');

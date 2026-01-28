@@ -248,7 +248,9 @@ function getDefaultState() {
  * Registry for cross-view handlers to avoid circular imports
  */
 const handlers = {
-  onDiagramFilesChanged: null
+  onDiagramFilesChanged: null,
+  highlightNodeInGraph: null,
+  openFileInspector: null
 };
 
 /**
@@ -269,6 +271,42 @@ function callDiagramFilesChangedHandler(data) {
   }
 }
 
+/**
+ * Register a handler for highlighting nodes in the graph
+ * Called by graph-renderer.js during initialization
+ */
+function registerHighlightNodeHandler(handler) {
+  handlers.highlightNodeInGraph = handler;
+}
+
+/**
+ * Call the registered highlight node handler
+ * Called by diagram-renderer.js to highlight nodes in graph view
+ */
+function callHighlightNodeHandler(nodeId) {
+  if (handlers.highlightNodeInGraph) {
+    handlers.highlightNodeInGraph(nodeId);
+  }
+}
+
+/**
+ * Register a handler for opening the file inspector
+ * Called by graph-renderer.js during initialization
+ */
+function registerOpenFileInspectorHandler(handler) {
+  handlers.openFileInspector = handler;
+}
+
+/**
+ * Call the registered open file inspector handler
+ * Called by diagram-renderer.js to open file inspector
+ */
+function callOpenFileInspectorHandler(node) {
+  if (handlers.openFileInspector) {
+    handlers.openFileInspector(node);
+  }
+}
+
 // ============================================================================
 // EXPORTS
 // ============================================================================
@@ -282,5 +320,9 @@ module.exports = {
   resetViewState,
   getDefaultState,
   registerDiagramFilesChangedHandler,
-  callDiagramFilesChangedHandler
+  callDiagramFilesChangedHandler,
+  registerHighlightNodeHandler,
+  callHighlightNodeHandler,
+  registerOpenFileInspectorHandler,
+  callOpenFileInspectorHandler
 };

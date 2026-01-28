@@ -7,9 +7,9 @@
 
 import * as d3 from 'd3';
 import dagre from '@dagrejs/dagre';
-import { state, subscribe, registerDiagramFilesChangedHandler } from './state-manager.js';
+import { state, subscribe, registerDiagramFilesChangedHandler, callHighlightNodeHandler, callOpenFileInspectorHandler } from './state-manager.js';
 import { parsePipelineState, GSD_STAGES } from './gsd-pipeline-parser.js';
-import { openFileInspector, formatFileSize, formatRelativeTime, highlightNodeInGraph } from './graph-renderer.js';
+import { formatFileSize, formatRelativeTime } from './shared-utils.js';
 
 const fs = window.require('fs');
 const path = window.require('path');
@@ -673,10 +673,10 @@ function renderArtifacts(stageGroups) {
         updateArtifactSelection();
 
         // Highlight in graph view (for when user switches back)
-        highlightNodeInGraph(nodeId);
+        callHighlightNodeHandler(nodeId);
 
         // Open file inspector
-        openFileInspector(node);
+        callOpenFileInspectorHandler(node);
       })
       .on('mouseover', (event, artifact) => {
         const tooltip = document.getElementById('diagram-tooltip');
