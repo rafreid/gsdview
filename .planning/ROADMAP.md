@@ -104,6 +104,12 @@ Plans:
 
 **Requirements:** INTR-01, INTR-02, INTR-03, INTR-04, INTR-05, INTR-06
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 33-01-PLAN.md — Diagram click, hover tooltip, stage expand/collapse
+- [ ] 33-02-PLAN.md — Two-way selection sync and bookmark navigation
+
 **Success Criteria:**
 1. User clicks artifact in diagram and file inspector modal opens showing file contents
 2. User hovers over artifact and sees tooltip with file metadata (name, size, modified date)
@@ -156,9 +162,9 @@ Plans:
 | v1.2 | 5 | 7 | Shipped 2026-01-24 |
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
 | v1.4 | 4 | 5 | Shipped 2026-01-25 |
-| v1.5 | 6 | 8+ | Phase 32 complete |
-| **Total** | **35** | **74+** | |
+| v1.5 | 6 | 10+ | Phase 33 planning |
+| **Total** | **35** | **76+** | |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-28 (Phase 32 complete)*
+*Last updated: 2026-01-28 (Phase 33 planned)*
