@@ -8,6 +8,18 @@ A desktop application that visualizes GSD project structure as an interactive 3D
 
 Make the invisible structure of a GSD project visible and navigable — so users always know where they are, what's connected, and what's blocked.
 
+## Current Milestone: v1.5 GSD Workflow Diagram
+
+**Goal:** Add a workflow-oriented diagram view that maps the `.planning/` folder onto the GSD process model, showing both how the workflow operates and why it's effective through visual indicators.
+
+**Target features:**
+- Flowchart pipeline view (Initialize → Discuss → Plan → Execute → Verify → Complete)
+- Nested phase blocks showing actual project artifacts (CONTEXT.md, RESEARCH.md, PLANs, SUMMARYs)
+- Artifact completion status (done/in-progress/missing) per phase
+- Interactive — click to expand phases, open inspector, sync with graph selection
+- "Why it works" visual indicators: context window usage, parallel agent lanes, atomic commit markers
+- Toggle between Graph view and Diagram view
+
 ## Current State
 
 **Shipped:** v1.4 Live Activity Sync (2026-01-25)
@@ -94,7 +106,19 @@ Claude Code operations now trigger highly visible flash animations synchronized 
 
 ### Active
 
-*Next milestone scope — not yet defined*
+*v1.5 — GSD Workflow Diagram:*
+
+- [ ] Diagram view toggle (switch between Graph and Diagram views)
+- [ ] Workflow pipeline layout (Initialize → Discuss → Plan → Execute → Verify → Complete)
+- [ ] Phase artifact blocks (CONTEXT.md, RESEARCH.md, PLANs, SUMMARYs grouped by phase)
+- [ ] Artifact completion status indicators (done/in-progress/missing)
+- [ ] Click to expand/collapse phase blocks
+- [ ] Click artifact to open file inspector
+- [ ] Sync selection between diagram and graph views
+- [ ] Context window usage visualization (bars showing % utilization)
+- [ ] Parallel agent lanes during research/execute stages
+- [ ] Atomic commit markers on executed tasks
+- [ ] Real-time updates when artifacts change
 
 ### Out of Scope
 
@@ -144,4 +168,4 @@ Claude Code operations now trigger highly visible flash animations synchronized 
 | Limit scope to .planning/ + src/ | Performance and relevance balance | — Pending |
 
 ---
-*Last updated: 2026-01-25 after v1.4 milestone complete*
+*Last updated: 2026-01-28 after v1.5 milestone started*

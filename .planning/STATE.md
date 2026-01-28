@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-01-25)
+See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** None active — run /gsd:new-milestone to start v1.5
+**Current focus:** v1.5 GSD Workflow Diagram — defining requirements
 
 ## Current Position
 
-Phase: —
+Phase: Not started (defining requirements)
 Plan: —
-Status: Ready for next mileston
-Last activity: 2026-01-26 — Completed quick task 022: Simplify node hover tooltip to 2 items
+Status: Defining requirements
+Last activity: 2026-01-28 — Milestone v1.5 started
 
-Progress: No active milestone
+Progress: Requirements definition in progress
 
 ## Performance Metrics
 
