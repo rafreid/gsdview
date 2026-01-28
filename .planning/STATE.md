@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 ## Current Position
 
 Phase: 31 - View Switching
-Plan: 01 of 01
-Status: Complete
-Last activity: 2026-01-28 — Completed 31-01-PLAN.md (View Switching Infrastructure)
+Plan: 02 of 02
+Status: Phase Complete
+Last activity: 2026-01-28 — Completed 31-02-PLAN.md (Selection & Keyboard Routing)
 
-Progress: [████░░░░░░░░░░░░░░░░] 3/6 phases (50%)
+Progress: [█████░░░░░░░░░░░░░░░] 4/6 phases (67%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 70 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 4)
+- Total plans completed: 71 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 5)
 - Average duration: 5min
-- Total execution time: 2 days + 120m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m, v1.5: 12m)
+- Total execution time: 2 days + 125m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m, v1.5: 17m)
 
 **By Milestone:**
 
@@ -46,8 +46,8 @@ Progress: [████░░░░░░░░░░░░░░░░] 3/6 pha
 - Status: Shipped 2026-01-25 (All phases complete)
 
 *v1.5 (In Progress):*
-- 6 phases, 4 plans complete
-- Status: Phase 31 complete, ready for Phase 32
+- 6 phases, 5 plans complete
+- Status: Phase 31 complete (2/2 plans), ready for Phase 32
 
 ## Accumulated Context
 
@@ -291,6 +291,10 @@ Recent decisions affecting current work:
 - diagram-container mirrors all graph-container responsive classes for consistent panel behavior (31-01)
 - unmountGraph() called before hiding to stop animations cleanly (31-01)
 - window.switchToView global function for HTML onclick handlers (31-01)
+- activeView stored in state-manager.js to avoid circular dependencies (31-02)
+- Keyboard handlers check state.activeView !== 'graph' for early return (31-02)
+- File watcher always updates data, conditionally triggers visual effects based on activeView (31-02)
+- Selection restoration uses highlightNodeInGraph() on mount (31-02)
 
 ### Pending Todos
 
@@ -330,6 +334,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Completed 31-01-PLAN.md
+Stopped at: Completed 31-02-PLAN.md
 Resume file: None
 Next action: Plan Phase 32 (Diagram Rendering)
