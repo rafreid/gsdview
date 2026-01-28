@@ -92,6 +92,9 @@ export function mount() {
     }
   });
 
+  // Register keyboard handler for bookmark navigation
+  document.addEventListener('keydown', handleDiagramKeydown);
+
   console.log('[DiagramRenderer] Mounted');
 }
 
@@ -107,6 +110,9 @@ export function unmount() {
     selectionUnsubscribe();
     selectionUnsubscribe = null;
   }
+
+  // Remove keyboard handler
+  document.removeEventListener('keydown', handleDiagramKeydown);
 
   // Clear SVG reference
   svg = null;
@@ -603,6 +609,139 @@ function scrollArtifactIntoView(artifactElement) {
   currentTransform.y = containerHeight / 2 - targetY - ARTIFACT_HEIGHT / 2;
 
   updateTransform();
+}
+
+/**
+ * Handle keyboard events for diagram view
+ */
+function handleDiagramKeydown(e) {
+  // Only handle in diagram view
+  if (state.activeView !== 'diagram') return;
+
+  // Ignore if typing in input
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+  // Handle 1-9 for bookmark navigation
+  const key = parseInt(e.key);
+  if (key >= 1 && key <= 9) {
+    const slot = key - 1;
+    const bookmark = state.bookmarks[slot];
+
+    if (bookmark) {
+      console.log('[Diagram] Jump to bookmark', slot + 1, bookmark);
+
+      // If bookmark has a nodeId, find the phase and scroll to it
+      if (bookmark.nodeId) {
+        navigateToBookmarkedPhase(bookmark);
+      } else if (bookmark.cameraPosition) {
+        // For camera-only bookmarks, just show toast
+        showToast(`Bookmark ${slot + 1}: No artifact selected`, 'info');
+      }
+    } else {
+      showToast(`Bookmark ${slot + 1} is empty`, 'info');
+    }
+  }
+}
+
+/**
+ * Navigate to bookmarked phase in diagram
+ */
+function navigateToBookmarkedPhase(bookmark) {
+  const nodeId = bookmark.nodeId;
+
+  // Parse phase number from node ID (format: 'planning:/phases/XX-name/...')
+  const match = nodeId.match(/phases\/(\d+)-/);
+  if (!match) {
+    showToast('Bookmark not in a phase', 'warning');
+    return;
+  }
+
+  const phaseNumber = parseInt(match[1], 10);
+
+  // Find the stage containing this phase
+  if (!pipelineData || !pipelineData.phases) {
+    showToast('Pipeline data not loaded', 'warning');
+    return;
+  }
+
+  const phase = pipelineData.phases.find(p => p.number === phaseNumber);
+  if (!phase) {
+    showToast(`Phase ${phaseNumber} not found in diagram`, 'warning');
+    return;
+  }
+
+  // Find stage index for this phase
+  const stageIndex = GSD_STAGES.findIndex(s => s.id === phase.stage);
+
+  // Calculate target X position (stages are laid out horizontally)
+  const targetX = stageIndex * (STAGE_WIDTH + STAGE_SPACING);
+
+  // Get container width for centering
+  const container = document.getElementById('diagram-container');
+  const containerWidth = container.clientWidth;
+
+  // Pan to center on stage
+  const newX = containerWidth / 2 - targetX - STAGE_WIDTH / 2;
+
+  // Animate the pan
+  animatePanTo(newX, currentTransform.y);
+
+  // Highlight the artifact
+  highlightArtifactInDiagram({ id: nodeId });
+
+  showToast(`Jumped to Phase ${phaseNumber}`, 'success');
+}
+
+/**
+ * Animate smooth pan to target position
+ */
+function animatePanTo(targetX, targetY) {
+  const startX = currentTransform.x;
+  const startY = currentTransform.y;
+  const duration = 500; // ms
+  const startTime = performance.now();
+
+  function animate(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // Ease-out curve
+    const eased = 1 - Math.pow(1 - progress, 3);
+
+    currentTransform.x = startX + (targetX - startX) * eased;
+    currentTransform.y = startY + (targetY - startY) * eased;
+
+    updateTransform();
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+/**
+ * Show toast notification
+ */
+function showToast(message, type = 'info') {
+  // Remove existing toast if any
+  const existingToast = document.querySelector('.toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+
+  // Create and show new toast
+  const toast = document.createElement('div');
+  toast.className = `toast ${type} visible`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  // Auto-hide after 3 seconds
+  setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
 }
 
 /**
