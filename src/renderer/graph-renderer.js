@@ -195,6 +195,22 @@ const nodeHeatMap = new Map();
 let storedDirectoryData = null;
 
 // ============================================================================
+// Animation Frame Tracking for Cleanup
+// ============================================================================
+
+/**
+ * Registry for all animation frame IDs to enable proper cleanup on unmount
+ * All requestAnimationFrame calls should register their IDs here
+ */
+const animationFrameIds = {
+  heatLoop: null,       // Heat map decay animation loop
+  trailLoop: null,      // Activity trail fade animation loop
+  minimap: null,        // Minimap continuous update loop
+  orbit: null,          // Orbit camera animation loop
+  particles: null       // Particle burst animation loop (self-calling, tracked separately)
+};
+
+// ============================================================================
 // Position Fixing Functions (for smooth incremental graph updates)
 // ============================================================================
 
@@ -716,14 +732,17 @@ function startHeatDecayLoop() {
 
     // Continue loop if there are still heated nodes
     if (nodeHeatMap.size > 0) {
-      heatLoopRafId = requestAnimationFrame(heatLoop);
+      animationFrameIds.heatLoop = requestAnimationFrame(heatLoop);
+      heatLoopRafId = animationFrameIds.heatLoop;
     } else {
       heatLoopRunning = false;
       heatLoopRafId = null;
+      animationFrameIds.heatLoop = null;
     }
   }
 
-  heatLoopRafId = requestAnimationFrame(heatLoop);
+  animationFrameIds.heatLoop = requestAnimationFrame(heatLoop);
+  heatLoopRafId = animationFrameIds.heatLoop;
 }
 
 // Stop heat decay loop (for cleanup)
@@ -974,14 +993,17 @@ function startTrailAnimationLoop() {
 
     // Continue loop if there are still trails
     if (activityTrails.length > 0) {
-      trailLoopRafId = requestAnimationFrame(trailLoop);
+      animationFrameIds.trailLoop = requestAnimationFrame(trailLoop);
+      trailLoopRafId = animationFrameIds.trailLoop;
     } else {
       trailLoopRunning = false;
       trailLoopRafId = null;
+      animationFrameIds.trailLoop = null;
     }
   }
 
-  trailLoopRafId = requestAnimationFrame(trailLoop);
+  animationFrameIds.trailLoop = requestAnimationFrame(trailLoop);
+  trailLoopRafId = animationFrameIds.trailLoop;
 }
 
 // Stop trail animation loop
@@ -2008,10 +2030,12 @@ function startOrbitMode() {
       );
     }
 
-    orbitAnimationId = requestAnimationFrame(orbitLoop);
+    animationFrameIds.orbit = requestAnimationFrame(orbitLoop);
+    orbitAnimationId = animationFrameIds.orbit;
   }
 
-  orbitAnimationId = requestAnimationFrame(orbitLoop);
+  animationFrameIds.orbit = requestAnimationFrame(orbitLoop);
+  orbitAnimationId = animationFrameIds.orbit;
 
   // Update UI
   const toggle = document.getElementById('orbit-toggle');
@@ -7357,7 +7381,8 @@ function renderMinimap() {
 function startMinimapUpdateLoop() {
   function updateLoop() {
     renderMinimap();
-    minimapRafId = requestAnimationFrame(updateLoop);
+    animationFrameIds.minimap = requestAnimationFrame(updateLoop);
+    minimapRafId = animationFrameIds.minimap;
   }
   updateLoop();
 }
@@ -7652,6 +7677,114 @@ function logDebugOperation(event) {
   while (content.children.length > MAX_DEBUG_ENTRIES) {
     content.removeChild(content.lastChild);
   }
+}
+
+// ============================================================================
+// LIFECYCLE METHODS (for view switching and cleanup)
+// ============================================================================
+
+/**
+ * Mount the graph renderer
+ * Starts animation loops and initializes the graph
+ *
+ * @param {HTMLElement} containerEl - Optional container element (defaults to current)
+ */
+export function mount(containerEl) {
+  console.log('[Lifecycle] Mounting graph renderer');
+
+  // Start animation loops that were stopped during unmount
+  if (nodeHeatMap.size > 0 && !heatLoopRunning) {
+    startHeatDecayLoop();
+  }
+
+  if (activityTrails.length > 0 && !trailLoopRunning) {
+    startTrailAnimationLoop();
+  }
+
+  if (!minimapRafId) {
+    startMinimapUpdateLoop();
+  }
+
+  console.log('[Lifecycle] Graph renderer mounted');
+}
+
+/**
+ * Unmount the graph renderer
+ * Cancels all animation frames, clears intervals, and resets view state
+ * Call this before switching to diagram view to prevent memory leaks
+ */
+export function unmount() {
+  console.log('[Lifecycle] Unmounting graph renderer');
+
+  // Cancel all registered animation frames
+  Object.keys(animationFrameIds).forEach(key => {
+    if (animationFrameIds[key]) {
+      cancelAnimationFrame(animationFrameIds[key]);
+      animationFrameIds[key] = null;
+    }
+  });
+
+  // Cancel flash animations
+  flashingNodes.forEach((anim, nodeId) => {
+    if (anim.rafId) {
+      cancelAnimationFrame(anim.rafId);
+    }
+  });
+  flashingNodes.clear();
+
+  // Clear intervals and timeouts
+  if (playbackInterval) {
+    clearInterval(playbackInterval);
+    playbackInterval = null;
+  }
+
+  if (pathPlaybackTimeoutId) {
+    clearTimeout(pathPlaybackTimeoutId);
+    pathPlaybackTimeoutId = null;
+  }
+
+  if (hookStatusTimeout) {
+    clearTimeout(hookStatusTimeout);
+    hookStatusTimeout = null;
+  }
+
+  // Stop specific animation loops
+  if (heatLoopRafId) {
+    cancelAnimationFrame(heatLoopRafId);
+    heatLoopRafId = null;
+    heatLoopRunning = false;
+  }
+
+  if (trailLoopRafId) {
+    cancelAnimationFrame(trailLoopRafId);
+    trailLoopRafId = null;
+    trailLoopRunning = false;
+  }
+
+  if (minimapRafId) {
+    cancelAnimationFrame(minimapRafId);
+    minimapRafId = null;
+  }
+
+  if (orbitAnimationId) {
+    cancelAnimationFrame(orbitAnimationId);
+    orbitAnimationId = null;
+  }
+
+  // Reset view state (clears selection, inspection, etc.)
+  resetViewState();
+
+  console.log('[Lifecycle] Graph renderer unmounted');
+}
+
+/**
+ * Get reference to the ForceGraph3D instance
+ * Useful for external integrations or diagram view to access camera, scene, etc.
+ *
+ * @returns {Object} ForceGraph3D instance
+ */
+export function getGraph() {
+  return Graph;
 }
 
 console.log('GSD Viewer initialized - select a project folder to visualize');
