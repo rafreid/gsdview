@@ -27,8 +27,8 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 - [x] **DIAG-02**: Stages display as distinct containers with status indicators
 - [x] **DIAG-03**: Connection lines show sequential workflow flow
 - [x] **DIAG-04**: Layout supports horizontal scroll/pan for navigation
-- [ ] **DIAG-05**: "Why it works" context usage bars show utilization per stage
-- [ ] **DIAG-06**: Parallel agent lanes visualize concurrent research/execution work
+- [x] **DIAG-05**: "Why it works" context usage bars show utilization per stage
+- [x] **DIAG-06**: Parallel agent lanes visualize concurrent research/execution work
 
 ### Artifact Visualization ✓
 
@@ -36,7 +36,7 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 - [x] **ARTF-02**: Each artifact shows completion status (done/in-progress/missing)
 - [x] **ARTF-03**: Status colors: green (done), yellow (in-progress), gray (missing)
 - [x] **ARTF-04**: Current stage/phase highlighted based on STATE.md
-- [ ] **ARTF-05**: Execute stage shows atomic commit markers on completed tasks
+- [x] **ARTF-05**: Execute stage shows atomic commit markers on completed tasks
 
 ### Interactivity ✓
 
@@ -94,13 +94,13 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 | DIAG-02 | Phase 32 | Complete |
 | DIAG-03 | Phase 32 | Complete |
 | DIAG-04 | Phase 32 | Complete |
-| DIAG-05 | Phase 35 | Pending |
-| DIAG-06 | Phase 35 | Pending |
+| DIAG-05 | Phase 35 | Complete |
+| DIAG-06 | Phase 35 | Complete |
 | ARTF-01 | Phase 32 | Complete |
 | ARTF-02 | Phase 32 | Complete |
 | ARTF-03 | Phase 32 | Complete |
 | ARTF-04 | Phase 32 | Complete |
-| ARTF-05 | Phase 35 | Pending |
+| ARTF-05 | Phase 35 | Complete |
 | INTR-01 | Phase 33 | Complete |
 | INTR-02 | Phase 33 | Complete |
 | INTR-03 | Phase 33 | Complete |
@@ -118,4 +118,4 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-01-28*
-*Last updated: 2026-01-28 (Phase 34 requirements complete)*
+*Last updated: 2026-01-28 (Phase 35 requirements complete - v1.5 COMPLETE)*

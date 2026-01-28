@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.5 GSD Workflow Diagram — Phase 35 (Advanced Features & Polish)
+**Current focus:** v1.5 COMPLETE — Ready for v1.6 planning
 
 ## Current Position
 
 Phase: 35 - Advanced Features & Polish
-Plan: 02 of 03
-Status: In progress
-Last activity: 2026-01-28 — Completed 35-02-PLAN.md
+Plan: 03 of 03
+Status: MILESTONE COMPLETE
+Last activity: 2026-01-28 — v1.5 Milestone Complete
 
-Progress: [█████████░░░░░░░░░░░] 5/6 phases (83%)
+Progress: [████████████████████] 6/6 phases (100%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 79 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 13)
+- Total plans completed: 80 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 14)
 - Average duration: 5min
 - Total execution time: 2 days + 146m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m, v1.5: 38m)
 
@@ -45,9 +45,9 @@ Progress: [█████████░░░░░░░░░░░] 5/6 pha
 - 4 phases, 5 plans complete
 - Status: Shipped 2026-01-25 (All phases complete)
 
-*v1.5 (In Progress):*
-- 6 phases, 13 plans complete
-- Status: Phase 35 in progress (2/3 plans complete)
+*v1.5 (Complete):*
+- 6 phases, 14 plans complete
+- Status: Shipped 2026-01-28 (All phases complete)
 
 ## Accumulated Context
 

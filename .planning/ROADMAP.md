@@ -145,7 +145,7 @@ Plans:
 
 ---
 
-### Phase 35: Advanced Features & Polish
+### Phase 35: Advanced Features & Polish ✓
 
 **Goal:** Add workflow efficiency indicators showing why GSD process works (context usage, parallel lanes, commit markers)
 
@@ -153,19 +153,21 @@ Plans:
 
 **Requirements:** DIAG-05, DIAG-06, ARTF-05
 
-**Plans:** 3 plans
+**Plans:** 3 plans ✓
 
 Plans:
-- [ ] 35-01-PLAN.md — Context usage bars + responsive layout polish
-- [ ] 35-02-PLAN.md — Parallel agent lanes + atomic commit markers
-- [ ] 35-03-PLAN.md — Verification checkpoint (final v1.5 verification)
+- [x] 35-01-PLAN.md — Context usage bars + responsive layout polish
+- [x] 35-02-PLAN.md — Parallel agent lanes + atomic commit markers
+- [x] 35-03-PLAN.md — Verification checkpoint (final v1.5 verification)
 
 **Success Criteria:**
-1. User sees "Why it works" context usage bars showing utilization percentage per stage
-2. User sees parallel agent lanes visualizing concurrent research/execution work during multi-agent stages
-3. User sees atomic commit markers on executed tasks in Execute stage
-4. User experiences polished diagram with responsive layout adjustments
-5. Developer verifies no performance degradation with advanced features enabled
+1. ✓ User sees "Why it works" context usage bars showing utilization percentage per stage
+2. ✓ User sees parallel agent lanes visualizing concurrent research/execution work during multi-agent stages
+3. ✓ User sees atomic commit markers on executed tasks in Execute stage
+4. ✓ User experiences polished diagram with responsive layout adjustments
+5. ✓ Developer verifies no performance degradation with advanced features enabled
+
+**Completed:** 2026-01-28
 
 ---
 
@@ -178,9 +180,9 @@ Plans:
 | v1.2 | 5 | 7 | Shipped 2026-01-24 |
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
 | v1.4 | 4 | 5 | Shipped 2026-01-25 |
-| v1.5 | 6 | 14 | Phase 35 planning |
+| v1.5 | 6 | 14 | Shipped 2026-01-28 |
 | **Total** | **35** | **80** | |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-28 (Phase 35 planned)*
+*Last updated: 2026-01-28 (v1.5 MILESTONE COMPLETE)*
