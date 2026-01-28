@@ -5389,6 +5389,9 @@ document.querySelector('#section-structure .section-content')?.addEventListener(
 
 // Close modal on Escape key (also closes details panel)
 document.addEventListener('keydown', (e) => {
+  // Only handle in graph view
+  if (state.activeView !== 'graph') return;
+
   if (e.key === 'Escape') {
     const modal = document.getElementById('file-inspector-modal');
     const searchContainer = document.getElementById('modal-search-container');
@@ -5410,6 +5413,9 @@ document.addEventListener('keydown', (e) => {
 
 // Ctrl+F opens search within modal
 document.addEventListener('keydown', (e) => {
+  // Only handle in graph view
+  if (state.activeView !== 'graph') return;
+
   if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
     const modal = document.getElementById('file-inspector-modal');
     if (modal && !modal.classList.contains('hidden')) {
@@ -5421,6 +5427,9 @@ document.addEventListener('keydown', (e) => {
 
 // Keyboard shortcuts for navigation (Alt+Left/Right)
 document.addEventListener('keydown', (e) => {
+  // Only handle in graph view
+  if (state.activeView !== 'graph') return;
+
   // Alt+Left = Back
   if (e.altKey && e.key === 'ArrowLeft') {
     e.preventDefault();
@@ -5435,6 +5444,9 @@ document.addEventListener('keydown', (e) => {
 
 // Bookmark keyboard shortcuts (1-9 keys)
 document.addEventListener('keydown', (e) => {
+  // Only handle in graph view
+  if (state.activeView !== 'graph') return;
+
   // Ignore if typing in input or if modal is open
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   if (document.getElementById('file-inspector-modal')?.classList.contains('visible')) return;
@@ -5459,6 +5471,9 @@ document.addEventListener('keydown', (e) => {
 
 // P key to toggle path playback
 document.addEventListener('keydown', (e) => {
+  // Only handle in graph view
+  if (state.activeView !== 'graph') return;
+
   // Ignore if typing in input or if modal is open
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   if (document.getElementById('file-inspector-modal')?.classList.contains('visible')) return;

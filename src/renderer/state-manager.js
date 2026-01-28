@@ -26,6 +26,7 @@ const DEFAULT_STATE = {
 
   // View state
   is3D: true,
+  activeView: 'graph',  // Current view: 'graph' or 'diagram'
 
   // Activity feed state
   activityEntries: [],
@@ -71,6 +72,7 @@ const rawState = {
 
   // View state
   is3D: true,
+  activeView: 'graph',  // Current view: 'graph' or 'diagram'
 
   // Activity feed state
   activityEntries: [],

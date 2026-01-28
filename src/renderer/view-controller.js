@@ -8,15 +8,12 @@
 import { mount as mountGraph, unmount as unmountGraph } from './graph-renderer.js';
 import { state, setState } from './state-manager.js';
 
-// Current active view: 'graph' or 'diagram'
-let activeView = 'graph';
-
 /**
  * Get the currently active view
  * @returns {'graph' | 'diagram'}
  */
 export function getActiveView() {
-  return activeView;
+  return state.activeView;
 }
 
 /**
@@ -24,12 +21,12 @@ export function getActiveView() {
  * @param {'graph' | 'diagram'} viewName
  */
 export function switchToView(viewName) {
-  if (viewName === activeView) {
+  if (viewName === state.activeView) {
     console.log(`[ViewCtrl] Already on ${viewName} view`);
     return;
   }
 
-  console.log(`[ViewCtrl] Switching from ${activeView} to ${viewName}`);
+  console.log(`[ViewCtrl] Switching from ${state.activeView} to ${viewName}`);
 
   const graphContainer = document.getElementById('graph-container');
   const diagramContainer = document.getElementById('diagram-container');
@@ -68,7 +65,7 @@ export function switchToView(viewName) {
     console.log('[ViewCtrl] Graph view mounted');
   }
 
-  activeView = viewName;
+  state.activeView = viewName;
 }
 
 /**
@@ -77,7 +74,7 @@ export function switchToView(viewName) {
  */
 export function initViewSwitching() {
   // Ensure graph is the default active view
-  activeView = 'graph';
+  state.activeView = 'graph';
 
   // Make switchToView available globally for onclick handlers
   window.switchToView = switchToView;
