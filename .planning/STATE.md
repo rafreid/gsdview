@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 ## Current Position
 
 Phase: 35 - Advanced Features & Polish
-Plan: 01 of 03
+Plan: 02 of 03
 Status: In progress
-Last activity: 2026-01-28 — Completed 35-01-PLAN.md
+Last activity: 2026-01-28 — Completed 35-02-PLAN.md
 
 Progress: [█████████░░░░░░░░░░░] 5/6 phases (83%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 78 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 12)
+- Total plans completed: 79 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 13)
 - Average duration: 5min
-- Total execution time: 2 days + 143m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m, v1.5: 35m)
+- Total execution time: 2 days + 146m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m, v1.5: 38m)
 
 **By Milestone:**
 
@@ -46,8 +46,8 @@ Progress: [█████████░░░░░░░░░░░] 5/6 pha
 - Status: Shipped 2026-01-25 (All phases complete)
 
 *v1.5 (In Progress):*
-- 6 phases, 12 plans complete
-- Status: Phase 35 in progress (1/3 plans complete)
+- 6 phases, 13 plans complete
+- Status: Phase 35 in progress (2/3 plans complete)
 
 ## Accumulated Context
 
@@ -329,6 +329,12 @@ Recent decisions affecting current work:
 - Context bar color thresholds: 30%/50%/70% for green/yellow/orange/red transitions (35-01)
 - Context bars positioned 5px below stage header, 8px height, 10px horizontal padding (35-01)
 - Window resize handler re-centers diagram with 300ms D3 transition (35-01)
+- Parallel agent detection: CONTEXT+RESEARCH for discuss stage, wave assignments for execute stage (35-02)
+- Agent color scheme: researcher=purple, executor=orange, discusser=blue (35-02)
+- Agent lanes render below context bar with icon, label, and type-specific color (35-02)
+- Commit markers on SUMMARY artifacts: green checkmark with red count badge for multiple commits (35-02)
+- extractCommitMarkers() parses commits from frontmatter and body sections of SUMMARY files (35-02)
+- Dynamic Y offset calculation accounts for agent lanes (24px + 5px margin) when present (35-02)
 
 ### Pending Todos
 
@@ -367,7 +373,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-28 19:46:23 UTC
-Stopped at: Completed 35-01-PLAN.md (Phase 35 Plan 01 complete)
+Last session: 2026-01-28 19:52:13 UTC
+Stopped at: Completed 35-02-PLAN.md (Phase 35 Plan 02 complete)
 Resume file: None
-Next action: Continue Phase 35 (2 more plans remaining)
+Next action: Continue Phase 35 (1 more plan remaining)
