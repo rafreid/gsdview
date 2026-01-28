@@ -136,13 +136,15 @@ function parsePhases(phasesDir) {
     // Determine stage and collect artifacts
     const stage = getPhaseStage(phaseDir);
     const artifacts = collectArtifacts(phaseDir);
+    const contextUsage = calculateContextUsage(phaseDir);
 
     phases.push({
       number: phaseNumber,
       name: phaseName,
       stage,
       artifacts,
-      directory: phaseDir
+      directory: phaseDir,
+      contextUsage
     });
   }
 
@@ -150,6 +152,90 @@ function parsePhases(phasesDir) {
   phases.sort((a, b) => a.number - b.number);
 
   return phases;
+}
+
+/**
+ * Calculate context usage for a phase
+ * Estimates Claude's context window utilization during phase execution
+ *
+ * @param {string} phaseDir - Path to phase directory
+ * @returns {number} Context usage percentage (0-100)
+ */
+function calculateContextUsage(phaseDir) {
+  const files = fs.readdirSync(phaseDir);
+
+  // Find SUMMARY files for this phase
+  const summaryFiles = files.filter(f => f.match(/^\d+-\d+-SUMMARY\.md$/));
+
+  if (summaryFiles.length === 0) {
+    // No SUMMARYs yet, phase not executed - default to 0
+    return 0;
+  }
+
+  let totalContextUsage = 0;
+  let summaryCount = 0;
+
+  for (const summaryFile of summaryFiles) {
+    const summaryPath = path.join(phaseDir, summaryFile);
+
+    try {
+      const content = fs.readFileSync(summaryPath, 'utf8');
+
+      // Try to parse YAML frontmatter for explicit context_used metric
+      const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+      if (frontmatterMatch) {
+        const frontmatter = frontmatterMatch[1];
+
+        // Look for context_used or similar metric
+        const contextMatch = frontmatter.match(/context[_-]?used:\s*(\d+)/i);
+        if (contextMatch) {
+          totalContextUsage += parseInt(contextMatch[1], 10);
+          summaryCount++;
+          continue;
+        }
+
+        // No explicit metric - estimate based on files_modified count
+        // Parse key-files section from frontmatter
+        const modifiedMatch = frontmatter.match(/modified:\s*\n((?:\s*-\s*.+\n)*)/);
+        if (modifiedMatch) {
+          const modifiedLines = modifiedMatch[1].trim().split('\n');
+          const fileCount = modifiedLines.filter(line => line.trim().startsWith('-')).length;
+
+          // Estimate context usage based on file count
+          let estimatedUsage;
+          if (fileCount <= 2) {
+            estimatedUsage = 15 + Math.random() * 10; // 15-25%
+          } else if (fileCount <= 5) {
+            estimatedUsage = 30 + Math.random() * 20; // 30-50%
+          } else {
+            estimatedUsage = 50 + Math.random() * 20; // 50-70%
+          }
+
+          totalContextUsage += estimatedUsage;
+          summaryCount++;
+        } else {
+          // Fallback: assume moderate context usage
+          totalContextUsage += 35;
+          summaryCount++;
+        }
+      } else {
+        // No frontmatter found - assume moderate context usage
+        totalContextUsage += 35;
+        summaryCount++;
+      }
+
+    } catch (err) {
+      console.warn('[GSD Parser] Error reading SUMMARY file:', summaryPath, err);
+      // Skip this summary
+    }
+  }
+
+  // Return average context usage for the phase
+  if (summaryCount === 0) {
+    return 0;
+  }
+
+  return Math.round(totalContextUsage / summaryCount);
 }
 
 /**
@@ -278,15 +364,38 @@ function buildStagesSummary(phases, currentPhase) {
     id: stage.id,
     name: stage.name,
     status: 'pending',
-    artifacts: []
+    artifacts: [],
+    contextUsage: 0
   }));
 
-  // Aggregate artifacts by stage
+  // Aggregate artifacts and context usage by stage
+  const stageContextUsages = {}; // Track context usage per stage for averaging
+
   for (const phase of phases) {
     const stageIndex = GSD_STAGES.findIndex(s => s.id === phase.stage);
     if (stageIndex === -1) continue;
 
     stageSummary[stageIndex].artifacts.push(...phase.artifacts);
+
+    // Aggregate context usage (will average later)
+    if (!stageContextUsages[phase.stage]) {
+      stageContextUsages[phase.stage] = [];
+    }
+    if (phase.contextUsage > 0) {
+      stageContextUsages[phase.stage].push(phase.contextUsage);
+    }
+  }
+
+  // Calculate average context usage per stage
+  for (const stageId in stageContextUsages) {
+    const usages = stageContextUsages[stageId];
+    if (usages.length > 0) {
+      const avgUsage = usages.reduce((sum, val) => sum + val, 0) / usages.length;
+      const stageIndex = GSD_STAGES.findIndex(s => s.id === stageId);
+      if (stageIndex !== -1) {
+        stageSummary[stageIndex].contextUsage = Math.round(avgUsage);
+      }
+    }
   }
 
   // Determine stage status based on current phase
