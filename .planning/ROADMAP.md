@@ -77,6 +77,12 @@ Plans:
 
 **Requirements:** DIAG-01, DIAG-02, DIAG-03, DIAG-04, ARTF-01, ARTF-02, ARTF-03, ARTF-04
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 32-01-PLAN.md — Foundation: Dependencies + Parser + Renderer Skeleton
+- [ ] 32-02-PLAN.md — SVG Pipeline Layout + Artifact Blocks
+
 **Success Criteria:**
 1. User sees 6 GSD stages (Initialize → Discuss → Plan → Execute → Verify → Complete) in left-to-right pipeline
 2. User sees stage containers display with distinct status indicators (green/yellow/gray)
@@ -148,9 +154,9 @@ Plans:
 | v1.2 | 5 | 7 | Shipped 2026-01-24 |
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
 | v1.4 | 4 | 5 | Shipped 2026-01-25 |
-| v1.5 | 6 | 6+ | Phase 31 ✓ |
-| **Total** | **35** | **72+** | |
+| v1.5 | 6 | 8+ | Phase 32 planned |
+| **Total** | **35** | **74+** | |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-28 (Phase 31 complete)*
+*Last updated: 2026-01-28 (Phase 32 planned)*
