@@ -337,6 +337,32 @@ function renderArtifacts(stageGroups) {
           sourceType: 'planning'
         };
         openFileInspector(node);
+      })
+      .on('mouseover', (event, artifact) => {
+        const tooltip = document.getElementById('diagram-tooltip');
+        if (!tooltip) return;
+
+        // Get file stats
+        const stats = fs.existsSync(artifact.path) ? fs.statSync(artifact.path) : null;
+
+        const lines = [];
+        lines.push(`<strong>${artifact.name}</strong>`);
+        if (stats) {
+          lines.push(`Size: ${formatFileSize(stats.size)}`);
+          lines.push(`Modified: ${formatRelativeTime(stats.mtime.getTime())}`);
+        }
+        lines.push(`Status: ${artifact.status}`);
+
+        tooltip.innerHTML = lines.join('<br>');
+        tooltip.classList.remove('hidden');
+        tooltip.classList.add('visible');
+      })
+      .on('mouseout', () => {
+        const tooltip = document.getElementById('diagram-tooltip');
+        if (tooltip) {
+          tooltip.classList.remove('visible');
+          tooltip.classList.add('hidden');
+        }
       });
 
     // Artifact background
@@ -426,6 +452,14 @@ function setupPanZoom() {
   });
 
   svg.on('mousemove', (event) => {
+    // Position tooltip if visible
+    const tooltip = document.getElementById('diagram-tooltip');
+    if (tooltip && tooltip.classList.contains('visible')) {
+      tooltip.style.left = event.clientX + 15 + 'px';
+      tooltip.style.top = event.clientY + 15 + 'px';
+    }
+
+    // Handle panning
     if (!isDragging) return;
     currentTransform.x = event.clientX - dragStart.x;
     currentTransform.y = event.clientY - dragStart.y;
