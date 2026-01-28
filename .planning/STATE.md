@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.5 GSD Workflow Diagram — Phase 31 (View Switching)
+**Current focus:** v1.5 GSD Workflow Diagram — Phase 32 (Diagram Layout)
 
 ## Current Position
 
-Phase: 31 - View Switching
-Plan: 02 of 02
-Status: Phase Complete
-Last activity: 2026-01-28 — Completed 31-02-PLAN.md (Selection & Keyboard Routing)
+Phase: 32 - Diagram Layout
+Plan: 01 of 03
+Status: In Progress
+Last activity: 2026-01-28 — Completed 32-01-PLAN.md (Diagram Foundation)
 
-Progress: [█████░░░░░░░░░░░░░░░] 4/6 phases (67%)
+Progress: [█████░░░░░░░░░░░░░░░] 5/6 phases (83%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 71 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 5)
+- Total plans completed: 72 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 6)
 - Average duration: 5min
-- Total execution time: 2 days + 125m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m, v1.5: 17m)
+- Total execution time: 2 days + 128m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m, v1.5: 20m)
 
 **By Milestone:**
 
@@ -46,8 +46,8 @@ Progress: [█████░░░░░░░░░░░░░░░] 4/6 pha
 - Status: Shipped 2026-01-25 (All phases complete)
 
 *v1.5 (In Progress):*
-- 6 phases, 5 plans complete
-- Status: Phase 31 complete (2/2 plans), ready for Phase 32
+- 6 phases, 6 plans complete
+- Status: Phase 32 in progress (1/3 plans), diagram foundation ready
 
 ## Accumulated Context
 
@@ -295,6 +295,10 @@ Recent decisions affecting current work:
 - Keyboard handlers check state.activeView !== 'graph' for early return (31-02)
 - File watcher always updates data, conditionally triggers visual effects based on activeView (31-02)
 - Selection restoration uses highlightNodeInGraph() on mount (31-02)
+- Use window.require for Node.js APIs (fs/path) in Electron renderer with nodeIntegration (32-01)
+- GSD pipeline parser scans .planning/phases/ to determine workflow stage per phase (32-01)
+- Artifact status by file size: >50 bytes = done, <50 bytes = in-progress (32-01)
+- Diagram renderer creates SVG container with D3.js, mirrors graph-renderer lifecycle (32-01)
 
 ### Pending Todos
 
@@ -334,6 +338,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Completed 31-02-PLAN.md
+Stopped at: Completed 32-01-PLAN.md
 Resume file: None
-Next action: Plan Phase 32 (Diagram Rendering)
+Next action: Execute 32-02-PLAN.md (Diagram Rendering)
