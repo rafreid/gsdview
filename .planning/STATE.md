@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.5 GSD Workflow Diagram — Phase 30 (Architecture Foundation)
+**Current focus:** v1.5 GSD Workflow Diagram — Phase 31 (View Switching)
 
 ## Current Position
 
-Phase: 30 - Architecture Foundation ✓
-Plan: 03 of 03
+Phase: 31 - View Switching
+Plan: 01 of 01
 Status: Complete
-Last activity: 2026-01-28 — Phase 30 complete (Architecture Foundation)
+Last activity: 2026-01-28 — Completed 31-01-PLAN.md (View Switching Infrastructure)
 
-Progress: [████░░░░░░░░░░░░░░░░] 2/6 phases (33%)
+Progress: [████░░░░░░░░░░░░░░░░] 3/6 phases (50%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 69 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 3)
+- Total plans completed: 70 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 4)
 - Average duration: 5min
-- Total execution time: 2 days + 117m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m, v1.5: 9m)
+- Total execution time: 2 days + 120m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m, v1.5: 12m)
 
 **By Milestone:**
 
@@ -46,8 +46,8 @@ Progress: [████░░░░░░░░░░░░░░░░] 2/6 pha
 - Status: Shipped 2026-01-25 (All phases complete)
 
 *v1.5 (In Progress):*
-- 6 phases, 3 plans complete
-- Status: Phase 30 complete, ready for Phase 31
+- 6 phases, 4 plans complete
+- Status: Phase 31 complete, ready for Phase 32
 
 ## Accumulated Context
 
@@ -287,6 +287,10 @@ Recent decisions affecting current work:
 - View-specific animation loops with cancel on switch
 - D3.js ^7.9.0 for SVG manipulation and interactivity
 - @dagrejs/dagre ^2.0.0 for hierarchical workflow layout computation
+- Tab controls placed after refresh button with teal border-bottom active indicator (31-01)
+- diagram-container mirrors all graph-container responsive classes for consistent panel behavior (31-01)
+- unmountGraph() called before hiding to stop animations cleanly (31-01)
+- window.switchToView global function for HTML onclick handlers (31-01)
 
 ### Pending Todos
 
@@ -326,6 +330,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Phase 30 complete
+Stopped at: Completed 31-01-PLAN.md
 Resume file: None
-Next action: Plan Phase 31 (View Switching)
+Next action: Plan Phase 32 (Diagram Rendering)
