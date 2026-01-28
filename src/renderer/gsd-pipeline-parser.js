@@ -288,6 +288,128 @@ export function getPhaseStage(phaseDir) {
 }
 
 /**
+ * Detect parallel agents working in a phase
+ *
+ * @param {string} phaseDir - Path to phase directory
+ * @param {string} stageId - Stage ID (discuss, execute, etc.)
+ * @returns {Array} Array of agent objects with type and label
+ */
+function detectParallelAgents(phaseDir, stageId) {
+  const agents = [];
+
+  if (stageId === 'discuss') {
+    // Check for both CONTEXT.md and RESEARCH.md
+    const hasContext = fs.existsSync(path.join(phaseDir, 'CONTEXT.md'));
+    const hasResearch = fs.existsSync(path.join(phaseDir, 'RESEARCH.md'));
+
+    if (hasContext && hasResearch) {
+      agents.push(
+        { type: 'discusser', label: 'Discusser', icon: '💬' },
+        { type: 'researcher', label: 'Researcher', icon: '🔬' }
+      );
+    }
+  } else if (stageId === 'execute') {
+    // Check PLAN files for wave assignments
+    const files = fs.readdirSync(phaseDir);
+    const planFiles = files.filter(f => f.match(/^\d+-\d+-PLAN\.md$/));
+
+    const waves = new Set();
+
+    for (const planFile of planFiles) {
+      const planPath = path.join(phaseDir, planFile);
+      try {
+        const content = fs.readFileSync(planPath, 'utf8');
+        const frontmatter = content.match(/^---\n([\s\S]*?)\n---/);
+
+        if (frontmatter) {
+          const waveMatch = frontmatter[1].match(/wave:\s*(\d+)/);
+          if (waveMatch) {
+            waves.add(parseInt(waveMatch[1], 10));
+          }
+        }
+      } catch (err) {
+        console.warn('[GSD Parser] Error reading PLAN file for waves:', planPath, err);
+      }
+    }
+
+    // If multiple waves detected, there was parallel execution
+    if (waves.size > 1) {
+      const waveCount = waves.size;
+      for (let i = 0; i < waveCount; i++) {
+        agents.push({ type: 'executor', label: `Executor ${i + 1}`, icon: '⚡' });
+      }
+    }
+  }
+
+  return agents;
+}
+
+/**
+ * Extract commit markers from SUMMARY file
+ *
+ * @param {string} summaryPath - Path to SUMMARY.md file
+ * @returns {Array} Array of commit objects with hash and description
+ */
+function extractCommitMarkers(summaryPath) {
+  const commits = [];
+
+  try {
+    const content = fs.readFileSync(summaryPath, 'utf8');
+
+    // Look for commits in frontmatter
+    const frontmatter = content.match(/^---\n([\s\S]*?)\n---/);
+    if (frontmatter) {
+      // Try to find commits in key-files section
+      const commitMatch = frontmatter[1].match(/commits:\s*\n((?:\s*-\s*.+\n)*)/);
+      if (commitMatch) {
+        const commitLines = commitMatch[1].trim().split('\n');
+        for (const line of commitLines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('-')) {
+            const commit = trimmed.replace(/^-\s*/, '').trim();
+            // Extract hash and description (format: "abc1234: description")
+            const hashMatch = commit.match(/^([a-f0-9]{7,}):?\s*(.*)$/i);
+            if (hashMatch) {
+              commits.push({
+                hash: hashMatch[1],
+                description: hashMatch[2] || ''
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // Also look for commits in body (common format: "**Commits:**" section)
+    const commitsSection = content.match(/\*\*Commits?:\*\*\s*\n([\s\S]*?)(?=\n\n|\n#|$)/i);
+    if (commitsSection) {
+      const lines = commitsSection[1].trim().split('\n');
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('-')) {
+          const commit = trimmed.replace(/^-\s*/, '').trim();
+          const hashMatch = commit.match(/^([a-f0-9]{7,}):?\s*(.*)$/i);
+          if (hashMatch) {
+            // Avoid duplicates
+            if (!commits.some(c => c.hash === hashMatch[1])) {
+              commits.push({
+                hash: hashMatch[1],
+                description: hashMatch[2] || ''
+              });
+            }
+          }
+        }
+      }
+    }
+
+  } catch (err) {
+    console.warn('[GSD Parser] Error reading SUMMARY file for commits:', summaryPath, err);
+  }
+
+  return commits;
+}
+
+/**
  * Collect artifacts from a phase directory
  *
  * @param {string} phaseDir - Path to phase directory
@@ -304,10 +426,17 @@ function collectArtifacts(phaseDir) {
     const artifactPath = path.join(phaseDir, file);
     const status = getArtifactStatus(artifactPath);
 
+    // Extract commit markers for SUMMARY files
+    let commits = [];
+    if (file.match(/^\d+-\d+-SUMMARY\.md$/)) {
+      commits = extractCommitMarkers(artifactPath);
+    }
+
     artifacts.push({
       name: file,
       path: artifactPath,
-      status
+      status,
+      commits
     });
   }
 
@@ -365,11 +494,13 @@ function buildStagesSummary(phases, currentPhase) {
     name: stage.name,
     status: 'pending',
     artifacts: [],
-    contextUsage: 0
+    contextUsage: 0,
+    parallelAgents: []
   }));
 
-  // Aggregate artifacts and context usage by stage
+  // Aggregate artifacts, context usage, and parallel agents by stage
   const stageContextUsages = {}; // Track context usage per stage for averaging
+  const stageAgents = {}; // Track parallel agents by stage
 
   for (const phase of phases) {
     const stageIndex = GSD_STAGES.findIndex(s => s.id === phase.stage);
@@ -384,6 +515,20 @@ function buildStagesSummary(phases, currentPhase) {
     if (phase.contextUsage > 0) {
       stageContextUsages[phase.stage].push(phase.contextUsage);
     }
+
+    // Detect parallel agents for this phase
+    const agents = detectParallelAgents(phase.directory, phase.stage);
+    if (agents.length > 0) {
+      if (!stageAgents[phase.stage]) {
+        stageAgents[phase.stage] = [];
+      }
+      // Merge agents (avoid duplicates by type)
+      for (const agent of agents) {
+        if (!stageAgents[phase.stage].some(a => a.type === agent.type && a.label === agent.label)) {
+          stageAgents[phase.stage].push(agent);
+        }
+      }
+    }
   }
 
   // Calculate average context usage per stage
@@ -395,6 +540,14 @@ function buildStagesSummary(phases, currentPhase) {
       if (stageIndex !== -1) {
         stageSummary[stageIndex].contextUsage = Math.round(avgUsage);
       }
+    }
+  }
+
+  // Set parallel agents per stage
+  for (const stageId in stageAgents) {
+    const stageIndex = GSD_STAGES.findIndex(s => s.id === stageId);
+    if (stageIndex !== -1) {
+      stageSummary[stageIndex].parallelAgents = stageAgents[stageId];
     }
   }
 
