@@ -1,849 +1,353 @@
-# Real-Time Event Integration Pitfalls
+# Pitfalls Research: Adding Workflow Diagram View to GSD Viewer
 
-**Domain:** Adding WebSocket/Hook Integration to Existing Electron Visualization App
-**Researched:** 2026-01-25
-**Confidence:** MEDIUM-HIGH
+## Summary
 
-This research identifies common mistakes when adding real-time external event integration (Claude Code hooks via WebSocket) to an existing Electron visualization application with animation-based feedback.
+Adding a second visualization view (workflow diagram) to an existing complex application with 7600+ lines of renderer code, real-time file watching, and multiple coordinated UI components creates high risk for memory leaks, state synchronization bugs, and rendering conflicts. The most critical risks are: incomplete cleanup when switching views causing memory accumulation, stale closures capturing outdated state, and race conditions when file watcher events update both views simultaneously.
 
----
+## Critical Pitfalls
 
-## Critical Pitfalls  
+### 1. Memory Leaks from Incomplete View Cleanup
 
-Mistakes that cause rewrites, data corruption, or major architectural changes.
+**Risk:** When switching between Graph and Diagram views, the inactive view's resources (Three.js objects, event listeners, animation frames) remain in memory if not explicitly destroyed. With 94+ instances of `addEventListener` and `requestAnimationFrame` in the current codebase, each view switch without proper cleanup compounds memory usage.
 
-### Pitfall 1: Duplicate Hook Events from Directory Context
-
-**What goes wrong:** Claude Code hooks fire duplicate events when running from certain directories (particularly home directory), causing double animations, duplicate activity log entries, and state corruption.
-
-**Why it happens:**
-- Claude Code has a known issue where hook events fire twice from home directory
-- Configuration loading hierarchy or session management creates duplicate registration
-- Directory-specific behavior affects hook execution
-
-**Consequences:**
-- Every file operation triggers TWO flash animations instead of one
-- Activity log fills with duplicate entries
-- Performance degrades from processing same event twice
-- User confusion from doubled visual feedback
-- Token waste from duplicate context window updates
+**Warning Signs:**
+- Memory usage increases each time user toggles views
+- Browser DevTools heap snapshots show detached DOM trees
+- Application becomes sluggish after 5-10 view switches
+- `MaxListenersExceededWarning` in console
+- Three.js objects appear in memory profiler after view is hidden
 
 **Prevention:**
-1. **Event deduplication layer** - Track recent event hashes/signatures with timestamp window (200-500ms)
-2. **Idempotency keys** - Add unique event ID to each hook payload, discard duplicates
-3. **Source tracking** - Log hook event source to detect if same event arrives twice
-4. **Validation** - Check event timestamp + path combo hasn't been processed recently
+- Create explicit lifecycle methods for each view: `mountView()` and `unmountView()`
+- Track all event listeners in arrays: `this.viewEventListeners = []` with cleanup loop
+- Cancel all animation frames: store `animationFrameId = requestAnimationFrame()` and call `cancelAnimationFrame(animationFrameId)`
+- Dispose Three.js objects explicitly: `geometry.dispose()`, `material.dispose()`, `texture.dispose()`
+- Remove DOM event listeners: match each `addEventListener` with `removeEventListener` in cleanup
+- Test view switching 20+ times in DevTools Memory panel to verify no accumulation
 
-**Detection:**
-- Activity log shows identical events within <500ms
-- Same file node flashes twice in rapid succession
-- WebSocket server logs show duplicate messages for single operation
-- Performance profiling shows duplicate processing paths
+**Phase to Address:** Phase 1 (Architecture Foundation) - establish cleanup contract before building diagram view
 
-**Which phase:** Phase 1 (WebSocket server + hook integration) - MUST address before proceeding to animation sync
+**Confidence:** HIGH - Verified by Electron memory leak documentation and Three.js forum discussions
 
-**Sources:**
-- [Claude Code Hook Events Fired Twice When Running from Home Directory · Issue #3465](https://github.com/anthropics/claude-code/issues/3465)
+### 2. Stale Closures in Event Handlers Across Views
 
----
+**Risk:** Event handlers (keyboard shortcuts, file watcher callbacks, IPC handlers) capture view state at registration time. When views switch, handlers still reference old view state, causing updates to apply to wrong view or use outdated node references. React's `useEffectEvent` (React 19.2) addresses this, but vanilla JS requires manual patterns.
 
-### Pitfall 2: Event Ordering Lost in Async Processing
-
-**What goes wrong:** Events arrive in correct order via WebSocket (TCP guarantees) but get processed out-of-order due to async handlers, causing animations to show wrong sequence (e.g., file deleted BEFORE it was created).
-
-**Why it happens:**
-- WebSocket protocol guarantees message ordering (TCP)
-- Application-level async handlers don't preserve that order
-- Multiple async operations (file system checks, graph updates, animation triggers) race
-- Renderer IPC handlers process events independently without coordination
-
-**Consequences:**
-- Graph shows file deletion before creation
-- Animation sequence incorrect (flash effect for delete before create)
-- Activity log displays events in wrong chronological order
-- State diverges from reality
-- User loses trust in visualization accuracy
+**Warning Signs:**
+- Keyboard shortcut "jump to node" jumps in wrong view
+- File changes flash in diagram view even when graph view is active
+- Selection sync goes to wrong view after toggle
+- Inspector modal shows stale data when opened from diagram
+- Console errors about undefined nodes after view switch
 
 **Prevention:**
-1. **Message queue with serial processing** - Queue all events, process one at a time
-2. **Sequence numbers** - Add incrementing ID to each event, reject out-of-order
-3. **Promise chaining** - Chain async operations so they complete in order
-4. **Single processing loop** - Centralized event processor with FIFO queue
+- Use function references with current state lookup: `() => getCurrentView().selectedNode` instead of closure-captured `selectedNode`
+- Implement view context object that updates on switch: `activeViewContext = { type: 'graph', nodes: [...] }`
+- Re-register file watcher callbacks on view switch (or use shared callback with view routing)
+- Pass state as parameters rather than capturing: `handleNodeClick(nodeId, viewType)` instead of `handleNodeClick(nodeId)`
+- Use `useRef` pattern (or vanilla equivalent) for latest value: `viewRef.current = activeView`
+- Test: switch views, trigger keyboard shortcuts, verify correct view responds
 
-**Implementation Pattern:**
-```javascript
-// BAD: Parallel async handlers
-ws.on('message', async (event) => {
-  await processEvent(event); // Multiple can run simultaneously
-});
+**Phase to Address:** Phase 1 (Architecture Foundation) - establish state management pattern before handlers multiply
 
-// GOOD: Serial queue
-const eventQueue = [];
-let processing = false;
+**Confidence:** HIGH - React stale closure documentation and recent useEffectEvent discussions (Jan 2026)
 
-ws.on('message', (event) => {
-  eventQueue.push(event);
-  processQueue();
-});
+### 3. Race Conditions in File Watcher Updates to Multiple Views
 
-async function processQueue() {
-  if (processing) return;
-  processing = true;
-  while (eventQueue.length > 0) {
-    const event = eventQueue.shift();
-    await processEvent(event);
-  }
-  processing = false;
-}
-```
+**Risk:** File watcher emits events on separate threads. When a file changes, both graph and diagram update handlers may execute simultaneously, causing: (1) partial updates if they share state, (2) render conflicts if both redraw concurrently, (3) animation collisions if both trigger flash effects. The existing ~3.5x emissive flash effect could double-trigger.
 
-**Detection:**
-- Activity log timestamps correct but visual order wrong
-- Graph state inconsistent with file system
-- Animation for operation X starts after animation for later operation Y
-- Race conditions in tests
-
-**Which phase:** Phase 1 (WebSocket integration) - Must establish queue before adding complex animations
-
-**Sources:**
-- [WebSockets guarantee order - so why are my messages scrambled?](https://www.sitongpeng.com/writing/websockets-guarantee-order-so-why-are-my-messages-scrambled)
-- [Handling Race Conditions in Real-Time Apps](https://dev.to/mattlewandowski93/handling-race-conditions-in-real-time-apps-49c8)
-
----
-
-### Pitfall 3: Main Process Blocking from WebSocket Server
-
-**What goes wrong:** Running WebSocket server in Electron main process blocks the renderer, freezing UI during message processing or connection handling.
-
-**Why it happens:**
-- Main process can block renderer process despite being "separate"
-- They aren't truly asynchronous - shared event loop characteristics
-- Heavy WebSocket message processing blocks main process event loop
-- Renderer waits for IPC responses from blocked main process
-
-**Consequences:**
-- Graph animations freeze mid-flash
-- UI becomes unresponsive during file operation bursts
-- Camera controls lag or stop working
-- Application appears hung to user
-- 60fps animation target impossible to maintain
+**Warning Signs:**
+- Inconsistent node highlighting between views after file changes
+- Flash animations sometimes missing or double-flashing
+- Graph shows updated file but diagram shows stale version (or vice versa)
+- Console warnings: "Modify event occurred but file contents empty"
+- Activity feed shows duplicate entries for same file change
 
 **Prevention:**
-1. **Separate worker process** - Run WebSocket server in dedicated Node.js child process, not main
-2. **Offload to renderer** - Run WebSocket client in renderer with proper isolation
-3. **Non-blocking patterns** - Use setImmediate(), process.nextTick() for CPU-intensive tasks
-4. **Throttle message processing** - Batch events, process in chunks with yields
+- Centralize file change handling with view routing: `onFileChange(path) { updateGraphView(path); updateDiagramView(path); }`
+- Use debouncing for watcher events: 50-100ms delay to batch rapid changes
+- Add update queue with atomic processing: `fileUpdateQueue.push(change); processQueue()`
+- Implement view-specific update flags: `graphNeedsUpdate = true` checked in render loop
+- Ensure thread-safe state updates (avoid concurrent modification of shared `currentGraphData`)
+- Add sequence numbers to updates to detect out-of-order processing
+- Test: rapid file changes (10+ files in 1 second), verify both views update correctly without duplication
 
-**Architecture Decision:**
-```
-OPTION A (Recommended): Separate Worker
-- main.js: Electron main process (window management)
-- ws-server.js: Child process running WebSocket server
-- Communication: IPC between main and ws-server
-- Benefits: True isolation, can't block renderer
+**Phase to Address:** Phase 2 (View Switching) - before connecting file watcher to diagram view
 
-OPTION B (Riskier): Renderer WebSocket Client
-- renderer.js: WebSocket client connects to external server
-- Benefits: Natural separation from main
-- Risks: Must handle preload/context bridge carefully
+**Confidence:** HIGH - Electron file watcher race conditions and thread safety documentation
 
-OPTION C (Avoid): Main Process Server
-- main.js: WebSocket server + Electron main
-- Risks: High chance of blocking renderer
-```
+### 4. Uncanceled Animation Frames from Both Views Running Simultaneously
 
-**Detection:**
-- DevTools performance profiling shows main process CPU spikes
-- UI freezes correlate with WebSocket message arrival
-- requestAnimationFrame callbacks delayed during WS activity
-- Chrome DevTools FPS meter drops below 60fps
+**Risk:** The 3D graph runs a continuous `requestAnimationFrame` loop for rendering. If diagram view also uses animation (for layout transitions or flash effects), and both loops run simultaneously, they compete for frame budget. Worse, if view switching doesn't cancel the inactive view's animation loop, multiple loops accumulate (hot-reload bug compounds this).
 
-**Which phase:** Phase 1 (Architecture) - Must decide before implementation begins
-
-**Sources:**
-- [The Horror of Blocking Electron's Main Process](https://medium.com/actualbudget/the-horror-of-blocking-electrons-main-process-351bf11a763c)
-- [Electron Performance Documentation](https://www.electronjs.org/docs/latest/tutorial/performance)
-
----
-
-### Pitfall 4: State Divergence on WebSocket Reconnect
-
-**What goes wrong:** When WebSocket reconnects after disconnection, client state (last processed event, current graph state) doesn't sync with server, causing missed events or duplicate processing.
-
-**Why it happens:**
-- Socket IDs regenerate after reconnection
-- Server doesn't remember client's last processed event
-- Client doesn't request missed events from disconnect period
-- No state synchronization protocol on reconnect
-
-**Consequences:**
-- File operations during disconnect never visualized
-- Graph becomes stale (missing nodes, wrong state)
-- User sees incomplete project visualization
-- Reconnect might replay old events causing duplicate animations
-- Activity log has gaps in timeline
+**Warning Signs:**
+- "Violation: requestAnimationFrame handler took Xms" warnings in console
+- Frame rate drops from 60fps to 30fps or lower after view toggle
+- CPU usage increases with each view switch
+- Both views rendering in background (check Chrome DevTools Rendering panel)
+- Battery drain on laptops during idle
 
 **Prevention:**
-1. **Event sourcing with sequence numbers** - Server tracks event sequence, client requests since last known
-2. **Reconnection handshake** - Client sends last event ID, server replays missed events
-3. **Periodic full sync** - Every N minutes, send full state snapshot to detect drift
-4. **Optimistic queue** - Queue events during disconnect, reconcile on reconnect
+- Maintain single source of truth for active animation loop: `activeAnimationFrameId`
+- Cancel previous loop before starting new one: `if (activeAnimationFrameId) cancelAnimationFrame(activeAnimationFrameId)`
+- Pause inactive view's render loop: `if (currentView !== 'graph') return;` at top of animation function
+- Use conditional animation: only request next frame if view is active
+- Consider shared render loop with view-specific branches instead of separate loops
+- Track animation frame IDs in view objects: `graphView.animationFrameId` for targeted cleanup
+- Test: switch views rapidly, check DevTools Performance profiler for multiple concurrent loops
 
-**Handshake Protocol:**
-```javascript
-// On reconnect:
-ws.on('open', () => {
-  const lastEventId = localStorage.getItem('lastProcessedEventId');
-  ws.send(JSON.stringify({
-    type: 'RECONNECT',
-    lastEventId: lastEventId || 0
-  }));
-});
+**Phase to Address:** Phase 1 (Architecture Foundation) - establish animation contract before diagram animations added
 
-// Server responds with missed events:
-server.on('RECONNECT', (client, msg) => {
-  const missedEvents = getEventsSince(msg.lastEventId);
-  client.send(JSON.stringify({
-    type: 'SYNC',
-    events: missedEvents
-  }));
-});
-```
+**Confidence:** HIGH - requestAnimationFrame collision GitHub issues and performance documentation
 
-**Detection:**
-- Activity log has timestamp gaps
-- Graph state doesn't match file system after reconnect
-- Manual file system scan shows differences from graph
-- User reports "missing changes" after network issues
+### 5. Layout Thrashing During View Resize/Switch
 
-**Which phase:** Phase 2 (Connection management) - Add after basic WebSocket working
+**Risk:** Switching from Graph to Diagram view may change container dimensions. If both views read layout properties (`offsetWidth`) and write styles in rapid succession without batching, browser forces synchronous reflows (layout thrashing). With existing minimap, breadcrumb, activity feed, and tree panels, adding diagram compounds this.
 
-**Sources:**
-- [WebSocket Reconnect: Strategies for Reliable Communication](https://apidog.com/blog/websocket-reconnect/)
-- [Troubleshooting connection issues | Socket.IO](https://socket.io/docs/v4/troubleshooting-connection-issues/)
-
----
-
-### Pitfall 5: Memory Leaks from Unregistered Event Listeners
-
-**What goes wrong:** WebSocket and IPC event listeners accumulate without cleanup, causing memory to grow unbounded until app crashes or slows to unusable state.
-
-**Why it happens:**
-- New listeners added on every WebSocket reconnect
-- IPC listeners registered without corresponding removeListener
-- Graph animation callbacks retain references to old nodes
-- Activity trail objects never garbage collected
-
-**Consequences:**
-- Memory usage grows continuously (100MB -> 500MB -> 1GB+)
-- Application slows over time
-- MaxListenersExceeded warnings in console
-- Eventually crashes or becomes unresponsive
-- Node.js default limit is 10 listeners per event
+**Warning Signs:**
+- Visible stuttering/jank during view switch animation
+- DevTools Performance panel shows "Forced reflow" warnings in purple
+- Layout shift (CLS) metrics spike during toggle
+- Diagram appears at wrong size for 1-2 frames then corrects
+- Resize events firing excessively (10+ times for single window resize)
 
 **Prevention:**
-1. **Cleanup pattern** - Always pair addEventListener with removeEventListener
-2. **Component lifecycle hooks** - Use destroy/unmount to clean up listeners
-3. **WeakMap for references** - Use WeakMap for graph node callbacks to allow GC
-4. **Connection singleton** - Reuse single WebSocket connection, don't create new
+- Batch all reads then all writes: read dimensions first, then apply styles
+- Use ResizeObserver instead of polling for dimension changes
+- Debounce resize handlers: 100-150ms delay to avoid excessive recalculations
+- Cache layout dimensions: `const width = container.offsetWidth;` read once per frame
+- Apply CSS transitions for smooth view switching instead of JS animations
+- Use `transform` and `opacity` for animations (GPU-accelerated) instead of layout properties
+- Trigger diagram layout calculation only after view is visible: `requestAnimationFrame(() => diagram.resize())`
+- Test: DevTools Performance recording during view switch, verify no forced reflows
 
-**Cleanup Pattern:**
-```javascript
-// BAD: Memory leak
-function setupWebSocket() {
-  const ws = new WebSocket(url);
-  ws.on('message', handleMessage); // Listener never removed
-  return ws;
-}
+**Phase to Address:** Phase 2 (View Switching) - implement during toggle mechanism
 
-// GOOD: Proper cleanup
-class WebSocketManager {
-  constructor() {
-    this.ws = null;
-    this.boundHandleMessage = this.handleMessage.bind(this);
-  }
+**Confidence:** MEDIUM - CSS layout shift documentation and viewport resize behavior research
 
-  connect() {
-    this.ws = new WebSocket(url);
-    this.ws.on('message', this.boundHandleMessage);
-  }
+### 6. Keyboard Shortcut Conflicts Between Views
 
-  disconnect() {
-    if (this.ws) {
-      this.ws.off('message', this.boundHandleMessage);
-      this.ws.close();
-      this.ws = null;
-    }
-  }
-}
-```
+**Risk:** Graph view has 94+ event listeners including bookmarks (keys 1-9), navigation (arrow keys, space), search (Ctrl/Cmd+F), and zoom controls. Diagram view will need its own shortcuts (expand/collapse, pan, zoom). If both register handlers, they conflict or fire in wrong view.
 
-**Detection:**
-- Node.js process RSS memory continuously growing
-- MaxListenersExceededWarning in DevTools console
-- Chrome DevTools heap snapshots show increasing object counts
-- Application slows after hours of use
-- Event listener count increases in profiler
-
-**Which phase:** Phase 1 & ongoing - Establish cleanup patterns from start, audit regularly
-
-**Sources:**
-- [Diagnosing and Fixing Memory Leaks in Electron Applications](https://www.mindfulchase.com/explore/troubleshooting-tips/frameworks-and-libraries/diagnosing-and-fixing-memory-leaks-in-electron-applications.html)
-- [Memory leak when passing IPC events over contextBridge · Issue #27039](https://github.com/electron/electron/issues/27039)
-
----
-
-## Moderate Pitfalls
-
-Mistakes that cause delays, technical debt, or require refactoring.
-
-### Pitfall 6: Animation Queue Overflow from Event Bursts
-
-**What goes wrong:** During massive file operations (Git operations, bulk saves, directory scans), hundreds of events arrive in milliseconds, overwhelming the animation queue and causing frame drops, lag, or skipped animations.
-
-**Why it happens:**
-- Each file change triggers full animation sequence (flash + glow + fade)
-- No throttling on incoming events
-- requestAnimationFrame queue fills faster than 60fps can render
-- Three.js scene has too many simultaneous material updates
-
-**Consequences:**
-- FPS drops from 60 to <15 during bursts
-- Animation stutters and jerks
-- Some file changes never animate (queue overflow)
-- UI becomes laggy and unresponsive
-- User experience severely degraded
+**Warning Signs:**
+- Pressing "1" bookmarks both graph node AND diagram phase
+- Search shortcut (Cmd+F) opens two search panels
+- Arrow keys pan both graph and diagram simultaneously
+- Escape key closes inspector but also deselects diagram node
+- Keyboard focus unclear (user doesn't know which view receives input)
 
 **Prevention:**
-1. **Event batching** - Collect events in time window (100-200ms), animate batch as single pulse
-2. **Animation pooling** - Reuse animation objects instead of creating new
-3. **Priority queue** - Animate only visible nodes, skip off-screen
-4. **Debouncing** - Ignore rapid events for same file within threshold
-5. **Frame budget** - Limit animations per frame to maintain 60fps
+- Centralized keyboard manager with view-aware routing: `KeyboardManager.registerShortcut('1', () => activeView.handleBookmark(1))`
+- Unregister previous view's handlers on switch: `oldView.unregisterShortcuts(); newView.registerShortcuts()`
+- Add visual keyboard focus indicator on active view container
+- Prevent event propagation after handling: `event.stopPropagation()` and `event.preventDefault()`
+- Use view-scoped key maps: `graphKeyMap = {...}; diagramKeyMap = {...}` with single dispatcher
+- Document overlapping shortcuts and resolve conflicts (e.g., graph uses 1-9, diagram uses Shift+1-9)
+- Test: switch views and try all keyboard shortcuts, verify only active view responds
 
-**Batching Implementation:**
-```javascript
-const eventBatch = new Map(); // path -> latest event
-const BATCH_WINDOW = 150; // ms
+**Phase to Address:** Phase 3 (Keyboard Integration) - after both view basics work, before keyboard shortcuts proliferate
 
-function queueEvent(event) {
-  eventBatch.set(event.path, event);
+**Confidence:** MEDIUM - React keyboard event handler conflict documentation and SPA keyboard management articles
 
-  clearTimeout(batchTimer);
-  batchTimer = setTimeout(() => {
-    const batchedEvents = Array.from(eventBatch.values());
-    animateBatch(batchedEvents);
-    eventBatch.clear();
-  }, BATCH_WINDOW);
-}
-```
+### 7. Shared Inspector Modal State Leaking Between Views
 
-**Detection:**
-- Chrome DevTools FPS meter shows drops during file operations
-- Performance profiling shows long frame times (>16ms)
-- Animation queues in DevTools show thousands of pending
-- Visual stuttering during Git operations or bulk saves
+**Risk:** Inspector modal currently shows file details when double-clicking graph nodes. If diagram view also opens inspector on artifact clicks, the modal state (selected file, diff mode, scroll position, search query) can leak between views. Clicking graph node, opening inspector, switching to diagram, clicking artifact may show previous graph file or corrupt state.
 
-**Which phase:** Phase 3 (Animation optimization) - After basic animations working but before production
-
-**Sources:**
-- [Architecting Electron Applications for 60fps](https://www.nearform.com/blog/architecting-electron-applications-for-60fps/)
-- [Using Queues in Javascript to optimize animations on low-end devices](https://medium.com/tech-p7s1/using-queues-in-javascript-to-optimize-animations-on-low-end-devices-6e3dcad1cfdf)
-
----
-
-### Pitfall 7: File System Watcher Duplicate Events
-
-**What goes wrong:** File system watcher (chokidar) fires 3-5 events for single file save, causing multiple flash animations and activity log spam for one user action.
-
-**Why it happens:**
-- Text editors save files as: create temp -> write content -> rename -> delete temp
-- Each step triggers separate file system event
-- OS-level file system events are granular and noisy
-- Different behavior across Windows/Mac/Linux
-
-**Consequences:**
-- Same file flashes 3-5 times for one save
-- Activity log cluttered with duplicate entries
-- Performance waste from processing same change multiple times
-- User confusion from excessive visual feedback
-- Combined with WebSocket events creates 6-10 events per save
+**Warning Signs:**
+- Inspector shows wrong file after view switch
+- Diff toggle stuck in wrong mode
+- Search query from graph view persists in diagram context
+- Scroll position jumps to middle of file instead of top
+- Related files section shows graph neighbors instead of diagram relationships
 
 **Prevention:**
-1. **Debouncing with time window** - Merge events for same path within 200-500ms
-2. **Event deduplication** - Track file hash/mtime, ignore if unchanged
-3. **Disable chokidar during WebSocket events** - Choose one source of truth
-4. **Stabilization delay** - Wait for file to "settle" before processing
+- Reset inspector state on view switch: `inspector.reset()` before switching views
+- Pass complete context when opening inspector: `openInspector({ file, view: 'diagram', relatedContext: [...] })`
+- Use view-scoped inspector configurations: `inspectorConfig[currentView]` to store per-view settings
+- Clear search and scroll state explicitly: `inspector.searchQuery = ''; inspector.scrollTop = 0;`
+- Add view indicator in inspector header so user knows source context
+- Store inspector open state per-view: `graphInspectorState` and `diagramInspectorState` for restoration
+- Test: open inspector in graph, switch to diagram, open different file, verify no cross-contamination
 
-**Debounce Pattern:**
-```javascript
-const debounceTimers = new Map();
-const DEBOUNCE_MS = 300;
+**Phase to Address:** Phase 4 (Inspector Integration) - when connecting diagram artifacts to inspector
 
-watcher.on('change', (path) => {
-  if (debounceTimers.has(path)) {
-    clearTimeout(debounceTimers.get(path));
-  }
+**Confidence:** MEDIUM - View UI component state persistence documentation and modal state management articles
 
-  const timer = setTimeout(() => {
-    processFileChange(path);
-    debounceTimers.delete(path);
-  }, DEBOUNCE_MS);
+### 8. Diagram Library Integration: SVG vs Canvas Performance Collision
 
-  debounceTimers.set(path, timer);
-});
-```
+**Risk:** Graph view uses WebGL (Three.js/3d-force-graph) rendering to Canvas. Most diagram libraries use SVG (D3, Mermaid, Cytoscape) or separate Canvas. Running both on same page creates: (1) performance degradation (SVG DOM manipulation + Canvas pixel pushing), (2) z-index layering conflicts, (3) different coordinate systems for click detection.
 
-**Detection:**
-- Activity log shows same file path multiple times within <1 second
-- Single save in VSCode causes 3+ flash animations
-- Different event counts on different operating systems
-- Log analysis shows event clusters with same path
-
-**Which phase:** Phase 1 (Integration foundation) - Must address alongside WebSocket event deduplication
-
-**Sources:**
-- [A Robust Solution for FileSystemWatcher Firing Events Multiple Times](https://www.codeproject.com/Articles/1220093/A-Robust-Solution-for-FileSystemWatcher-Firing-Eve)
-- [FileSystemWatcher events raise more than once · Issue #347](https://github.com/microsoft/dotnet/issues/347)
-
----
-
-### Pitfall 8: WebSocket Connection Storms on Reconnect
-
-**What goes wrong:** Network hiccup causes WebSocket disconnect, client attempts immediate reconnect, server rejects (still processing old connection), client retries rapidly, creating exponential connection attempt storm.
-
-**Why it happens:**
-- No exponential backoff on reconnection
-- Client doesn't wait for server cleanup of old connection
-- Multiple tabs/instances all reconnecting simultaneously
-- Server overwhelmed by connection attempts during recovery
-
-**Consequences:**
-- Server CPU spikes from connection spam
-- Legitimate connections rejected
-- Network bandwidth wasted on failed attempts
-- Application appears broken to user (stuck "Connecting...")
-- Can trigger rate limiting or IP bans in production
+**Warning Signs:**
+- Frame rate drops when both views rendered (even if one hidden with `display: none`)
+- Diagram slower to render than expected (3-5 second layout calculation)
+- Click detection misses nodes (coordinates off by offset)
+- SVG elements visible over graph view or vice versa
+- Memory usage higher than sum of individual view sizes
 
 **Prevention:**
-1. **Exponential backoff with jitter** - 1s, 2s, 4s, 8s... + random jitter
-2. **Max reconnect attempts** - Give up after N tries, require manual reconnect
-3. **Connection status UI** - Show user reconnection state, don't hide failures
-4. **Heartbeat/ping-pong** - Detect dead connections proactively
+- Hide inactive view with `display: none` or `visibility: hidden` to stop rendering
+- Choose Canvas-based diagram library if possible (better performance pairing with Three.js)
+- If using SVG: render only when view is active, destroy DOM elements when switching
+- Isolate rendering contexts: dedicated container elements with no shared state
+- Use separate coordinate systems: normalize click coordinates per-view
+- Consider view-specific rendering optimizations: Canvas for 3D, SVG for 2D
+- Benchmark both approaches: SVG vs Canvas for diagram to match existing graph performance
+- Test: DevTools Performance profiler with both views existing (hidden) vs only active view mounted
 
-**Backoff Implementation:**
-```javascript
-class ReconnectingWebSocket {
-  constructor(url) {
-    this.url = url;
-    this.reconnectAttempts = 0;
-    this.maxAttempts = 10;
-  }
+**Phase to Address:** Phase 1 (Architecture Foundation) - choose diagram library with performance in mind
 
-  connect() {
-    this.ws = new WebSocket(this.url);
+**Confidence:** HIGH - SVG vs Canvas performance comparisons and multi-rendering context documentation (2025-2026)
 
-    this.ws.on('close', () => {
-      if (this.reconnectAttempts >= this.maxAttempts) {
-        console.error('Max reconnect attempts reached');
-        return;
-      }
+### 9. State Synchronization: Selection Across Views
 
-      const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
-      const jitter = Math.random() * 1000;
+**Risk:** User selects node in graph view, switches to diagram, expects corresponding artifact highlighted. Mapping between graph nodes (files, phases, plans) and diagram elements (pipeline stages, artifact blocks) is many-to-many. Naive sync causes: (1) selecting wrong element, (2) no selection in new view, (3) bidirectional update loops.
 
-      setTimeout(() => {
-        this.reconnectAttempts++;
-        this.connect();
-      }, delay + jitter);
-    });
-
-    this.ws.on('open', () => {
-      this.reconnectAttempts = 0; // Reset on successful connection
-    });
-  }
-}
-```
-
-**Detection:**
-- Network logs show rapid connection attempts (10+ per second)
-- Server logs show connection rate spikes
-- Multiple WebSocket handshakes in DevTools Network tab
-- Server CPU usage correlates with client disconnect events
-
-**Which phase:** Phase 2 (Connection reliability) - Add before production deployment
-
-**Sources:**
-- [Robust WebSocket Reconnection Strategies in JavaScript With Exponential Backoff](https://dev.to/hexshift/robust-websocket-reconnection-strategies-in-javascript-with-exponential-backoff-40n1)
-- [Deal with Reconnection Storm — Two Strategies](https://amirsoleimani.medium.com/deal-with-reconnection-storm-two-strategies-4a835d0457f6)
-
----
-
-### Pitfall 9: IPC Message Serialization Limits
-
-**What goes wrong:** Sending large graph data structures (1000+ nodes) from main to renderer via IPC fails or causes crashes because objects exceed serialization limits or contain non-serializable types.
-
-**Why it happens:**
-- Electron IPC uses structured clone algorithm with size limits
-- Graph nodes may contain THREE.js objects (non-serializable)
-- Circular references in node relationships
-- DOM objects can't cross process boundary
-
-**Consequences:**
-- IPC send fails silently or throws serialization error
-- Graph updates don't reach renderer
-- Application appears frozen (waiting for data that never arrives)
-- Main process crash if trying to serialize invalid objects
+**Warning Signs:**
+- Selecting graph node, switching to diagram shows no selection
+- Selecting diagram artifact, switching to graph highlights multiple unrelated nodes
+- Selection flickers or toggles rapidly (update loop)
+- Console errors about missing node IDs
+- Activity feed selection doesn't sync to either view
 
 **Prevention:**
-1. **Serialize before sending** - Convert to plain objects, strip non-serializable
-2. **Chunked transfers** - Split large datasets into smaller messages
-3. **Shared memory** - Use MessagePort or SharedArrayBuffer for large data
-4. **Data normalization** - Keep IPC payloads minimal, fetch details on demand
+- Create explicit mapping layer: `selectionMapper.graphToDiagram(nodeId)` and reverse
+- Handle unmappable selections gracefully: clear selection if no equivalent exists
+- Add selection change timestamps to prevent loops: `if (timestamp > lastSyncTimestamp) sync()`
+- Use event-based architecture: `emit('selectionChanged', { view, id })` with single handler
+- Store canonical selection: `selectedEntity = { type, id, sourceView }` independent of view
+- Implement "soft sync": highlight related elements without forcing exact match
+- Test: select various node types, switch views, verify sensible highlighting behavior
 
-**Serialization Pattern:**
-```javascript
-// BAD: Send entire graph with THREE.js objects
-mainWindow.webContents.send('graph-update', graphData);
+**Phase to Address:** Phase 5 (Selection Sync) - after both views have stable selection mechanisms
 
-// GOOD: Serialize to plain objects
-function serializeGraphData(graphData) {
-  return {
-    nodes: graphData.nodes.map(n => ({
-      id: n.id,
-      name: n.name,
-      type: n.type,
-      // Strip THREE.js objects, functions, etc.
-    })),
-    links: graphData.links.map(l => ({
-      source: typeof l.source === 'object' ? l.source.id : l.source,
-      target: typeof l.target === 'object' ? l.target.id : l.target
-    }))
-  };
-}
+**Confidence:** MEDIUM - State synchronization trap documentation and multi-view state management articles
 
-mainWindow.webContents.send('graph-update', serializeGraphData(graphData));
-```
+### 10. Real-Time Updates: Diagram Layout Recalculation Cost
 
-**Detection:**
-- Error: "object could not be cloned" in console
-- IPC send returns false
-- Data appears in main process logs but not renderer
-- Large objects (>10MB) being sent via IPC
+**Risk:** Graph view uses incremental updates (node property changes only, no full rebuild). Diagram view may require full layout recalculation when artifact status changes (flowchart positions shift to accommodate new elements). If file watcher triggers frequent updates, continuous layout thrashing freezes UI.
 
-**Which phase:** Phase 1 (IPC architecture) - Establish serialization patterns early
-
-**Sources:**
-- [Memory leak when passing IPC events over contextBridge · Issue #27039](https://github.com/electron/electron/issues/27039)
-- [Inter-Process Communication | Electron](https://www.electronjs.org/docs/latest/tutorial/ipc)
-
----
-
-## Minor Pitfalls
-
-Mistakes that cause annoyance but are easily fixable.
-
-### Pitfall 10: WebSocket Client in Renderer Process Fails
-
-**What goes wrong:** Trying to use WebSocket client library (like 'ws') in Electron renderer process throws "ws does not work in the browser" error despite renderer having Node.js access.
-
-**Why it happens:**
-- 'ws' package detects browser environment and loads browser.js stub
-- Renderer process uses browser-like module resolution
-- Package assumes browser = no Node.js WebSocket support
-- Even with nodeIntegration: true, ws detects as browser
-
-**Consequences:**
-- Cannot use 'ws' library in renderer
-- Must find alternative WebSocket library or approach
-- Wasted time debugging library compatibility
-- Potential delay in development
+**Warning Signs:**
+- Diagram view freezes for 2-3 seconds after file change
+- Rapid file changes cause diagram to lag behind graph updates
+- Layout "bounces" or repositions multiple times for single change
+- CPU spikes visible in Activity Monitor during file operations
+- User sees intermediate layout states (visual flicker)
 
 **Prevention:**
-1. **Use native WebSocket API** - Browser WebSocket works in renderer
-2. **Main process WebSocket** - Run ws library in main, proxy to renderer
-3. **Universal libraries** - Use isomorphic WebSocket libraries (socket.io-client)
+- Implement incremental diagram updates where possible: change artifact color without relayout
+- Debounce layout recalculations: batch multiple file changes into single layout update
+- Use dirty flags: mark layout as needing update, recalculate on next render frame
+- Add loading state: show spinner during layout calculation instead of frozen UI
+- Consider stable layout algorithm: fixed positions for pipeline stages, only artifacts move
+- Cache layout results: if structure unchanged, preserve positions
+- Show animations during layout transitions to communicate progress
+- Test: create/modify/delete 10 files rapidly, measure diagram responsiveness
 
-**Solution:**
-```javascript
-// In renderer process - use native WebSocket
-const ws = new WebSocket('ws://localhost:8080');
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  handleEvent(data);
-};
+**Phase to Address:** Phase 6 (Real-Time Sync) - when connecting file watcher to diagram layout
 
-// NOT this (will fail):
-const WebSocket = require('ws'); // Error: ws does not work in browser
-```
+**Confidence:** MEDIUM - Flowchart layout algorithm performance and file watcher synchronization research
 
-**Detection:**
-- Error message: "ws does not work in the browser"
-- Import fails in renderer process
-- Works in main process but not renderer
+## Integration-Specific Concerns
 
-**Which phase:** Phase 1 (Initial setup) - Discover quickly during prototyping
+### Existing Codebase Complexity
 
-**Sources:**
-- [Should it be possible to use ws in an Electron renderer process? · Issue #1459](https://github.com/websockets/ws/issues/1459)
+The current `renderer.js` is 7600+ lines with tightly coupled components (graph, tree, activity feed, minimap, inspector, bookmarks, breadcrumbs). Adding diagram view without refactoring creates:
 
----
-
-### Pitfall 11: Platform-Specific WebSocket Failures (Windows)
-
-**What goes wrong:** WebSocket connections work perfectly on macOS/Linux during development but fail on Windows with connection timeouts or immediate disconnects.
-
-**Why it happens:**
-- Windows firewall blocks WebSocket ports
-- Different network stack behavior on Windows
-- localhost vs 127.0.0.1 resolution differences
-- Windows Defender real-time protection interferes
-
-**Consequences:**
-- Application works for developers (Mac) but fails for users (Windows)
-- Hard to debug (need Windows test environment)
-- Support burden from Windows users
-- Platform-specific code branches
-
-**Prevention:**
-1. **Test on all platforms early** - Don't wait for production
-2. **Use 127.0.0.1 instead of localhost** - Avoids DNS resolution issues
-3. **Document firewall configuration** - User guide for Windows setup
-4. **Error messages with platform hints** - "WebSocket failed (check Windows Firewall)"
-
-**Detection:**
-- Bug reports from Windows users only
-- Connection works in browser but not Electron on Windows
-- Firewall logs show blocked connections
-- Different error codes on Windows vs Mac/Linux
-
-**Which phase:** Phase 2 (Cross-platform testing) - Before releasing to users
-
-**Sources:**
-- [Websocket client connection fails to connect to server (Windows only, Mac works fine) · Issue #25099](https://github.com/electron/electron/issues/25099)
-
----
-
-### Pitfall 12: Hooks Don't Fire from Subdirectories
-
-**What goes wrong:** Claude Code hooks work when running from project root but fail completely when Claude runs from subdirectories, blocking hook-based workflows.
-
-**Why it happens:**
-- Claude Code hook registration logic depends on working directory
-- Configuration hierarchy doesn't propagate to subdirectories
-- Process spawning logic differs based on cwd
-- Relative path resolution for hook scripts fails
-
-**Consequences:**
-- Users running Claude from subdirectories get no events
-- Inconsistent behavior confuses users
-- CI/CD pipelines fail if run from wrong directory
-- No error message, hooks just silently don't fire
-
-**Prevention:**
-1. **Detect working directory** - Check Claude's cwd and warn if not root
-2. **Absolute paths in hook config** - Use absolute paths for hook scripts
-3. **Parent directory search** - Look for .claude/ config in parent dirs
-4. **Documentation** - Warn users to run Claude from project root
-
-**Detection:**
-- Hooks work sometimes but not others
-- User reports "hooks not firing"
-- Hook scripts exist but never execute
-- cwd logs show Claude running from subdirectory
-
-**Which phase:** Phase 1 (Hook setup) - Document and test during integration
-
-**Sources:**
-- [BUG: Hooks Completely Non-Functional in Subdirectories (v2.0.27) - Blocking CI/CD Workflows · Issue #10367](https://github.com/anthropics/claude-code/issues/10367)
-
----
-
-## Phase-Specific Warnings
-
-Guidance on which phases are most likely to encounter specific pitfalls and need deeper research.
-
-| Phase Topic | Likely Pitfall | Mitigation Strategy |
-|-------------|---------------|-------------------|
-| WebSocket Server Setup | Main Process Blocking (#3) | Use separate worker process or renderer client |
-| Hook Integration | Duplicate Events (#1) | Implement event deduplication from start |
-| Event Processing | Event Ordering (#2) | Establish serial queue before complex logic |
-| Connection Management | Reconnection Storms (#8) | Add exponential backoff early |
-| State Sync | State Divergence (#4) | Design handshake protocol before reconnect logic |
-| Animation Sync | Queue Overflow (#6) | Plan batching strategy before implementing animations |
-| File Watching | Duplicate FS Events (#7) | Add debouncing when setting up chokidar |
-| Memory Management | Listener Leaks (#5) | Establish cleanup patterns from day 1 |
-| Cross-Platform | Windows WebSocket Issues (#11) | Test on Windows early and often |
-| IPC Architecture | Serialization Limits (#9) | Design normalized data structure upfront |
-
----
-
-## Integration-Specific Pitfalls
-
-Since this milestone adds features to an **existing** system, special attention to integration risks:
-
-### Integration Risk 1: Dual Event Sources (Chokidar + WebSocket)
-
-**Problem:** Project currently uses chokidar for file watching. Adding WebSocket events creates TWO sources for same file changes.
-
-**Scenarios:**
-- User saves file in editor → chokidar fires + Claude Code hook fires → 2 animations
-- Claude Code writes file → hook fires + chokidar fires → 2 animations
-- Git operation touches 50 files → 100 total events (50 × 2)
+1. **Monolithic file growth**: Risk of 10,000+ line renderer.js becoming unmaintainable
+2. **Implicit dependencies**: Diagram code may accidentally depend on graph-specific state
+3. **Testing difficulty**: No unit testing possible without extracting modules
 
 **Mitigation:**
-- **Option A:** Disable chokidar when WebSocket connected (WebSocket as primary)
-- **Option B:** Deduplication layer merging both sources
-- **Option C:** Use WebSocket for reads, chokidar for writes (different roles)
+- Refactor into modules FIRST: `GraphView.js`, `DiagramView.js`, `ViewSwitcher.js`, `SharedState.js`
+- Establish clear interfaces: `View` class with `mount()`, `unmount()`, `update()`, `getSelection()` methods
+- Extract shared utilities: file watcher handler, inspector state, selection manager
+- Add integration tests for view switching before building diagram
 
-**Recommendation:** Option A - WebSocket as primary source when available, chokidar as fallback
+### File Watcher Fan-Out
 
----
-
-### Integration Risk 2: Existing Animation System Compatibility
-
-**Problem:** Project has existing flash animation system (v1.3). WebSocket events must integrate cleanly without breaking current animations.
-
-**Current System (from PROJECT.md):**
-- Flash effects with configurable duration/intensity
-- Activity trails showing change flow
-- Follow-active camera mode
-- Operation-specific visual indicators
-
-**Risk Areas:**
-- WebSocket events might bypass existing animation queue
-- New event schema might not map to existing animation types
-- Timing conflicts between old and new animation triggers
-- State management fragmentation
+Current watcher sends events to: graph updater, activity feed, flash animator, heat map, git status checker. Adding diagram creates 6th consumer. Risk: event processing time multiplies, watcher buffer overflows.
 
 **Mitigation:**
-- Map WebSocket events to existing animation API (don't create parallel system)
-- Enhance current `processFileChange()` to accept WebSocket events
-- Unified event schema for both sources
-- Single animation queue for all event types
+- Create event bus architecture: watcher publishes to bus, consumers subscribe
+- Add backpressure handling: if processing queue > 50 events, pause watcher
+- Prioritize updates: graph/diagram before heat map/git status
+- Consider view-specific watchers: diagram only watches `.planning/`, graph watches both
 
----
+### Animation System Collision
 
-### Integration Risk 3: IPC Channel Congestion
-
-**Problem:** Project uses IPC for graph updates, file changes, and UI state. Adding WebSocket events increases IPC message frequency significantly.
-
-**Current IPC Channels (from codebase):**
-- 'graph-update'
-- 'file-changed'
-- 'select-node'
-- 'open-file'
-- Plus new 'websocket-event' channel
-
-**Risk:** IPC bottleneck during high-frequency events (100+ ops/sec during bulk operations)
+Graph has 4 animation systems: (1) force simulation, (2) flash effects, (3) activity trails, (4) camera movement. Diagram will add: (5) layout transitions, (6) expand/collapse animations. Risk: 6 concurrent animation loops.
 
 **Mitigation:**
-- Batch WebSocket events before sending via IPC
-- Use dedicated IPC channel for WebSocket (don't overload existing channels)
-- Monitor IPC queue depth
-- Consider SharedArrayBuffer for high-frequency data
+- Unified animation scheduler: single `requestAnimationFrame` with per-system tick callbacks
+- Disable inactive view animations: graph trails pause when diagram active
+- Share animation utilities: flash effect function reused for both views
+- Budget frame time: allocate 16ms budget across active animations, skip if exceeded
 
----
+### Dual Rendering Contexts: Three.js + Diagram Library
 
-## Research Quality Assessment
+**Problem:** Three.js creates WebGL context for graph. Diagram library (likely SVG-based like D3/Mermaid) creates separate rendering context. Browser limits on simultaneous contexts, coordinate system conflicts.
 
-**Confidence Levels:**
+**Specific Risks:**
+- WebGL context lost when switching views (mobile browsers especially)
+- SVG event handlers interfere with Three.js raycasting
+- Z-index battles between Canvas and SVG overlays
+- Memory duplication for shared data (both maintain node lists)
 
-| Area | Confidence | Notes |
-|------|------------|-------|
-| Electron WebSocket Integration | HIGH | Multiple official sources + GitHub issues |
-| Event Ordering & Race Conditions | HIGH | Well-documented problem with proven solutions |
-| Animation Performance | MEDIUM | General web animation patterns, Electron-specific research limited |
-| Claude Code Hooks | MEDIUM | Recent feature, documented issues but evolving |
-| Connection Management | HIGH | Industry-standard patterns, extensive documentation |
-| Memory Leaks | HIGH | Common Electron problem, well-documented solutions |
-
-**Research Gaps:**
-
-1. **Claude Code Hook Event Schema** - Limited documentation on exact event payload format (need to reference official docs during implementation)
-2. **Performance at Scale** - No specific benchmarks for 1000+ file operations through WebSocket → Electron → Three.js pipeline
-3. **Production Deployment** - Hook configuration in non-development environments unclear
-
----
-
-## Prevention Checklist
-
-Use this checklist during implementation to avoid common pitfalls:
-
-**Phase 1: WebSocket Integration**
-- [ ] Event deduplication layer for duplicate hook events
-- [ ] Serial event queue to preserve ordering
-- [ ] WebSocket server in worker process (not main)
-- [ ] Proper event listener cleanup patterns
-- [ ] IPC message serialization validated
-
-**Phase 2: Connection Management**
-- [ ] Exponential backoff for reconnection
-- [ ] State sync handshake on reconnect
-- [ ] Connection status UI for users
-- [ ] Heartbeat/ping-pong keepalive
-
-**Phase 3: Animation Integration**
-- [ ] Event batching for burst handling
-- [ ] Debouncing for file system events
-- [ ] Frame budget monitoring (60fps target)
-- [ ] Unified animation API for all event sources
-
-**Phase 4: Production Readiness**
-- [ ] Cross-platform testing (Windows, Mac, Linux)
-- [ ] Memory leak audit
-- [ ] Performance profiling under load
-- [ ] Error recovery scenarios tested
-
----
+**Mitigation:**
+- Use `display: none` on inactive view to release rendering resources
+- Implement context restoration handlers: `canvas.addEventListener('webglcontextlost', handleContextLost)`
+- Deduplicate data: single source of truth for nodes, views consume read-only
+- Test on mobile browsers (Chrome Android) for WebGL context limits
 
 ## Sources
 
-### Electron & WebSocket Integration
-- [Strange error with WebSockets in Electron app - TMS WEB Core](https://support.tmssoftware.com/t/strange-error-with-websockets-in-electron-app/13873)
-- [I can't connect to websocket server in electron app · Issue #37861](https://github.com/electron/electron/issues/37861)
-- [Does anybody run wss server in electron normally? · Issue #1622](https://github.com/websockets/ws/issues/1622)
-- [Websocket client connection fails to connect to server (Windows only) · Issue #25099](https://github.com/electron/electron/issues/25099)
-- [Should it be possible to use ws in an Electron renderer process? · Issue #1459](https://github.com/websockets/ws/issues/1459)
-
-### Performance & Animation
-- [The Horror of Blocking Electron's Main Process](https://medium.com/actualbudget/the-horror-of-blocking-electrons-main-process-351bf11a763c)
-- [Performance | Electron](https://www.electronjs.org/docs/latest/tutorial/performance)
-- [Architecting Electron Applications for 60fps](https://www.nearform.com/blog/architecting-electron-applications-for-60fps/)
-- [Advanced Electron.js architecture - LogRocket Blog](https://blog.logrocket.com/advanced-electron-js-architecture/)
-- [Using Queues in Javascript to optimize animations on low-end devices](https://medium.com/tech-p7s1/using-queues-in-javascript-to-optimize-animations-on-low-end-devices-6e3dcad1cfdf)
-
-### Event Ordering & Synchronization
-- [WebSockets guarantee order - so why are my messages scrambled?](https://www.sitongpeng.com/writing/websockets-guarantee-order-so-why-are-my-messages-scrambled)
-- [Handling Race Conditions in Real-Time Apps](https://dev.to/mattlewandowski93/handling-race-conditions-in-real-time-apps-49c8)
-- [Top 7 Practices for Real-Time Data Synchronization](https://www.serverion.com/uncategorized/top-7-practices-for-real-time-data-synchronization/)
-
-### Connection Management
-- [Robust WebSocket Reconnection Strategies in JavaScript With Exponential Backoff](https://dev.to/hexshift/robust-websocket-reconnection-strategies-in-javascript-with-exponential-backoff-40n1)
-- [WebSocket Reconnect: Strategies for Reliable Communication](https://apidog.com/blog/websocket-reconnect/)
-- [Deal with Reconnection Storm — Two Strategies](https://amirsoleimani.medium.com/deal-with-reconnection-storm-two-strategies-4a835d0457f6)
-- [WebSocket Best Practices for Production Applications](https://lattestream.com/blog/websocket-best-practices)
-- [Troubleshooting connection issues | Socket.IO](https://socket.io/docs/v4/troubleshooting-connection-issues/)
-
-### Memory Leaks & IPC
+**Memory Leaks & Cleanup:**
+- [Viacheslav Eremin - Memory Leaks in Electron application](https://www.vb-net.com/AngularElectron/MemoryLeaks.htm)
 - [Diagnosing and Fixing Memory Leaks in Electron Applications](https://www.mindfulchase.com/explore/troubleshooting-tips/frameworks-and-libraries/diagnosing-and-fixing-memory-leaks-in-electron-applications.html)
-- [Memory leak when passing IPC events over contextBridge · Issue #27039](https://github.com/electron/electron/issues/27039)
-- [MaxListenersExceededWarning: Possible EventEmitter memory leak detected · Issue #139](https://github.com/electron/remote/issues/139)
-- [Inter-Process Communication | Electron](https://www.electronjs.org/docs/latest/tutorial/ipc)
+- [Vue.js - Avoiding Memory Leaks](https://v2.vuejs.org/v2/cookbook/avoiding-memory-leaks.html?redirect=true)
+- [MaxListenersExceededWarning: Possible EventEmitter memory leak detected](https://github.com/electron/remote/issues/139)
 
-### File System Watching
-- [A Robust Solution for FileSystemWatcher Firing Events Multiple Times](https://www.codeproject.com/Articles/1220093/A-Robust-Solution-for-FileSystemWatcher-Firing-Eve)
-- [FileSystemWatcher events raise more than once · Issue #347](https://github.com/microsoft/dotnet/issues/347)
-- [Monitoring File System Changes with FileSystemWatcher in .NET](https://www.dotnet-guide.com/filesystemwatcher-class.html)
+**State Synchronization:**
+- [Avoid the State Synchronization Trap](https://ondrejvelisek.github.io/avoid-state-synchronization-trap/)
+- [State Management 2025: React, Server State, URL State, Dapr & Agent Sync](https://medium.com/@QuarkAndCode/state-management-2025-react-server-state-url-state-dapr-agent-sync-d8a1f6c59288)
+- [Synchronizing Application State Across Browser Frames](https://engineering.squarespace.com/blog/2021/synchronizing-application-state-across-browser-frames)
 
-### Claude Code Hooks
-- [Get started with Claude Code hooks](https://code.claude.com/docs/en/hooks-guide)
-- [Claude Code Hook Events Fired Twice When Running from Home Directory · Issue #3465](https://github.com/anthropics/claude-code/issues/3465)
-- [Hooks Completely Non-Functional in Subdirectories (v2.0.27) · Issue #10367](https://github.com/anthropics/claude-code/issues/10367)
-- [A complete guide to hooks in Claude Code: Automating your development workflow](https://www.eesel.ai/blog/hooks-in-claude-code)
+**Animation Conflicts:**
+- [Code refresh results in multiple requestAnimationFrame running in parallel](https://github.com/codesandbox/codesandbox-client/issues/6413)
+- [Applying the cancelAnimationFrame() Method](https://reintech.io/blog/tutorial-applying-cancelanimationframe-method)
+- [Window: requestAnimationFrame() method - MDN](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame)
 
----
+**Keyboard Events:**
+- [React Keyboard Shortcuts: Boost App Performance Using React-Keyhub](https://dev.to/xenral/react-keyboard-shortcuts-boost-app-performance-using-react-keyhub-25co)
+- [Lessons about React, Keyboard Input, Forms, Event Listeners and Debugging](https://alexbostock.medium.com/lessons-about-react-keyboard-input-forms-event-listeners-and-debugging-e79016c20ef1)
 
-**Last Updated:** 2026-01-25
-**Research Confidence:** MEDIUM-HIGH
-**Primary Risk Areas:** Event deduplication, event ordering, main process blocking, state synchronization
+**Layout & Resize:**
+- [Mastering CSS - Solutions to Common Layout Shift Challenges](https://moldstud.com/articles/p-mastering-css-solutions-to-common-layout-shift-challenges-for-web-developers)
+- [viewport-resize-behavior explainer](https://github.com/bramus/viewport-resize-behavior/blob/main/explainer.md)
+
+**Stale Closures:**
+- [Understanding React's useEffectEvent: A Complete Guide to Solving Stale Closures](https://peterkellner.net/2026/01/09/understanding-react-useeffectevent-vs-useeffect/)
+- [Be Aware of Stale Closures when Using React Hooks](https://dmitripavlutin.com/react-hooks-stale-closures/)
+- [Hooks, Dependencies and Stale Closures](https://tkdodo.eu/blog/hooks-dependencies-and-stale-closures)
+
+**Canvas vs SVG:**
+- [SVG vs Canvas vs WebGL: Choosing the Right Graphics Tech in 2025](https://www.svggenie.com/blog/svg-vs-canvas-vs-webgl-performance-2025)
+- [From SVG to Canvas – part 1: making Felt faster](https://felt.com/blog/from-svg-to-canvas-part-1-making-felt-faster)
+- [Performance of canvas versus SVG](https://smus.com/canvas-vs-svg-performance/)
+
+**File Watcher Race Conditions:**
+- [File watcher race condition where Modify event occurs and file contents are empty](https://github.com/denoland/deno/issues/13035)
+- [Race conditions when watching the file system](https://github.com/atom/github/issues/345)
+- [Query Synchronization | Watchman](https://facebook.github.io/watchman/docs/cookies)
+
+**Modal & Component State:**
+- [Opening Modals in Another Component in Angular: Complete Guide with Best Practices 2026](https://copyprogramming.com/howto/proper-way-to-call-modal-dialog-from-another-component-in-angular)
+- [Fixing Persistent Component State Issues in View UI Applications](https://www.mindfulchase.com/explore/troubleshooting-tips/front-end-frameworks/fixing-persistent-component-state-issues-in-view-ui-applications.html)
+
+**Three.js Multi-View:**
+- [Render multiple views - three.js forum](https://discourse.threejs.org/t/render-multiple-views/57999)
+- [What is best choice for manage 2D and 3D at the same time?](https://discourse.threejs.org/t/what-is-best-choice-for-manage-2d-and-3d-at-the-same-time/85452)
+
+**Modern JavaScript Integration:**
+- [JavaScript Frameworks - Heading into 2026](https://dev.to/this-is-learning/javascript-frameworks-heading-into-2026-2hel)
+- [JavaScript in 2026: What We Stopped Using](https://medium.com/front-end-weekly/javascript-in-2026-what-we-stopped-using-and-why-it-matters-da5664709c46)

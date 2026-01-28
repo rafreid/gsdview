@@ -1,266 +1,280 @@
 # Project Research Summary
 
-**Project:** GSD Viewer v1.4 - Claude Code Integration
-**Domain:** Real-time IDE activity visualization for AI assistant operations
-**Researched:** 2026-01-25
+**Project:** GSD Viewer v1.5 - Workflow Diagram View
+**Domain:** Developer tools visualization (Electron desktop app extension)
+**Researched:** 2026-01-28
 **Confidence:** HIGH
 
 ## Executive Summary
 
-GSD Viewer v1.4 will integrate Claude Code hooks to visualize AI assistant file operations in real-time alongside existing file system monitoring. The recommended approach uses Claude Code's native PostToolUse hooks with a file-based event communication pattern that requires zero new dependencies. Hooks write event files to a watched directory, extending the existing chokidar infrastructure rather than introducing WebSocket server complexity. 
+The v1.5 Workflow Diagram feature adds a second visualization mode to GSD Viewer, providing a stage-oriented view of the GSD workflow (Initialize → Discuss → Plan → Execute → Verify → Complete) alongside the existing 3D graph. Research across stack, features, architecture, and pitfalls dimensions reveals that this is primarily an **integration challenge** rather than a greenfield feature. The existing 7600-line renderer.js requires careful extraction of shared state before adding diagram capabilities to avoid memory leaks, stale closures, and race conditions.
 
-The key architectural insight is that Claude Code hooks provide the only reliable way to detect Read operations (which file system watchers cannot capture), while avoiding common pitfalls like duplicate events, event ordering issues, and main process blocking. By reusing the proven chokidar watcher pattern with a simple bash hook script, we achieve real-time Claude operation visualization without adding npm dependencies or server lifecycle management overhead.
+The recommended approach uses **D3.js for SVG rendering** with **@dagrejs/dagre for layout computation**. Both libraries are lightweight, actively maintained, and well-suited for the target scale (50-100 nodes). The diagram will use a **separate DOM container with CSS-based view switching** (hide/show) to preserve state between toggles. Critical architecture decision: **extract state-manager.js first** to centralize selection, project data, and activity feed before building diagram-renderer.js, preventing the stale closure and synchronization pitfalls documented in research.
 
-Critical risks center on event deduplication (Claude Code hooks can fire twice from certain directories) and maintaining 60fps animation performance during operation bursts. These are mitigated through event hashing with time windows and batched animation processing that already exists in v1.3's flash system.
+Key risks center on **multi-view state synchronization** (selection, file updates, animations) and **rendering context conflicts** (Three.js WebGL + SVG). Prevention strategies include explicit lifecycle methods (mount/unmount), centralized keyboard shortcuts with view-aware routing, and atomic file watcher updates with view routing. The most critical pitfall—memory leaks from incomplete cleanup—must be addressed in Phase 1 before diagram features are built.
 
 ## Key Findings
 
 ### Recommended Stack
 
-**NO new npm dependencies required.** The integration leverages existing infrastructure (chokidar, Electron IPC) with Claude Code's native hooks system.
+The workflow diagram feature integrates into the existing Electron renderer process using SVG-based rendering separate from the 3D graph's Canvas/WebGL approach. Research strongly recommends avoiding deprecated or unmaintained libraries (dagre-d3, d3-dag, leader-line) and framework-heavy solutions (React Flow, JointJS) in favor of lightweight, actively maintained tools.
 
 **Core technologies:**
-- **Claude Code Hooks (PostToolUse)**: Native integration for Read/Write/Edit detection - fires automatically on all file operations with structured JSON payloads
-- **File-based communication**: Hook scripts write to `.gsd-viewer/events/`, chokidar watches directory - reuses existing watcher, zero server overhead
-- **Bash hook scripts**: Parse Claude JSON stdin, write event files - simple, portable, no Node.js process spawning needed
-- **Existing chokidar watcher**: Extended to watch `.gsd-viewer/events/` directory - proven infrastructure, already handles debouncing and IPC
+- **D3.js (^7.9.0)**: SVG manipulation and DOM selection — already in dependency tree via 3d-force-graph, provides excellent interactivity for <5000 elements (well within 50-100 node target)
+- **@dagrejs/dagre (^2.0.0)**: Hierarchical graph layout computation — industry standard for directed graphs, actively maintained (Nov 2025 release), perfect for workflow stage hierarchy
+- **svg.js (^3.2.5) OPTIONAL**: Enhanced SVG API if D3 feels too low-level — lightweight (15KB gzipped), only add if needed during implementation
 
 **What NOT to add:**
-- WebSocket server (ws package) - unnecessary complexity for one-way events, IPC is superior for Electron
-- HTTP server - file-based approach simpler, no port conflicts or lifecycle management
-- electron-better-ipc - current IPC patterns work perfectly
-- Electron 28 -> 40 upgrade - not required for integration, low priority (though safe if desired)
+- React Flow (requires framework, adds bundle size)
+- dagre-d3 (deprecated since 2017)
+- d3-dag (light maintenance mode)
+- Flowy.js (XSS vulnerabilities, no npm package)
+- leader-line (archived April 2025)
+- Mermaid.js (text-based generation, not interactive)
+
+**SVG vs Canvas decision:** SVG chosen for diagram because it provides native DOM events for interactivity, CSS styling for states, and accessibility for screen readers. Performance is excellent for <5000 elements. Canvas rejected because it requires manual hit detection and is harder to style. This creates a hybrid architecture: Canvas (3D graph) + SVG (2D diagram) in separate containers.
 
 ### Expected Features
 
-**Must have (table stakes for v1.4):**
-- **Claude Read operation visualization** - Critical differentiator; no other tool shows reads
-- **Operation-specific flash colors** - Blue for reads, yellow for writes, green for creates, red for deletes
-- **Enhanced flash effects** - User requirement: larger radius, brighter glow (current + 50% radius, + 25% intensity)
-- **Source attribution** - Distinguish Claude operations from file system events in visualization
+Research identified clear patterns from CI/CD pipeline visualizations (GitHub Actions, GitLab CI), kanban boards, and swimlane diagrams. Feature set divided into table stakes, differentiators, and anti-features.
 
-**Should have (competitive differentiators):**
-- **Real-time feedback (<300ms latency)** - Industry standard for perceived instantaneous response
-- **Synchronized AI operation feedback** - Visual confirmation matching Claude's actual file access timing
-- **Activity feed integration** - Claude operations appear in existing activity log with source indicator
+**Must have (table stakes):**
+- Left-to-right pipeline flow with stage containers (Initialize → Complete)
+- Color-coded status indicators per stage (green/yellow/gray)
+- Artifact blocks nested within stages
+- Connection lines showing sequential flow
+- Click to select artifact (opens inspector, syncs with graph)
+- Hover tooltips with metadata
+- Expand/collapse stage detail (progressive disclosure)
+- Current stage highlighting based on STATE.md
+- Scroll/pan support for horizontal layout
+- Live file updates via existing watcher
 
-**Defer (v2+ or not needed):**
-- OS-level read detection (strace/inotify) - complex, platform-specific, Claude hooks are superior
-- VS Code extension for non-Claude editors - separate project scope
-- Accessibility reduced-motion support - should add but not blocking
-- Full audit trail with indefinite retention - anti-feature, privacy concerns
-- System-wide file monitoring - performance nightmare, security risks
-- Built-in file editing - violates viewer-only constraint
+**Should have (differentiators):**
+- Two-way sync with 3D graph (click in diagram → fly to node in graph)
+- "Why it works" visual indicators (context usage, parallel lanes, commit markers)
+- Context window usage bars per stage
+- Parallel agent swimlanes showing concurrent work
+- Atomic commit markers in Execute stage
+- Timeline replay updates diagram state
+- Phase bookmarks (reuse existing 1-9 shortcuts)
+- Diagram export (SVG/PNG)
+
+**Defer (v2+):**
+- Timeline replay in diagram view (complex historical state)
+- Parallel agent swimlanes (requires multi-agent execution detection)
+- Progress rings per stage (polish feature)
+- Minimap adaptation (existing minimap works for graph)
+
+**Anti-features (deliberately NOT build):**
+- Editable diagram (GSD workflow is fixed, not user-customizable)
+- Freeform flowchart editor (adds complexity without value)
+- Vertical swimlanes per file (too many lanes = visual noise)
+- Animation-heavy transitions (distracts from information)
+- Everything expanded by default (overwhelming)
+- Detailed content preview inline (use inspector modal)
+- Zoom in/out (scroll/pan sufficient for 2D)
 
 ### Architecture Approach
 
-The architecture extends existing patterns rather than introducing new systems. Claude Code hooks POST JSON to bash scripts that write event files, chokidar detects new files and forwards via existing IPC to renderer, where existing flash animation system visualizes operations.
+The diagram integrates as a **parallel rendering mode** using CSS-based view switching to preserve state and avoid re-initialization overhead. A new diagram-renderer.js handles SVG rendering while reusing existing parsers and graph-builder data through a new workflow-layout.js transform layer.
 
 **Major components:**
 
-1. **Claude Code Hooks Configuration** (`.claude/settings.json`) - PostToolUse matcher for Read/Write/Edit tools, executes hook script with JSON stdin
-2. **Hook Observer Script** (`.gsd-viewer/hooks/notify-electron.sh`) - Parses JSON stdin from Claude hooks, writes event file with operation metadata, exits immediately (non-blocking)
-3. **Extended Chokidar Watcher** (`src/main/main.js`) - Watches `.gsd-viewer/events/` directory, detects new event files, enriches with node ID/source type, forwards via IPC, cleans up event files
-4. **IPC Extension** (`src/main/preload.js`) - New `onClaudeOperation` listener exposes Claude events to renderer process
-5. **Renderer Integration** (`src/renderer/renderer.js`) - Handles `claude-operation` events, triggers flash animations with Claude-specific styling, updates activity feed and heat map
+1. **state-manager.js (NEW)** — Centralized state using Proxy pattern for reactivity; manages currentGraphData, selectedNode, activityEntries, bookmarks; replaces global state scattered in renderer.js
+2. **graph-renderer.js (REFACTOR from renderer.js)** — Extract 3D-specific logic, import state from state-manager, export public API (selectNode, focusCamera); keep existing graph/physics/camera code
+3. **view-controller.js (NEW)** — Handle view switching with CSS hide/show, sync current selection to newly visible view, coordinate keyboard shortcuts per view
+4. **workflow-layout.js (NEW)** — Transform graph-builder output to workflow stage structure (stages → phases → artifacts), extract ROADMAP phase order, add horizontal positioning
+5. **diagram-renderer.js (NEW)** — SVG workflow rendering using D3 + dagre, nested phase cards with artifact lists, click handlers route through state-manager, subscribe to activity updates
 
-**Key architectural decisions:**
-- File-based over WebSocket: Reuses proven infrastructure, no server lifecycle, no port conflicts, atomic writes prevent races
-- Event enrichment in main process: Convert absolute paths to graph node IDs before sending to renderer
-- Dual event sources: Claude hooks (reads + writes) + chokidar (writes only) provide redundancy and different timing characteristics
-- Non-blocking hooks: Always exit 0, log errors to file, never block Claude operations
+**Integration strategy:**
+- Phase 1: Extract shared state (decouple before adding complexity)
+- Phase 2: Add view switching UI (tab controls, CSS containers)
+- Phase 3: Build workflow layout transform (data layer before rendering)
+- Phase 4: Implement SVG diagram renderer (visual implementation)
+- Phase 5: Wire state synchronization (selection, file updates)
+- Phase 6: Add diagram-specific features (collapse, export)
+
+**Data flow:**
+```
+PROJECT LOAD: main.js → parsers → graph-builder → state-manager → [graph-renderer | diagram-renderer]
+FILE CHANGE: main.js watcher → state-manager (update + flash) → both renderers
+USER SELECTION: either renderer → state-manager → view-controller → sync both views
+```
+
+**Architecture decisions:**
+- Separate DOM containers (graph uses Canvas/WebGL, diagram uses SVG)
+- Hide/show with display:none (preserves state, faster than destroy/recreate)
+- Shared state via Proxy pattern (2026 best practice for Vanilla JS)
+- View-specific animation loops with cancel on switch
+- Atomic file watcher updates with view routing to prevent race conditions
 
 ### Critical Pitfalls
 
-1. **Duplicate Hook Events from Directory Context** - Claude Code hooks fire twice when running from home directory. Mitigation: Event deduplication layer with hash + timestamp window (200-500ms), idempotency keys, already-processed tracking.
+Research identified 10 pitfalls specific to adding multi-view rendering to complex Electron apps. Top 5 critical risks:
 
-2. **Event Ordering Lost in Async Processing** - TCP guarantees WebSocket order, but async handlers race causing wrong animation sequence. Mitigation: Serial event queue with FIFO processing, not parallel handlers (though less critical for file-based approach where chokidar already serializes).
+1. **Memory leaks from incomplete view cleanup** — With 94+ event listeners and continuous animation frames in graph view, switching without explicit mount/unmount lifecycle causes memory accumulation. Prevention: track listeners in arrays, cancel animation frames, dispose Three.js objects, test 20+ view switches in DevTools Memory panel. **Address in Phase 1.**
 
-3. **Main Process Blocking from WebSocket Server** - Running server in main process blocks renderer, freezes animations. Mitigation: File-based approach avoids this entirely; no server process needed.
+2. **Stale closures in event handlers** — Keyboard shortcuts, file watcher callbacks, and IPC handlers capture view state at registration time. After view switch, handlers reference outdated state. Prevention: use function references with current state lookup `() => getCurrentView().selectedNode`, re-register callbacks on switch, pass state as parameters. **Address in Phase 1.**
 
-4. **Animation Queue Overflow from Event Bursts** - Git operations or bulk saves create hundreds of events in milliseconds, overwhelming animation system. Mitigation: Event batching with 100-200ms window, animation pooling, priority queue for visible nodes only, frame budget enforcement.
+3. **Race conditions in file watcher updates** — File watcher emits on separate threads; simultaneous updates to graph and diagram cause partial updates, render conflicts, animation collisions. Prevention: centralize file change handling with view routing, debounce 50-100ms, use update queue with atomic processing. **Address in Phase 2.**
 
-5. **Memory Leaks from Unregistered Event Listeners** - Listeners accumulate without cleanup, memory grows unbounded. Mitigation: Always pair addEventListener with removeEventListener, component lifecycle cleanup hooks, WeakMap for graph node callbacks.
+4. **Uncanceled animation frames from both views** — Graph runs continuous requestAnimationFrame loop. If diagram adds animations and both run simultaneously, they compete for frame budget and accumulate on hot-reload. Prevention: maintain single activeAnimationFrameId, cancel previous loop before starting new one, pause inactive view's render loop. **Address in Phase 1.**
+
+5. **Layout thrashing during view resize/switch** — Switching views changes container dimensions. If both views read/write layout properties in rapid succession, browser forces synchronous reflows. Prevention: batch reads then writes, use ResizeObserver, debounce resize handlers 100-150ms, use transform/opacity for GPU-accelerated animations. **Address in Phase 2.**
+
+Additional concerns: keyboard shortcut conflicts (centralized manager needed), shared inspector modal state leaking between views (reset on switch), Canvas/SVG performance collision (hide inactive view), selection mapping complexity (many-to-many), diagram layout recalculation cost (debounce, use dirty flags).
 
 ## Implications for Roadmap
 
-Based on research, suggested phase structure follows natural dependency chain from hook infrastructure to visual integration:
+Based on research, the feature requires **architectural foundation before visual implementation**. Dependencies dictate a 6-phase approach with state management and cleanup patterns established first to avoid pitfalls. Total estimated time: 8-12 days.
 
-### Phase 1: Hook Infrastructure
-**Rationale:** Foundation must work before any UI integration. Hooks and event files are invisible infrastructure that can be tested independently.
+### Phase 1: Architecture Foundation (1-2 days)
+**Rationale:** Establishes clean separation and lifecycle patterns before adding diagram complexity. Prevents memory leaks, stale closures, and animation conflicts identified as critical pitfalls.
 
-**Delivers:**
-- Claude Code hooks configuration in `.claude/settings.json`
-- Hook observer script in `.gsd-viewer/hooks/notify-electron.sh`
-- Event file schema definition
+**Delivers:** state-manager.js with centralized state, renderer.js refactored to graph-renderer.js with state imports, explicit lifecycle methods (mount/unmount), animation frame cleanup patterns.
 
-**Addresses Features:**
-- Claude Read operation detection (FEATURES.md table stakes)
-- Foundation for all Claude integration features
+**Addresses:** Pitfalls 1, 2, 4 (memory leaks, stale closures, animation conflicts)
 
-**Avoids Pitfalls:**
-- Duplicate events (add deduplication from start)
-- Non-blocking hook pattern (never exit code 2)
-- Hooks from subdirectories (document working directory requirement)
+**Avoids:** Building diagram on top of tightly-coupled monolithic renderer.js
 
-**Research needed:** None - Claude Code hooks API is well-documented
+**Success criteria:** Graph view works identically after refactor, state centralized, lifecycle methods tested
 
-### Phase 2: Chokidar Extension & IPC
-**Rationale:** Extends proven existing infrastructure (chokidar watcher, IPC channels) without risk to current functionality. Can test event flow before touching renderer.
+### Phase 2: View Switching UI (1 day)
+**Rationale:** UI framework for both views before building diagram. Implements CSS-based hide/show strategy to preserve state between toggles.
 
-**Delivers:**
-- Extended chokidar to watch `.gsd-viewer/events/`
-- Event enrichment logic (path to node ID mapping)
-- New IPC channel `claude-operation`
-- Preload script `onClaudeOperation` listener
+**Delivers:** Tab controls in index.html, view-controller.js with CSS switching, keyboard shortcut routing per view, centralized file watcher handler with view routing.
 
-**Uses Stack:**
-- Existing chokidar watcher (STACK.md - no changes needed)
-- Electron IPC (STACK.md - proven pattern)
-- Node.js built-in fs module
+**Uses:** D3.js (already installed), CSS transitions
 
-**Implements Architecture:**
-- Extended Chokidar Watcher component
-- IPC Extension component
-- Event enrichment layer
+**Addresses:** Pitfalls 3, 5 (race conditions, layout thrashing)
 
-**Avoids Pitfalls:**
-- IPC serialization limits (validate plain object structure)
-- Event ordering (chokidar already serializes events)
-- Memory leaks (establish cleanup pattern)
+**Success criteria:** Can toggle between views (diagram empty but container exists), no layout stuttering, keyboard shortcuts route correctly
 
-**Research needed:** None - extends existing code patterns
+### Phase 3: Workflow Layout Transform (1-2 days)
+**Rationale:** Data layer before rendering. Transforms graph-builder output into workflow stage structure needed for diagram.
 
-### Phase 3: Renderer Integration & Flash Animations
-**Rationale:** Only touches renderer after event flow proven working end-to-end. Reuses existing flash animation system, just adds new trigger path.
+**Delivers:** workflow-layout.js transform, unit tests with real GSDv project data, integration into project load flow.
 
-**Delivers:**
-- Handler for `claude-operation` IPC events
-- Operation-specific flash colors (blue for reads, yellow/green/red for writes)
-- Enhanced flash effects (larger radius, brighter glow per user requirement)
-- Activity feed Claude operation entries
+**Implements:** Workflow stage mapping (Initialize → Discuss → Plan → Execute → Verify → Complete), phase/artifact nesting
 
-**Addresses Features:**
-- Operation-specific visual indicators (FEATURES.md table stakes)
-- Enhanced flash effects (FEATURES.md user requirement)
-- Source attribution (FEATURES.md differentiator)
-- Activity feed integration (FEATURES.md differentiator)
+**Success criteria:** Console log shows correct workflow structure from graph data
 
-**Implements Architecture:**
-- Renderer Integration component
-- Reuses existing flash animation system from v1.3
+### Phase 4: Basic Diagram Rendering (2-3 days)
+**Rationale:** Core visual implementation using recommended stack (D3 + dagre + SVG).
 
-**Avoids Pitfalls:**
-- Animation queue overflow (add batching before processing events)
-- Dual event sources (flash once for Claude, once for chokidar with different colors)
-- Frame budget (enforce 60fps target, skip animations if falling behind)
+**Delivers:** diagram-renderer.js with SVG rendering, dagre layout computation, horizontal swim lanes for stages, nested phase cards with artifact lists, basic status colors.
 
-**Research needed:** None - extends existing animation code
+**Uses:** D3.js ^7.9.0, @dagrejs/dagre ^2.0.0
 
-### Phase 4: Performance & Polish
-**Rationale:** Handles edge cases discovered during testing. Adds user-facing error messages and debug logging.
+**Implements:** Table stakes features (stage containers, artifact blocks, connection lines, status indicators)
 
-**Delivers:**
-- Event batching for burst handling (100-200ms window)
-- Event deduplication layer for duplicate hook fires
-- Frame budget monitoring and enforcement
-- User notifications if hooks not configured
-- Debug mode showing hook traffic
-- Cross-platform testing (Windows, Mac, Linux)
+**Success criteria:** Diagram view shows workflow stages and phases visually, layout responds to window resize
 
-**Avoids Pitfalls:**
-- Animation queue overflow (batching implementation)
-- Duplicate events (deduplication implementation)
-- File system watcher duplicates (extend debouncing to Claude events)
+### Phase 5: Interaction Sync (1-2 days)
+**Rationale:** Wire state between views to enable two-way selection sync and file updates.
 
-**Research needed:** None - standard optimization patterns
+**Delivers:** Click handlers in diagram-renderer routing through state-manager, selection sync between views, hover tooltips, inspector modal integration, activity feed updates to both views.
+
+**Implements:** Two-way sync pattern (click diagram → highlight graph, vice versa)
+
+**Addresses:** Pitfall 7, 9 (inspector state leaking, selection sync complexity)
+
+**Success criteria:** Selection persists across view switches, inspector opens correct file from both views
+
+### Phase 6: Real-Time Updates (1 day)
+**Rationale:** Leverage existing file watcher infrastructure to update diagram on file changes.
+
+**Delivers:** Diagram subscribes to activity updates, card highlight animation on file change, debounced layout recalculation for structure changes.
+
+**Implements:** Live file updates (table stakes feature)
+
+**Addresses:** Pitfall 10 (layout recalculation cost)
+
+**Success criteria:** File changes flash in both views, rapid changes don't freeze diagram
+
+### Phase 7: Diagram-Specific Features (1-2 days)
+**Rationale:** Quality-of-life features after core works. Adds differentiators from feature research.
+
+**Delivers:** Expand/collapse phase cards, current stage highlighting, responsive layout polish, diagram-specific styling, optional SVG export.
+
+**Implements:** Progressive disclosure (expand/collapse), should-have differentiators
+
+**Success criteria:** Diagram view feels polished, expand/collapse smooth, export works
 
 ### Phase Ordering Rationale
 
-- **Infrastructure first (Phase 1-2):** Hook configuration and event flow must work before any visual integration. Can be tested in isolation with curl/manual event files.
+- **State management first** prevents architecture debt from compounding when diagram is added
+- **View switching second** establishes container structure before rendering logic
+- **Data transform third** decouples diagram layout from rendering implementation
+- **Rendering fourth** allows visual iteration without affecting state/sync logic
+- **Interaction sync fifth** builds on stable rendering foundation
+- **Real-time updates sixth** adds complexity after basic interactions work
+- **Polish last** adds nice-to-haves without blocking core functionality
 
-- **Renderer last (Phase 3):** Only touch renderer after event pipeline proven. Minimizes risk to existing v1.3 functionality (flash animations, activity feed, heat map).
-
-- **Performance separate (Phase 4):** Edge case handling comes after basic flow working. Allows real usage data to guide optimization priorities.
-
-- **Incremental testability:** Each phase can be tested independently. Phase 1 validates hooks fire, Phase 2 validates events reach renderer console, Phase 3 validates animations display.
-
-- **Parallel work opportunity:** Documentation, hook script testing, and event schema design can happen alongside Phase 2 implementation.
+This ordering explicitly avoids the "build everything at once" anti-pattern that leads to debugging nightmares when state, rendering, and interactions interfere. Each phase has clear success criteria and can be tested independently.
 
 ### Research Flags
 
-**Phases needing deeper research during planning:** None
+**Phases needing deeper research during planning:**
+- **Phase 4 (Diagram Rendering):** Dagre layout configuration for nested hierarchy needs experimentation with real GSD project structure to determine optimal rankdir, ranksep, nodesep parameters
+- **Phase 5 (Interaction Sync):** Selection mapping between graph nodes and diagram artifacts is many-to-many; may need phase-specific research to handle edge cases (selecting plan vs. task vs. file)
 
-All four phases use well-documented patterns:
-- **Phase 1:** Claude Code hooks API officially documented, bash scripting is standard
-- **Phase 2:** Chokidar and Electron IPC are existing working code, just extending
-- **Phase 3:** Existing animation system from v1.3, just adding new triggers
-- **Phase 4:** Standard performance patterns (batching, debouncing, profiling)
-
-**Note on confidence:** Research quality is HIGH across all areas. Claude Code hooks have official documentation, Electron patterns are proven in existing codebase, and pitfalls are well-documented from community experience. The recommended file-based approach is simpler than WebSocket alternatives researched, increasing confidence further.
+**Phases with standard patterns (skip research-phase):**
+- **Phase 1 (Architecture Foundation):** State management with Proxy pattern is well-documented in 2026 Vanilla JS resources
+- **Phase 2 (View Switching):** CSS hide/show and view controller patterns are standard SPA approaches
+- **Phase 3 (Workflow Layout):** Data transformation is straightforward mapping, no special patterns needed
+- **Phase 6 (Real-Time Updates):** File watcher integration already exists, extension is incremental
+- **Phase 7 (Diagram-Specific Features):** Expand/collapse and export are standard SVG techniques
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Official Claude Code hooks docs via WebFetch, file-based approach reuses existing chokidar, no new dependencies needed |
-| Features | MEDIUM | Clear table stakes (operation visualization) and differentiators (reads detection), but animation tuning will need iteration based on user feedback |
-| Architecture | HIGH | Extends proven patterns from existing v1.3 code, file-based approach simpler than researched WebSocket alternative |
-| Pitfalls | HIGH | Multiple documented sources for each critical pitfall, community examples of solutions, integration risks identified from v1.3 architecture |
+| Stack | HIGH | D3 and dagre have official docs, active development, verified maintenance; svg.js is optional fallback; no deprecated libraries recommended |
+| Features | HIGH | Extensive research into CI/CD visualizations, workflow diagrams, and developer tool UX patterns; clear table stakes vs. differentiators |
+| Architecture | HIGH | Separate rendering modes with shared state is proven pattern; hide/show vs. destroy/recreate trade-offs well-documented; hybrid Canvas+SVG approach validated |
+| Pitfalls | HIGH | Multi-view state synchronization, memory leaks, and animation conflicts have extensive documentation and real-world examples; prevention strategies concrete |
 
 **Overall confidence:** HIGH
 
-The integration approach is well-researched and conservative (extends existing infrastructure rather than adding complexity). Primary uncertainty is user experience tuning (flash intensity, batching thresholds, color choices) which requires iteration after basic functionality works.
+Research covered all dimensions thoroughly with recent sources (2025-2026), official documentation, and real-world examples. The main unknowns are implementation-specific (dagre layout parameters, selection mapping edge cases) which can be resolved during execution.
 
 ### Gaps to Address
 
-**Gap 1: Event schema evolution**
-- **Issue:** Claude Code hooks payload format could change in future releases
-- **Handling:** Version lock hook configuration, add schema validation, graceful degradation if fields missing
-- **Phase:** Phase 1 (add schema validation from start)
+- **Dagre layout parameters:** Research provides library recommendation but not specific rankdir/ranksep/nodesep values for nested GSD workflow. Address during Phase 4 implementation with experimentation.
 
-**Gap 2: Animation tuning parameters**
-- **Issue:** Optimal flash duration, glow intensity, batch window unknown until real usage
-- **Handling:** Make all parameters configurable in settings, add debug mode showing event rates, plan to iterate based on user feedback
-- **Phase:** Phase 3 (add configuration UI), Phase 4 (tune based on testing)
+- **Selection mapping complexity:** Many-to-many relationship between graph nodes (files, phases, plans) and diagram elements (stages, artifacts) needs detailed mapping table. Address during Phase 5 with test cases covering all node types.
 
-**Gap 3: Multi-instance Electron behavior**
-- **Issue:** Research didn't cover multiple GSD Viewer instances for different projects
-- **Handling:** File-based approach naturally supports this (each project has own `.gsd-viewer/events/` directory), but test explicitly
-- **Phase:** Phase 4 (cross-platform testing should include multi-instance scenario)
+- **Performance under extreme load:** Research assumes 50-100 nodes (typical GSD project). If project has 500+ files/phases, SVG may need virtual rendering. Address during Phase 6 with large project testing.
 
-**Gap 4: Historical replay when app closed**
-- **Issue:** User runs Claude while GSD Viewer closed, expects to see operations when reopening
-- **Handling:** Defer to v1.5+ (requires parsing Claude transcript JSON on startup, out of scope for v1.4 MVP)
-- **Phase:** Not addressed in v1.4, document as known limitation
+- **Mobile/touch support:** Research focused on desktop Electron app. If mobile browser access added later, diagram needs touch gesture handlers. Defer to post-v1.5.
+
+- **Accessibility:** SVG provides natural DOM structure for screen readers, but research didn't verify ARIA label best practices for workflow diagrams. Address during Phase 7 with WCAG compliance check.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [Claude Code Hooks Reference](https://code.claude.com/docs/en/hooks) - Official API documentation, exact JSON schemas
-- [Claude Code Hooks Guide](https://code.claude.com/docs/en/hooks-guide) - Getting started patterns
-- [Electron IPC Tutorial](https://www.electronjs.org/docs/latest/tutorial/ipc) - Official IPC patterns
-- [chokidar GitHub Repository](https://github.com/paulmillr/chokidar) - File watcher capabilities and limitations
-- Existing GSD Viewer codebase - v1.3 architecture patterns (main.js, renderer.js, preload.js)
+- Official D3.js documentation (d3js.org) — SVG manipulation, transitions, selections
+- Dagre GitHub repository (github.com/dagrejs/dagre) — Layout algorithms, API, recent releases
+- Electron performance guide (electronjs.org/docs/latest/tutorial/performance) — Renderer process optimization, memory management
+- Three.js forum discussions (discourse.threejs.org) — Multi-view rendering, WebGL context management
+- MDN Web Docs (developer.mozilla.org) — requestAnimationFrame, ResizeObserver, Proxy pattern
+- React documentation on stale closures (react.dev) — useEffectEvent patterns applicable to vanilla JS
 
 ### Secondary (MEDIUM confidence)
-- [Hooks in Claude Code (eesel.ai)](https://www.eesel.ai/blog/hooks-in-claude-code) - Community guide with examples
-- [Multi-Agent Observability System](https://github.com/disler/claude-code-hooks-multi-agent-observability) - Real-world hook integration example
-- [IPC vs WebSocket comparison](https://www.scriptol.com/javascript/ipc-vs-websocket.php) - Performance characteristics
-- [NN/g Animation Duration Guidelines](https://www.nngroup.com/articles/animation-duration/) - UX timing standards
-- [Electron Performance Guide](https://www.electronjs.org/docs/latest/tutorial/performance) - Main process blocking patterns
+- JavaScript diagramming libraries comparison (jointjs.com/blog, jqueryscript.net) — 2026 ecosystem survey, library trade-offs
+- GitHub Actions workflow visualization (docs.github.com/actions) — UX patterns for pipeline visualizations
+- GitLab CI pipeline editor (docs.gitlab.com/ci) — Multi-level hierarchy patterns, dependency visualization
+- State management in Vanilla JS (medium.com/@chirag.dave, nucamp.co) — 2026 trends, Proxy pattern adoption
+- SVG vs Canvas performance (blog.logrocket.com, augustinfotech.com) — Use case comparison, hybrid approaches
+- Canvas vs SVG animation benchmarks (smus.com, apache.github.io/echarts-handbook) — Performance characteristics
 
-### Tertiary (LOW confidence, needs validation)
-- Various Stack Overflow discussions on file watcher debouncing techniques
-- Blog posts on animation queue optimization (general patterns, not Electron-specific)
-
-### Known Issues Documented
-- [Claude Code Hook Events Fired Twice - Issue #3465](https://github.com/anthropics/claude-code/issues/3465) - Duplicate events from home directory
-- [Hooks Non-Functional in Subdirectories - Issue #10367](https://github.com/anthropics/claude-code/issues/10367) - Working directory dependency
-- [Memory leak passing IPC events - Issue #27039](https://github.com/electron/electron/issues/27039) - Event listener cleanup importance
+### Tertiary (LOW confidence, validated with multiple sources)
+- Electron memory leak diagnostics (vb-net.com, mindfulchase.com) — Memory profiling techniques
+- File watcher race conditions (github.com/denoland/deno/issues, github.com/atom/github/issues) — Concurrency patterns
+- Keyboard shortcut conflicts (dev.to/xenral, alexbostock.medium.com) — React keyboard handling (patterns applicable to vanilla)
 
 ---
-*Research completed: 2026-01-25*
+*Research completed: 2026-01-28*
 *Ready for roadmap: yes*
-*Recommended approach: File-based event communication with Claude Code PostToolUse hooks*
-*Critical success factor: Event deduplication and animation batching from Phase 1*
