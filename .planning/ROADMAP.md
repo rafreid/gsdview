@@ -96,7 +96,7 @@ Plans:
 
 ---
 
-### Phase 33: Interactivity
+### Phase 33: Interactivity ✓
 
 **Goal:** User can interact with diagram artifacts and sync selection between diagram and graph views
 
@@ -104,19 +104,21 @@ Plans:
 
 **Requirements:** INTR-01, INTR-02, INTR-03, INTR-04, INTR-05, INTR-06
 
-**Plans:** 2 plans
+**Plans:** 2 plans ✓
 
 Plans:
-- [ ] 33-01-PLAN.md — Diagram click, hover tooltip, stage expand/collapse
-- [ ] 33-02-PLAN.md — Two-way selection sync and bookmark navigation
+- [x] 33-01-PLAN.md — Diagram click, hover tooltip, stage expand/collapse
+- [x] 33-02-PLAN.md — Two-way selection sync and bookmark navigation
 
 **Success Criteria:**
-1. User clicks artifact in diagram and file inspector modal opens showing file contents
-2. User hovers over artifact and sees tooltip with file metadata (name, size, modified date)
-3. User clicks stage header and sees artifact detail expand/collapse smoothly
-4. User clicks artifact in diagram and corresponding node highlights in graph view
-5. User clicks node in graph view and corresponding artifact highlights in diagram view
-6. User presses bookmark shortcuts (1-9) in diagram view and camera flies to bookmarked phase
+1. ✓ User clicks artifact in diagram and file inspector modal opens showing file contents
+2. ✓ User hovers over artifact and sees tooltip with file metadata (name, size, modified date)
+3. ✓ User clicks stage header and sees artifact detail expand/collapse smoothly
+4. ✓ User clicks artifact in diagram and corresponding node highlights in graph view
+5. ✓ User clicks node in graph view and corresponding artifact highlights in diagram view
+6. ✓ User presses bookmark shortcuts (1-9) in diagram view and camera flies to bookmarked phase
+
+**Completed:** 2026-01-28
 
 ---
 
@@ -162,9 +164,9 @@ Plans:
 | v1.2 | 5 | 7 | Shipped 2026-01-24 |
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
 | v1.4 | 4 | 5 | Shipped 2026-01-25 |
-| v1.5 | 6 | 10+ | Phase 33 planning |
+| v1.5 | 6 | 10+ | Phase 33 complete |
 | **Total** | **35** | **76+** | |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-28 (Phase 33 planned)*
+*Last updated: 2026-01-28 (Phase 33 complete)*

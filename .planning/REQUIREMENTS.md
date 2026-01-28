@@ -38,14 +38,14 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 - [x] **ARTF-04**: Current stage/phase highlighted based on STATE.md
 - [ ] **ARTF-05**: Execute stage shows atomic commit markers on completed tasks
 
-### Interactivity
+### Interactivity ✓
 
-- [ ] **INTR-01**: Click artifact opens file inspector modal
-- [ ] **INTR-02**: Hover shows tooltip with file metadata
-- [ ] **INTR-03**: Click stage header to expand/collapse artifact detail
-- [ ] **INTR-04**: Two-way sync: select in diagram → highlights corresponding node in graph
-- [ ] **INTR-05**: Two-way sync: select in graph → highlights corresponding artifact in diagram
-- [ ] **INTR-06**: Bookmark shortcuts (1-9) work in diagram view for quick phase navigation
+- [x] **INTR-01**: Click artifact opens file inspector modal
+- [x] **INTR-02**: Hover shows tooltip with file metadata
+- [x] **INTR-03**: Click stage header to expand/collapse artifact detail
+- [x] **INTR-04**: Two-way sync: select in diagram → highlights corresponding node in graph
+- [x] **INTR-05**: Two-way sync: select in graph → highlights corresponding artifact in diagram
+- [x] **INTR-06**: Bookmark shortcuts (1-9) work in diagram view for quick phase navigation
 
 ### Real-Time Updates
 
@@ -101,12 +101,12 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 | ARTF-03 | Phase 32 | Complete |
 | ARTF-04 | Phase 32 | Complete |
 | ARTF-05 | Phase 35 | Pending |
-| INTR-01 | Phase 33 | Pending |
-| INTR-02 | Phase 33 | Pending |
-| INTR-03 | Phase 33 | Pending |
-| INTR-04 | Phase 33 | Pending |
-| INTR-05 | Phase 33 | Pending |
-| INTR-06 | Phase 33 | Pending |
+| INTR-01 | Phase 33 | Complete |
+| INTR-02 | Phase 33 | Complete |
+| INTR-03 | Phase 33 | Complete |
+| INTR-04 | Phase 33 | Complete |
+| INTR-05 | Phase 33 | Complete |
+| INTR-06 | Phase 33 | Complete |
 | LIVE-01 | Phase 34 | Pending |
 | LIVE-02 | Phase 34 | Pending |
 | LIVE-03 | Phase 34 | Pending |
@@ -118,4 +118,4 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-01-28*
-*Last updated: 2026-01-28 (Phase 32 requirements complete)*
+*Last updated: 2026-01-28 (Phase 33 requirements complete)*
