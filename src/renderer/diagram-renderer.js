@@ -264,8 +264,116 @@ function renderPipeline(g, data) {
 }
 
 /**
- * Render artifact blocks (stub for Task 2)
+ * Get icon for artifact based on file type
+ */
+function getArtifactIcon(filename) {
+  if (filename.includes('CONTEXT')) return '📋';
+  if (filename.includes('RESEARCH')) return '🔬';
+  if (filename.includes('PLAN')) return '📝';
+  if (filename.includes('SUMMARY')) return '✅';
+  return '📄';
+}
+
+/**
+ * Get status symbol for artifact
+ */
+function getStatusSymbol(status) {
+  if (status === 'done') return '✓';
+  if (status === 'in-progress') return '◐';
+  return '○';
+}
+
+/**
+ * Truncate artifact name for display
+ */
+function truncateArtifactName(name, maxLength = 25) {
+  if (name.length <= maxLength) return name;
+  return name.substring(0, maxLength - 3) + '...';
+}
+
+/**
+ * Render artifact blocks
  */
 function renderArtifacts(stageGroups) {
-  // Placeholder - will be implemented in Task 2
+  stageGroups.each(function(d) {
+    const stage = d.stage;
+    const artifacts = stage.artifacts || [];
+
+    if (artifacts.length === 0) return;
+
+    const group = d3.select(this);
+    const contentY = STAGE_HEADER_HEIGHT + ARTIFACT_SPACING;
+    const maxArtifacts = Math.floor((STAGE_HEIGHT - STAGE_HEADER_HEIGHT - ARTIFACT_SPACING * 2) / (ARTIFACT_HEIGHT + ARTIFACT_SPACING));
+
+    // Render artifacts (limit to fit in stage)
+    const visibleArtifacts = artifacts.slice(0, maxArtifacts);
+
+    const artifactGroups = group.selectAll('.artifact')
+      .data(visibleArtifacts)
+      .enter()
+      .append('g')
+      .attr('class', 'artifact')
+      .attr('transform', (artifact, i) =>
+        `translate(${ARTIFACT_SPACING}, ${contentY + i * (ARTIFACT_HEIGHT + ARTIFACT_SPACING)})`
+      );
+
+    // Artifact background
+    artifactGroups.append('rect')
+      .attr('width', STAGE_WIDTH - ARTIFACT_SPACING * 2)
+      .attr('height', ARTIFACT_HEIGHT)
+      .attr('fill', artifact => {
+        const baseColor = STATUS_COLORS[artifact.status] || STATUS_COLORS.missing;
+        // Slightly transparent for better visual hierarchy
+        return baseColor + '33'; // 20% opacity
+      })
+      .attr('stroke', artifact => STATUS_COLORS[artifact.status] || STATUS_COLORS.missing)
+      .attr('stroke-width', 1)
+      .attr('rx', 4);
+
+    // Status indicator bar (left edge)
+    artifactGroups.append('rect')
+      .attr('width', 4)
+      .attr('height', ARTIFACT_HEIGHT)
+      .attr('fill', artifact => STATUS_COLORS[artifact.status] || STATUS_COLORS.missing)
+      .attr('rx', 4);
+
+    // Artifact icon
+    artifactGroups.append('text')
+      .attr('x', 15)
+      .attr('y', ARTIFACT_HEIGHT / 2)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('font-size', '18px')
+      .text(artifact => getArtifactIcon(artifact.name));
+
+    // Artifact name
+    artifactGroups.append('text')
+      .attr('x', 30)
+      .attr('y', ARTIFACT_HEIGHT / 2 - 6)
+      .attr('fill', 'white')
+      .attr('font-size', '12px')
+      .text(artifact => truncateArtifactName(artifact.name));
+
+    // Status symbol
+    artifactGroups.append('text')
+      .attr('x', STAGE_WIDTH - ARTIFACT_SPACING * 2 - 10)
+      .attr('y', ARTIFACT_HEIGHT / 2)
+      .attr('text-anchor', 'end')
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', artifact => STATUS_COLORS[artifact.status] || STATUS_COLORS.missing)
+      .attr('font-size', '16px')
+      .attr('font-weight', 'bold')
+      .text(artifact => getStatusSymbol(artifact.status));
+
+    // Show artifact count if there are more than fit
+    if (artifacts.length > maxArtifacts) {
+      group.append('text')
+        .attr('x', STAGE_WIDTH / 2)
+        .attr('y', STAGE_HEIGHT - 15)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#95A5A6')
+        .attr('font-size', '11px')
+        .text(`+${artifacts.length - maxArtifacts} more`);
+    }
+  });
 }
