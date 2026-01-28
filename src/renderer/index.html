@@ -532,6 +532,27 @@
       display: block;
     }
 
+    #diagram-tooltip {
+      position: fixed;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.9);
+      color: #fff;
+      border-radius: 6px;
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 1000;
+      max-width: 300px;
+      display: none;
+    }
+
+    #diagram-tooltip.visible {
+      display: block;
+    }
+
+    #diagram-tooltip.hidden {
+      display: none;
+    }
+
     /* Toolbar additions */
     #toolbar button:disabled {
       opacity: 0.6;
@@ -3525,6 +3546,7 @@
     </div>
   </div>
   <div id="tooltip"></div>
+  <div id="diagram-tooltip" class="hidden"></div>
   <div id="details-panel" class="hidden">
     <button id="close-panel">&times;</button>
     <h2 id="panel-title"></h2>

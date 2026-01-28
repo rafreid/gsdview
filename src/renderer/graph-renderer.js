@@ -3598,7 +3598,7 @@ container.addEventListener('mousemove', (e) => {
 });
 
 // Format file size for display
-function formatFileSize(bytes) {
+export function formatFileSize(bytes) {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
@@ -4442,7 +4442,7 @@ function refreshDetailsPanel() {
 }
 
 // Open file inspector modal for a file node
-async function openFileInspector(node) {
+export async function openFileInspector(node) {
   if (node.type !== 'file') return;
 
   state.inspectorNode = node;
@@ -5091,7 +5091,7 @@ function renderRecentActivity(filePath) {
 }
 
 // Format timestamp as relative time
-function formatRelativeTime(timestamp) {
+export function formatRelativeTime(timestamp) {
   const diff = Date.now() - timestamp;
   const seconds = Math.floor(diff / 1000);
 

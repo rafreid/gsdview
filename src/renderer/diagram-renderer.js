@@ -9,6 +9,10 @@ import * as d3 from 'd3';
 import dagre from '@dagrejs/dagre';
 import { state, subscribe } from './state-manager.js';
 import { parsePipelineState, GSD_STAGES } from './gsd-pipeline-parser.js';
+import { openFileInspector, formatFileSize, formatRelativeTime } from './graph-renderer.js';
+
+const fs = window.require('fs');
+const path = window.require('path');
 
 // SVG container reference
 let svg = null;
@@ -320,7 +324,20 @@ function renderArtifacts(stageGroups) {
       .attr('class', 'artifact')
       .attr('transform', (artifact, i) =>
         `translate(${ARTIFACT_SPACING}, ${contentY + i * (ARTIFACT_HEIGHT + ARTIFACT_SPACING)})`
-      );
+      )
+      .style('cursor', 'pointer')
+      .on('click', (event, artifact) => {
+        event.stopPropagation();
+        // Build node object matching what openFileInspector expects
+        const node = {
+          id: 'planning:' + artifact.path.replace(/.*\.planning\//, ''),
+          name: artifact.name,
+          type: 'file',
+          path: artifact.path.replace(/.*\.planning\//, ''),
+          sourceType: 'planning'
+        };
+        openFileInspector(node);
+      });
 
     // Artifact background
     artifactGroups.append('rect')
