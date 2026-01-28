@@ -45,6 +45,12 @@ const ARTIFACT_HEIGHT = 50;
 const ARTIFACT_SPACING = 10;
 const STAGE_HEADER_HEIGHT = 40;
 
+// All Files panel constants
+const FILES_PANEL_WIDTH = 300;
+const FILES_PANEL_PADDING = 10;
+const FILE_ITEM_HEIGHT = 28;
+const FILES_PER_PAGE = 20;
+
 // Color constants
 const STATUS_COLORS = {
   done: '#2ECC71',      // Green
@@ -525,14 +531,19 @@ function renderPipeline(g, data) {
   // Render artifacts
   renderArtifacts(stageGroups);
 
+  // Render ALL files panel below stages
+  if (data.allFiles && data.allFiles.length > 0) {
+    renderAllFilesPanel(g, data.allFiles, layout);
+  }
+
   // Center the diagram
   const graphWidth = layout.graph().width;
-  const graphHeight = layout.graph().height;
+  const graphHeight = layout.graph().height + 400; // Extra height for files panel
   const containerWidth = parseInt(svg.style('width'));
   const containerHeight = parseInt(svg.style('height'));
 
   const offsetX = Math.max((containerWidth - graphWidth) / 2, 50);
-  const offsetY = Math.max((containerHeight - graphHeight) / 2, 50);
+  const offsetY = 50; // Start near top to allow scrolling down to files
 
   // Update currentTransform
   currentTransform.x = offsetX;
@@ -818,6 +829,232 @@ function renderArtifacts(stageGroups) {
         .style('opacity', isCollapsed ? 0 : 1);
     }
   });
+}
+
+// Track current page for all files panel
+let allFilesCurrentPage = 0;
+let allFilesData = [];
+
+/**
+ * Render the "All Files" panel showing all project files
+ * @param {Object} g - D3 group element
+ * @param {Array} allFiles - Array of all project file objects
+ * @param {Object} layout - Dagre layout for positioning
+ */
+function renderAllFilesPanel(g, allFiles, layout) {
+  // Store for pagination
+  allFilesData = allFiles;
+
+  // Calculate position below stages
+  const stagesBottom = STAGE_HEIGHT + 50;
+  const panelX = 0;
+  const panelY = stagesBottom;
+
+  // Calculate panel dimensions based on layout width
+  const layoutWidth = layout.graph().width || (6 * (STAGE_WIDTH + STAGE_SPACING));
+  const panelWidth = layoutWidth;
+  const totalPages = Math.ceil(allFiles.length / FILES_PER_PAGE);
+  const visibleFiles = allFiles.slice(
+    allFilesCurrentPage * FILES_PER_PAGE,
+    (allFilesCurrentPage + 1) * FILES_PER_PAGE
+  );
+  const panelHeight = 60 + (visibleFiles.length * FILE_ITEM_HEIGHT) + 40; // header + files + pagination
+
+  // Create files panel group
+  const filesPanel = g.append('g')
+    .attr('class', 'all-files-panel')
+    .attr('transform', `translate(${panelX}, ${panelY})`);
+
+  // Panel background
+  filesPanel.append('rect')
+    .attr('width', panelWidth)
+    .attr('height', panelHeight)
+    .attr('fill', '#1a1a2e')
+    .attr('stroke', '#4ECDC4')
+    .attr('stroke-width', 2)
+    .attr('rx', 8);
+
+  // Panel header
+  filesPanel.append('rect')
+    .attr('width', panelWidth)
+    .attr('height', 40)
+    .attr('fill', '#4ECDC4')
+    .attr('rx', 8);
+
+  // Fix bottom corners of header
+  filesPanel.append('rect')
+    .attr('y', 32)
+    .attr('width', panelWidth)
+    .attr('height', 8)
+    .attr('fill', '#4ECDC4');
+
+  // Header text
+  filesPanel.append('text')
+    .attr('x', 20)
+    .attr('y', 25)
+    .attr('fill', '#1a1a2e')
+    .attr('font-size', '16px')
+    .attr('font-weight', 'bold')
+    .text(`All Project Files (${allFiles.length} total)`);
+
+  // Page indicator
+  filesPanel.append('text')
+    .attr('x', panelWidth - 20)
+    .attr('y', 25)
+    .attr('text-anchor', 'end')
+    .attr('fill', '#1a1a2e')
+    .attr('font-size', '14px')
+    .text(`Page ${allFilesCurrentPage + 1} of ${totalPages}`);
+
+  // Create columns for files (4 columns)
+  const columnCount = 4;
+  const columnWidth = (panelWidth - 40) / columnCount;
+  const filesStartY = 50;
+
+  // Render files in columns
+  visibleFiles.forEach((file, index) => {
+    const column = index % columnCount;
+    const row = Math.floor(index / columnCount);
+    const x = 20 + (column * columnWidth);
+    const y = filesStartY + (row * FILE_ITEM_HEIGHT);
+
+    const fileGroup = filesPanel.append('g')
+      .datum(file) // Bind file data for flashArtifact to access
+      .attr('class', 'artifact file-item')
+      .attr('data-path', file.relativePath)
+      .attr('transform', `translate(${x}, ${y})`)
+      .style('cursor', 'pointer')
+      .on('click', (event) => {
+        event.stopPropagation();
+
+        const sourceType = file.sourceType || 'planning';
+        const nodeId = `${sourceType}:${file.relativePath}`;
+
+        const node = {
+          id: nodeId,
+          name: file.name,
+          type: 'file',
+          path: file.relativePath,
+          sourceType: sourceType
+        };
+
+        state.selectedNode = node;
+        updateArtifactSelection();
+        callHighlightNodeHandler(nodeId);
+        callOpenFileInspectorHandler(node);
+      })
+      .on('mouseover', function() {
+        d3.select(this).select('rect')
+          .attr('fill', '#3a3a5e');
+      })
+      .on('mouseout', function() {
+        d3.select(this).select('rect')
+          .attr('fill', '#2a2a4e');
+      });
+
+    // File item background
+    fileGroup.append('rect')
+      .attr('width', columnWidth - 10)
+      .attr('height', FILE_ITEM_HEIGHT - 4)
+      .attr('fill', '#2a2a4e')
+      .attr('stroke', '#444')
+      .attr('stroke-width', 1)
+      .attr('rx', 4);
+
+    // File icon
+    fileGroup.append('text')
+      .attr('x', 8)
+      .attr('y', (FILE_ITEM_HEIGHT - 4) / 2)
+      .attr('dominant-baseline', 'middle')
+      .attr('font-size', '12px')
+      .text(getArtifactIcon(file.name));
+
+    // File name (truncated)
+    const maxNameLength = Math.floor((columnWidth - 40) / 7);
+    const displayName = file.name.length > maxNameLength
+      ? file.name.substring(0, maxNameLength - 2) + '..'
+      : file.name;
+
+    fileGroup.append('text')
+      .attr('x', 24)
+      .attr('y', (FILE_ITEM_HEIGHT - 4) / 2)
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', '#ccc')
+      .attr('font-size', '11px')
+      .text(displayName);
+
+    // Tooltip with full path
+    fileGroup.append('title')
+      .text(file.relativePath);
+  });
+
+  // Pagination controls
+  const paginationY = filesStartY + (Math.ceil(visibleFiles.length / columnCount) * FILE_ITEM_HEIGHT) + 10;
+
+  // Previous button
+  if (allFilesCurrentPage > 0) {
+    const prevBtn = filesPanel.append('g')
+      .attr('class', 'pagination-btn')
+      .attr('transform', `translate(${panelWidth / 2 - 80}, ${paginationY})`)
+      .style('cursor', 'pointer')
+      .on('click', () => {
+        allFilesCurrentPage--;
+        refreshDiagram();
+      });
+
+    prevBtn.append('rect')
+      .attr('width', 70)
+      .attr('height', 24)
+      .attr('fill', '#3498DB')
+      .attr('rx', 4);
+
+    prevBtn.append('text')
+      .attr('x', 35)
+      .attr('y', 16)
+      .attr('text-anchor', 'middle')
+      .attr('fill', 'white')
+      .attr('font-size', '12px')
+      .text('← Prev');
+  }
+
+  // Next button
+  if (allFilesCurrentPage < totalPages - 1) {
+    const nextBtn = filesPanel.append('g')
+      .attr('class', 'pagination-btn')
+      .attr('transform', `translate(${panelWidth / 2 + 10}, ${paginationY})`)
+      .style('cursor', 'pointer')
+      .on('click', () => {
+        allFilesCurrentPage++;
+        refreshDiagram();
+      });
+
+    nextBtn.append('rect')
+      .attr('width', 70)
+      .attr('height', 24)
+      .attr('fill', '#3498DB')
+      .attr('rx', 4);
+
+    nextBtn.append('text')
+      .attr('x', 35)
+      .attr('y', 16)
+      .attr('text-anchor', 'middle')
+      .attr('fill', 'white')
+      .attr('font-size', '12px')
+      .text('Next →');
+  }
+}
+
+/**
+ * Refresh diagram while maintaining state
+ */
+function refreshDiagram() {
+  if (!diagramGroup || !state.selectedProjectPath) return;
+
+  // Re-parse and render
+  pipelineData = parsePipelineState(state.selectedProjectPath);
+  diagramGroup.selectAll('*').remove();
+  renderPipeline(diagramGroup, pipelineData);
+  updateTransform();
 }
 
 /**

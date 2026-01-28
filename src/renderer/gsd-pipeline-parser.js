@@ -598,14 +598,8 @@ function buildStagesSummary(phases, currentPhase, allFiles = []) {
     }
   }
 
-  // Add ALL project files to the "Initialize" stage (as a general container)
-  // This makes all files visible in the diagram view
-  if (allFiles && allFiles.length > 0) {
-    const initStageIndex = GSD_STAGES.findIndex(s => s.id === 'initialize');
-    if (initStageIndex !== -1) {
-      stageSummary[initStageIndex].artifacts.push(...allFiles);
-    }
-  }
+  // Note: allFiles are now rendered in a separate "All Files" panel in the diagram
+  // They are NOT added to stages to avoid cluttering the stage view
 
   // Calculate average context usage per stage
   for (const stageId in stageContextUsages) {
