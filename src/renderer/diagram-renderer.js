@@ -13,6 +13,8 @@ import { parsePipelineState, GSD_STAGES } from './gsd-pipeline-parser.js';
 // SVG container reference
 let svg = null;
 let pipelineData = null;
+let diagramGroup = null;
+let currentTransform = { x: 0, y: 0, scale: 1 };
 
 // Layout constants
 const STAGE_WIDTH = 250;
@@ -62,14 +64,15 @@ export function mount() {
     .attr('class', 'diagram-svg');
 
   // Add pan/scroll group
-  const g = svg.append('g').attr('class', 'diagram-content');
+  diagramGroup = svg.append('g').attr('class', 'diagram-content');
 
   // Load and render pipeline data
   if (state.selectedProjectPath) {
     pipelineData = parsePipelineState(state.selectedProjectPath);
-    renderPipeline(g, pipelineData);
+    renderPipeline(diagramGroup, pipelineData);
+    setupPanZoom();
   } else {
-    renderPlaceholder(g);
+    renderPlaceholder(diagramGroup);
   }
 
   console.log('[DiagramRenderer] Mounted');
@@ -85,6 +88,8 @@ export function unmount() {
   // Clear SVG reference
   svg = null;
   pipelineData = null;
+  diagramGroup = null;
+  currentTransform = { x: 0, y: 0, scale: 1 };
 
   console.log('[DiagramRenderer] Unmounted');
 }
@@ -376,4 +381,57 @@ function renderArtifacts(stageGroups) {
         .text(`+${artifacts.length - maxArtifacts} more`);
     }
   });
+}
+
+/**
+ * Setup pan and zoom interactions
+ */
+function setupPanZoom() {
+  let isDragging = false;
+  let dragStart = { x: 0, y: 0 };
+
+  // Mouse wheel for horizontal scroll
+  svg.on('wheel', (event) => {
+    event.preventDefault();
+
+    const delta = event.deltaY || event.deltaX;
+    currentTransform.x -= delta * 0.5;
+
+    updateTransform();
+  });
+
+  // Mouse drag for pan
+  svg.on('mousedown', (event) => {
+    if (event.button !== 0) return; // Left button only
+    isDragging = true;
+    dragStart = { x: event.clientX - currentTransform.x, y: event.clientY - currentTransform.y };
+    svg.style('cursor', 'grabbing');
+  });
+
+  svg.on('mousemove', (event) => {
+    if (!isDragging) return;
+    currentTransform.x = event.clientX - dragStart.x;
+    currentTransform.y = event.clientY - dragStart.y;
+    updateTransform();
+  });
+
+  svg.on('mouseup', () => {
+    isDragging = false;
+    svg.style('cursor', 'grab');
+  });
+
+  svg.on('mouseleave', () => {
+    isDragging = false;
+    svg.style('cursor', 'default');
+  });
+
+  // Set initial cursor
+  svg.style('cursor', 'grab');
+}
+
+/**
+ * Update diagram transform
+ */
+function updateTransform() {
+  diagramGroup.attr('transform', `translate(${currentTransform.x}, ${currentTransform.y})`);
 }
