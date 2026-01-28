@@ -5547,49 +5547,54 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
   window.electronAPI.onFilesChanged(async (data) => {
     console.log('Files changed:', data.event, data.path, 'sourceType:', data.sourceType);
     if (state.selectedProjectPath) {
-      // Add to activity feed and get entry with mapped event type
+      // Add to activity feed and get entry with mapped event type (always update state)
       const entry = addActivityEntry(data.event, data.path, data.sourceType);
 
-      // Flash the node with type-appropriate animation
-      if (entry.nodeId) {
-        flashNodeWithType(entry.nodeId, entry.event);
-        flashTreeItem(entry.nodeId, entry.event);
+      // Only trigger visual effects if graph view is active
+      if (state.activeView === 'graph') {
+        // Flash the node with type-appropriate animation
+        if (entry.nodeId) {
+          flashNodeWithType(entry.nodeId, entry.event);
+          flashTreeItem(entry.nodeId, entry.event);
 
-        // Follow camera to changed file if follow-active is enabled
-        if (followActiveEnabled && entry.event !== 'deleted') {
-          flyToNodeSmooth(entry.nodeId);
+          // Follow camera to changed file if follow-active is enabled
+          if (followActiveEnabled && entry.event !== 'deleted') {
+            flyToNodeSmooth(entry.nodeId);
+          }
+        }
+
+        // Check if the changed file is currently shown in details panel
+        // and auto-refresh the diff section if so
+        if (state.selectedNode && state.selectedNode.type === 'file' && entry.nodeId === state.selectedNode.id) {
+          // Refresh diff section for the currently displayed file
+          refreshDiffSection();
+        }
+
+        // Update timeline UI (range may have expanded with new entry)
+        // If in live mode, timeline stays at live; if historical, don't auto-advance
+        if (timelinePosition === null) {
+          // In live mode - just update UI to reflect new range
+          updateTimelineUI();
         }
       }
 
-      // Check if the changed file is currently shown in details panel
-      // and auto-refresh the diff section if so
-      if (state.selectedNode && state.selectedNode.type === 'file' && entry.nodeId === state.selectedNode.id) {
-        // Refresh diff section for the currently displayed file
-        refreshDiffSection();
-      }
-
-      // Update timeline UI (range may have expanded with new entry)
-      // If in live mode, timeline stays at live; if historical, don't auto-advance
-      if (timelinePosition === null) {
-        // In live mode - just update UI to reflect new range
-        updateTimelineUI();
-      }
-
-      // Apply incremental graph update (instead of full rebuild)
+      // Always apply incremental graph update (update data regardless of view)
       applyIncrementalUpdate({
         event: data.event,
         path: data.path,
         sourceType: data.sourceType
       });
 
-      // Update tree panel for new/deleted files
+      // Update tree panel for new/deleted files (always update data)
       if (data.event === 'add' || data.event === 'addDir' || data.event === 'unlink' || data.event === 'unlinkDir') {
         // Rebuild tree data from storedDirectoryData (updated by applyIncrementalUpdate)
         state.treeData = buildTreeStructure(storedDirectoryData);
-        updateTreePanel();
+        if (state.activeView === 'graph') {
+          updateTreePanel();
+        }
       }
 
-      // Refresh git status after file changes
+      // Refresh git status after file changes (always update data)
       await fetchGitStatus(state.selectedProjectPath);
     }
   });
@@ -5623,8 +5628,9 @@ if (window.electronAPI && window.electronAPI.onClaudeOperation) {
       changeType = 'modified'; // Fallback for unknown operations
     }
 
-    // Flash the node if we have a valid nodeId
-    if (event.nodeId) {
+    // Only trigger visual effects if graph view is active
+    if (state.activeView === 'graph' && event.nodeId) {
+      // Flash the node if we have a valid nodeId
       flashNodeWithType(event.nodeId, changeType);
       flashTreeItem(event.nodeId, changeType);
 
