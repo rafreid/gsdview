@@ -170,6 +170,69 @@ function createLayout(data) {
 }
 
 /**
+ * Get color for context usage bar based on percentage
+ */
+function getContextBarColor(contextUsage) {
+  if (contextUsage <= 30) {
+    return '#2ECC71'; // Green - healthy
+  } else if (contextUsage <= 50) {
+    return '#F1C40F'; // Yellow - normal
+  } else if (contextUsage <= 70) {
+    return '#F39C12'; // Orange - warning
+  } else {
+    return '#E74C3C'; // Red - danger zone
+  }
+}
+
+/**
+ * Render context usage bar below stage header
+ */
+function renderContextBar(stageGroup, contextUsage) {
+  const barY = STAGE_HEADER_HEIGHT + 5;
+  const barHeight = 8;
+  const barPadding = 10;
+  const barWidth = STAGE_WIDTH - (barPadding * 2);
+
+  // Create context bar group
+  const contextBarGroup = stageGroup.append('g')
+    .attr('class', 'context-bar')
+    .attr('transform', `translate(${barPadding}, ${barY})`);
+
+  // Background rect (full width)
+  contextBarGroup.append('rect')
+    .attr('width', barWidth)
+    .attr('height', barHeight)
+    .attr('fill', '#333')
+    .attr('rx', 2);
+
+  // Foreground rect (percentage filled)
+  const fillWidth = (contextUsage / 100) * barWidth;
+  const barColor = getContextBarColor(contextUsage);
+
+  contextBarGroup.append('rect')
+    .attr('width', fillWidth)
+    .attr('height', barHeight)
+    .attr('fill', barColor)
+    .attr('rx', 2);
+
+  // Percentage text label (right-aligned)
+  contextBarGroup.append('text')
+    .attr('x', barWidth)
+    .attr('y', barHeight / 2)
+    .attr('text-anchor', 'end')
+    .attr('dominant-baseline', 'middle')
+    .attr('fill', '#888')
+    .attr('font-size', '10px')
+    .attr('font-weight', 'bold')
+    .attr('dx', -3)
+    .text(`${contextUsage}%`);
+
+  // Add tooltip on hover
+  contextBarGroup.append('title')
+    .text(`Context Usage: ${contextUsage}%`);
+}
+
+/**
  * Render stage containers with headers and status indicators
  */
 function renderStages(g, layout) {
@@ -233,6 +296,13 @@ function renderStages(g, layout) {
     .attr('fill', 'white')
     .attr('font-size', '14px')
     .text(d => collapsedStages.has(d.stage.id) ? '+' : '-');
+
+  // Render context usage bars
+  stageGroups.each(function(d) {
+    const group = d3.select(this);
+    const contextUsage = d.stage.contextUsage || 0;
+    renderContextBar(group, contextUsage);
+  });
 
   // Add pulsing highlight for current stage
   stageGroups.filter(d => d.stage.isCurrent)
@@ -360,8 +430,10 @@ function renderArtifacts(stageGroups) {
     if (artifacts.length === 0) return;
 
     const group = d3.select(this);
-    const contentY = STAGE_HEADER_HEIGHT + ARTIFACT_SPACING;
-    const maxArtifacts = Math.floor((STAGE_HEIGHT - STAGE_HEADER_HEIGHT - ARTIFACT_SPACING * 2) / (ARTIFACT_HEIGHT + ARTIFACT_SPACING));
+    // Adjust contentY to account for context bar (STAGE_HEADER_HEIGHT + 5px margin + 8px bar + 5px margin)
+    const contextBarHeight = 18; // 5 + 8 + 5
+    const contentY = STAGE_HEADER_HEIGHT + contextBarHeight + ARTIFACT_SPACING;
+    const maxArtifacts = Math.floor((STAGE_HEIGHT - STAGE_HEADER_HEIGHT - contextBarHeight - ARTIFACT_SPACING * 2) / (ARTIFACT_HEIGHT + ARTIFACT_SPACING));
 
     // Render artifacts (limit to fit in stage)
     const visibleArtifacts = artifacts.slice(0, maxArtifacts);

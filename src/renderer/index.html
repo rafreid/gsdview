@@ -189,6 +189,23 @@
       }
     }
 
+    /* Context usage bar styles */
+    .context-bar {
+      cursor: help;
+    }
+
+    .context-bar rect {
+      transition: opacity 0.2s ease;
+    }
+
+    .context-bar:hover rect {
+      opacity: 0.9;
+    }
+
+    .context-bar text {
+      pointer-events: none;
+    }
+
     .connection {
       transition: stroke-width 0.2s ease;
     }
