@@ -130,6 +130,11 @@ Plans:
 
 **Requirements:** LIVE-01, LIVE-02, LIVE-03
 
+**Plans:** 1 plan
+
+Plans:
+- [ ] 34-01-PLAN.md — File change handler with re-render and flash animations
+
 **Success Criteria:**
 1. User sees file changes detected by existing watcher trigger immediate diagram updates
 2. User sees flash animation highlighting changed artifacts in diagram (matching graph flash colors)
@@ -164,9 +169,9 @@ Plans:
 | v1.2 | 5 | 7 | Shipped 2026-01-24 |
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
 | v1.4 | 4 | 5 | Shipped 2026-01-25 |
-| v1.5 | 6 | 10+ | Phase 33 complete |
-| **Total** | **35** | **76+** | |
+| v1.5 | 6 | 11+ | Phase 34 planning |
+| **Total** | **35** | **77+** | |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-28 (Phase 33 complete)*
+*Last updated: 2026-01-28 (Phase 34 planned)*
