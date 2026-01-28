@@ -558,6 +558,68 @@ function truncateArtifactName(name, maxLength = 25) {
 }
 
 /**
+ * Render commit markers on SUMMARY artifacts
+ */
+function renderCommitMarkers(artifactGroup, commits) {
+  if (!commits || commits.length === 0) return;
+
+  // Position markers on the right side
+  const markerX = STAGE_WIDTH - ARTIFACT_SPACING * 2 - 30;
+  const markerY = ARTIFACT_HEIGHT / 2;
+
+  // Commit marker group
+  const markerGroup = artifactGroup.append('g')
+    .attr('class', 'commit-markers')
+    .attr('transform', `translate(${markerX}, ${markerY})`);
+
+  // Green checkmark icon
+  markerGroup.append('circle')
+    .attr('r', 8)
+    .attr('fill', '#2ECC71')
+    .attr('stroke', '#27AE60')
+    .attr('stroke-width', 1.5);
+
+  markerGroup.append('text')
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'middle')
+    .attr('fill', 'white')
+    .attr('font-size', '10px')
+    .attr('font-weight', 'bold')
+    .text('✓');
+
+  // Badge for commit count if multiple commits
+  if (commits.length > 1) {
+    markerGroup.append('circle')
+      .attr('cx', 6)
+      .attr('cy', -6)
+      .attr('r', 6)
+      .attr('fill', '#E74C3C')
+      .attr('stroke', '#C0392B')
+      .attr('stroke-width', 1);
+
+    markerGroup.append('text')
+      .attr('x', 6)
+      .attr('y', -6)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', 'white')
+      .attr('font-size', '8px')
+      .attr('font-weight', 'bold')
+      .text(commits.length);
+  }
+
+  // Add tooltip with commit details
+  const tooltipText = commits.length === 1
+    ? `Commit: ${commits[0].hash}\n${commits[0].description}`
+    : `${commits.length} commits:\n${commits.map(c => `• ${c.hash}: ${c.description}`).join('\n')}`;
+
+  markerGroup.append('title')
+    .text(tooltipText);
+}
+
+/**
  * Render artifact blocks
  */
 function renderArtifacts(stageGroups) {
@@ -695,6 +757,14 @@ function renderArtifacts(stageGroups) {
       .attr('font-size', '16px')
       .attr('font-weight', 'bold')
       .text(artifact => getStatusSymbol(artifact.status));
+
+    // Render commit markers for SUMMARY artifacts with commits
+    artifactGroups.each(function(artifact) {
+      if (artifact.commits && artifact.commits.length > 0) {
+        const artifactGroup = d3.select(this);
+        renderCommitMarkers(artifactGroup, artifact.commits);
+      }
+    });
 
     // Show artifact count if there are more than fit
     if (artifacts.length > maxArtifacts) {

@@ -237,6 +237,28 @@
       pointer-events: none;
     }
 
+    /* Commit markers styles */
+    .commit-markers {
+      cursor: help;
+      transition: transform 0.2s ease;
+    }
+
+    .commit-markers:hover {
+      transform: scale(1.1);
+    }
+
+    .commit-markers circle {
+      transition: stroke-width 0.2s ease;
+    }
+
+    .commit-markers:hover circle {
+      stroke-width: 2.5;
+    }
+
+    .commit-markers text {
+      pointer-events: none;
+    }
+
     .connection {
       transition: stroke-width 0.2s ease;
     }
