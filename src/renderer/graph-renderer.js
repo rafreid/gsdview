@@ -1,6 +1,7 @@
 import ForceGraph3D from '3d-force-graph';
 import * as THREE from 'three';
 import { state, subscribe, setState, getState, initializeState, resetViewState } from './state-manager.js';
+import { onFilesChanged as onDiagramFilesChanged } from './diagram-renderer.js';
 
 // Color palette by node type (WCAG AA compliant against #1a1a2e background)
 const nodeColors = {
@@ -5550,7 +5551,7 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
       // Add to activity feed and get entry with mapped event type (always update state)
       const entry = addActivityEntry(data.event, data.path, data.sourceType);
 
-      // Only trigger visual effects if graph view is active
+      // Trigger view-specific visual effects
       if (state.activeView === 'graph') {
         // Flash the node with type-appropriate animation
         if (entry.nodeId) {
@@ -5576,6 +5577,9 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
           // In live mode - just update UI to reflect new range
           updateTimelineUI();
         }
+      } else if (state.activeView === 'diagram') {
+        // Route file changes to diagram renderer for real-time updates
+        onDiagramFilesChanged(data);
       }
 
       // Always apply incremental graph update (update data regardless of view)

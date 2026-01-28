@@ -26,6 +26,14 @@ let selectionUnsubscribe = null;
 // Collapsed stages tracking
 const collapsedStages = new Set();
 
+// Debounce timer for file changes
+let fileChangeDebounceTimer = null;
+const FILE_CHANGE_DEBOUNCE_MS = 300;
+
+// Track changed artifact for flash animation
+let lastChangedArtifact = null;
+let lastChangeType = null;
+
 // Layout constants
 const STAGE_WIDTH = 250;
 const STAGE_HEIGHT = 300;
@@ -837,4 +845,55 @@ function toggleStageCollapse(stageId) {
  */
 function updateTransform() {
   diagramGroup.attr('transform', `translate(${currentTransform.x}, ${currentTransform.y})`);
+}
+
+/**
+ * Handle file changes when diagram view is active
+ * Called from graph-renderer.js file change listener
+ */
+export function onFilesChanged(data) {
+  console.log('[DiagramRenderer] File changed:', data.event, data.path, 'sourceType:', data.sourceType);
+
+  // Only handle planning file changes (src/ changes don't affect diagram)
+  if (data.sourceType !== 'planning') {
+    console.log('[DiagramRenderer] Skipping non-planning file change');
+    return;
+  }
+
+  // Store changed artifact info for flash animation
+  lastChangedArtifact = data.path;
+  lastChangeType = data.event;
+
+  // Debounce re-render to prevent rapid updates during burst changes
+  if (fileChangeDebounceTimer) {
+    clearTimeout(fileChangeDebounceTimer);
+  }
+
+  fileChangeDebounceTimer = setTimeout(() => {
+    console.log('[DiagramRenderer] Applying debounced update');
+
+    // Re-parse pipeline data to get latest state
+    if (state.selectedProjectPath) {
+      pipelineData = parsePipelineState(state.selectedProjectPath);
+
+      // Clear existing diagram
+      if (diagramGroup) {
+        diagramGroup.selectAll('*').remove();
+      }
+
+      // Re-render with fresh data
+      renderPipeline(diagramGroup, pipelineData);
+
+      // Apply transform to maintain current pan position
+      updateTransform();
+
+      // Flash the changed artifact (will be handled in Task 2)
+      if (lastChangedArtifact && lastChangeType) {
+        // TODO: Task 2 - Call flashArtifact here
+        console.log('[DiagramRenderer] Would flash artifact:', lastChangedArtifact, lastChangeType);
+      }
+    }
+
+    fileChangeDebounceTimer = null;
+  }, FILE_CHANGE_DEBOUNCE_MS);
 }
