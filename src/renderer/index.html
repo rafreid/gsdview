@@ -119,6 +119,7 @@
       justify-content: center;
       color: #888;
       font-size: 1.2rem;
+      transition: left 0.3s ease, width 0.3s ease, bottom 0.3s ease, height 0.3s ease;
     }
 
     #diagram-container.hidden {
@@ -150,11 +151,16 @@
     }
 
     .stage {
-      transition: transform 0.2s ease;
+      transition: transform 0.2s ease, filter 0.2s ease;
     }
 
     .stage:hover {
       transform: scale(1.02);
+      filter: brightness(1.1);
+    }
+
+    .stage rect {
+      transition: stroke-width 0.2s ease;
     }
 
     .artifact {

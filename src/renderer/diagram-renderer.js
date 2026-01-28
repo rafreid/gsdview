@@ -34,6 +34,9 @@ const FILE_CHANGE_DEBOUNCE_MS = 300;
 let lastChangedArtifact = null;
 let lastChangeType = null;
 
+// Window resize handler
+let resizeHandler = null;
+
 // Layout constants
 const STAGE_WIDTH = 250;
 const STAGE_HEIGHT = 300;
@@ -103,6 +106,15 @@ export function mount() {
   // Register keyboard handler for bookmark navigation
   document.addEventListener('keydown', handleDiagramKeydown);
 
+  // Register window resize handler for responsive layout
+  resizeHandler = () => {
+    if (!diagramGroup || !pipelineData) return;
+
+    // Re-center diagram on resize
+    recenterDiagram();
+  };
+  window.addEventListener('resize', resizeHandler);
+
   console.log('[DiagramRenderer] Mounted');
 }
 
@@ -121,6 +133,12 @@ export function unmount() {
 
   // Remove keyboard handler
   document.removeEventListener('keydown', handleDiagramKeydown);
+
+  // Remove resize handler
+  if (resizeHandler) {
+    window.removeEventListener('resize', resizeHandler);
+    resizeHandler = null;
+  }
 
   // Clear SVG reference
   svg = null;
@@ -348,6 +366,38 @@ function renderConnections(g, layout) {
 }
 
 /**
+ * Recenter diagram in viewport
+ * Called on window resize or panel toggle
+ */
+function recenterDiagram() {
+  if (!svg || !diagramGroup) return;
+
+  const container = document.getElementById('diagram-container');
+  if (!container) return;
+
+  const containerWidth = container.clientWidth;
+  const containerHeight = container.clientHeight;
+
+  // Get current diagram bounds
+  const bbox = diagramGroup.node().getBBox();
+  const graphWidth = bbox.width;
+  const graphHeight = bbox.height;
+
+  const offsetX = Math.max((containerWidth - graphWidth) / 2, 50);
+  const offsetY = Math.max((containerHeight - graphHeight) / 2, 50);
+
+  // Update current transform for consistency with pan/zoom
+  currentTransform.x = offsetX;
+  currentTransform.y = offsetY;
+
+  // Apply transform with smooth transition
+  diagramGroup.transition()
+    .duration(300)
+    .ease(d3.easeCubicInOut)
+    .attr('transform', `translate(${offsetX}, ${offsetY})`);
+}
+
+/**
  * Render pipeline stages
  */
 function renderPipeline(g, data) {
@@ -376,7 +426,7 @@ function renderPipeline(g, data) {
   // Render stages
   const stageGroups = renderStages(g, layout);
 
-  // Render artifacts (placeholder for Task 2)
+  // Render artifacts
   renderArtifacts(stageGroups);
 
   // Center the diagram
@@ -387,6 +437,10 @@ function renderPipeline(g, data) {
 
   const offsetX = Math.max((containerWidth - graphWidth) / 2, 50);
   const offsetY = Math.max((containerHeight - graphHeight) / 2, 50);
+
+  // Update currentTransform
+  currentTransform.x = offsetX;
+  currentTransform.y = offsetY;
 
   g.attr('transform', `translate(${offsetX}, ${offsetY})`);
 }
