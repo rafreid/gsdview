@@ -7,12 +7,12 @@
 
 Requirements for workflow diagram view. Each maps to roadmap phases.
 
-### Architecture Foundation
+### Architecture Foundation ✓
 
-- [ ] **ARCH-01**: State-manager.js centralizes selection, project data, and activity state
-- [ ] **ARCH-02**: Renderer.js refactored to graph-renderer.js with state imports
-- [ ] **ARCH-03**: Explicit lifecycle methods (mount/unmount) for view management
-- [ ] **ARCH-04**: Animation frame cleanup patterns prevent memory leaks
+- [x] **ARCH-01**: State-manager.js centralizes selection, project data, and activity state
+- [x] **ARCH-02**: Renderer.js refactored to graph-renderer.js with state imports
+- [x] **ARCH-03**: Explicit lifecycle methods (mount/unmount) for view management
+- [x] **ARCH-04**: Animation frame cleanup patterns prevent memory leaks
 
 ### View Switching
 
@@ -82,10 +82,10 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ARCH-01 | Phase 30 | Pending |
-| ARCH-02 | Phase 30 | Pending |
-| ARCH-03 | Phase 30 | Pending |
-| ARCH-04 | Phase 30 | Pending |
+| ARCH-01 | Phase 30 | Complete |
+| ARCH-02 | Phase 30 | Complete |
+| ARCH-03 | Phase 30 | Complete |
+| ARCH-04 | Phase 30 | Complete |
 | VIEW-01 | Phase 31 | Pending |
 | VIEW-02 | Phase 31 | Pending |
 | VIEW-03 | Phase 31 | Pending |
@@ -118,4 +118,4 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-01-28*
-*Last updated: 2026-01-28 after initial definition*
+*Last updated: 2026-01-28 (Phase 30 requirements complete)*

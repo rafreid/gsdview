@@ -18,7 +18,7 @@ Transform a GSD project's .planning/ folder into an explorable 3D force-directed
 
 **Goal:** Add a workflow-oriented diagram view that maps the .planning/ folder onto the GSD process model, showing both how the workflow operates and why it's effective through visual indicators.
 
-### Phase 30: Architecture Foundation
+### Phase 30: Architecture Foundation ✓
 
 **Goal:** Establish clean separation and lifecycle patterns to prevent memory leaks, stale closures, and animation conflicts
 
@@ -26,18 +26,20 @@ Transform a GSD project's .planning/ folder into an explorable 3D force-directed
 
 **Requirements:** ARCH-01, ARCH-02, ARCH-03, ARCH-04
 
-**Plans:** 3 plans
+**Plans:** 3 plans ✓
 
 Plans:
-- [ ] 30-01-PLAN.md — Create state-manager.js with centralized state
-- [ ] 30-02-PLAN.md — Refactor renderer.js to graph-renderer.js with lifecycle methods
-- [ ] 30-03-PLAN.md — Verification checkpoint
+- [x] 30-01-PLAN.md — Create state-manager.js with centralized state
+- [x] 30-02-PLAN.md — Refactor renderer.js to graph-renderer.js with lifecycle methods
+- [x] 30-03-PLAN.md — Verification checkpoint
 
 **Success Criteria:**
-1. User sees graph view working identically after state-manager extraction
-2. Developer can verify all selection state flows through single state-manager.js module
-3. Developer can mount/unmount graph renderer without memory leaks (verified by 20+ view switches in DevTools)
-4. Animation frame IDs properly canceled when switching away from graph view
+1. ✓ User sees graph view working identically after state-manager extraction
+2. ✓ Developer can verify all selection state flows through single state-manager.js module
+3. ✓ Developer can mount/unmount graph renderer without memory leaks (verified by 20+ view switches in DevTools)
+4. ✓ Animation frame IDs properly canceled when switching away from graph view
+
+**Completed:** 2026-01-28
 
 ---
 
@@ -137,9 +139,9 @@ Plans:
 | v1.2 | 5 | 7 | Shipped 2026-01-24 |
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
 | v1.4 | 4 | 5 | Shipped 2026-01-25 |
-| v1.5 | 6 | 3+ | Planning |
+| v1.5 | 6 | 3+ | Phase 30 ✓ |
 | **Total** | **35** | **69+** | |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-28 (Phase 30 planned)*
+*Last updated: 2026-01-28 (Phase 30 complete)*
