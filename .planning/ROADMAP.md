@@ -43,7 +43,7 @@ Plans:
 
 ---
 
-### Phase 31: View Switching
+### Phase 31: View Switching ✓
 
 **Goal:** User can toggle between Graph and Diagram views while preserving selection and keyboard shortcuts
 
@@ -51,19 +51,21 @@ Plans:
 
 **Requirements:** VIEW-01, VIEW-02, VIEW-03, VIEW-04
 
-**Plans:** 3 plans
+**Plans:** 3 plans ✓
 
 Plans:
-- [ ] 31-01-PLAN.md — View infrastructure (tab controls, diagram container, view-controller.js)
-- [ ] 31-02-PLAN.md — Selection persistence and keyboard routing
-- [ ] 31-03-PLAN.md — Verification checkpoint
+- [x] 31-01-PLAN.md — View infrastructure (tab controls, diagram container, view-controller.js)
+- [x] 31-02-PLAN.md — Selection persistence and keyboard routing
+- [x] 31-03-PLAN.md — Verification checkpoint
 
 **Success Criteria:**
-1. User can click tab controls to switch between Graph and Diagram views
-2. User sees their selected node remains highlighted when switching between views
-3. User presses keyboard shortcuts (1-9 bookmarks, arrow navigation) and correct view responds
-4. Developer sees file watcher updates route to both views without render conflicts
-5. User experiences smooth transitions without layout stuttering or flashing
+1. ✓ User can click tab controls to switch between Graph and Diagram views
+2. ✓ User sees their selected node remains highlighted when switching between views
+3. ✓ User presses keyboard shortcuts (1-9 bookmarks, arrow navigation) and correct view responds
+4. ✓ Developer sees file watcher updates route to both views without render conflicts
+5. ✓ User experiences smooth transitions without layout stuttering or flashing
+
+**Completed:** 2026-01-28
 
 ---
 
@@ -146,9 +148,9 @@ Plans:
 | v1.2 | 5 | 7 | Shipped 2026-01-24 |
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
 | v1.4 | 4 | 5 | Shipped 2026-01-25 |
-| v1.5 | 6 | 6+ | Phase 30 ✓ |
+| v1.5 | 6 | 6+ | Phase 31 ✓ |
 | **Total** | **35** | **72+** | |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-28 (Phase 31 planned)*
+*Last updated: 2026-01-28 (Phase 31 complete)*

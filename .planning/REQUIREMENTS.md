@@ -14,12 +14,12 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 - [x] **ARCH-03**: Explicit lifecycle methods (mount/unmount) for view management
 - [x] **ARCH-04**: Animation frame cleanup patterns prevent memory leaks
 
-### View Switching
+### View Switching ✓
 
-- [ ] **VIEW-01**: User can toggle between Graph and Diagram views via tab controls
-- [ ] **VIEW-02**: Selection persists across view switches
-- [ ] **VIEW-03**: Keyboard shortcuts route correctly per active view
-- [ ] **VIEW-04**: File watcher updates route to both views without race conditions
+- [x] **VIEW-01**: User can toggle between Graph and Diagram views via tab controls
+- [x] **VIEW-02**: Selection persists across view switches
+- [x] **VIEW-03**: Keyboard shortcuts route correctly per active view
+- [x] **VIEW-04**: File watcher updates route to both views without race conditions
 
 ### Diagram Layout
 
@@ -86,10 +86,10 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 | ARCH-02 | Phase 30 | Complete |
 | ARCH-03 | Phase 30 | Complete |
 | ARCH-04 | Phase 30 | Complete |
-| VIEW-01 | Phase 31 | Pending |
-| VIEW-02 | Phase 31 | Pending |
-| VIEW-03 | Phase 31 | Pending |
-| VIEW-04 | Phase 31 | Pending |
+| VIEW-01 | Phase 31 | Complete |
+| VIEW-02 | Phase 31 | Complete |
+| VIEW-03 | Phase 31 | Complete |
+| VIEW-04 | Phase 31 | Complete |
 | DIAG-01 | Phase 32 | Pending |
 | DIAG-02 | Phase 32 | Pending |
 | DIAG-03 | Phase 32 | Pending |
@@ -118,4 +118,4 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-01-28*
-*Last updated: 2026-01-28 (Phase 30 requirements complete)*
+*Last updated: 2026-01-28 (Phase 31 requirements complete)*
