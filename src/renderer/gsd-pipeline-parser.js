@@ -5,8 +5,9 @@
  * Determines which GSD stage each phase is in and collects artifact status.
  */
 
-const fs = require('fs');
-const path = require('path');
+// Use window.require for Electron renderer with nodeIntegration
+const fs = window.require('fs');
+const path = window.require('path');
 
 /**
  * The 6 stages of GSD workflow

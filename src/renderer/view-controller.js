@@ -6,6 +6,7 @@
  */
 
 import { mount as mountGraph, unmount as unmountGraph } from './graph-renderer.js';
+import { mount as mountDiagram, unmount as unmountDiagram } from './diagram-renderer.js';
 import { state, setState } from './state-manager.js';
 
 /**
@@ -45,11 +46,12 @@ export function switchToView(viewName) {
     graphTab.classList.remove('active');
     diagramTab.classList.add('active');
 
-    // TODO: mountDiagram() in Phase 32
-    console.log('[ViewCtrl] Diagram view mounted (placeholder)');
+    // Mount diagram view
+    mountDiagram();
 
   } else if (viewName === 'graph') {
-    // TODO: unmountDiagram() in Phase 32
+    // Unmount diagram to clean up resources
+    unmountDiagram();
 
     // Hide diagram, show graph
     diagramContainer.classList.add('hidden');
