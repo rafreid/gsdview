@@ -1,7 +1,6 @@
 import ForceGraph3D from '3d-force-graph';
 import * as THREE from 'three';
-import { state, subscribe, setState, getState, initializeState, resetViewState } from './state-manager.js';
-import { onFilesChanged as onDiagramFilesChanged } from './diagram-renderer.js';
+import { state, subscribe, setState, getState, initializeState, resetViewState, callDiagramFilesChangedHandler } from './state-manager.js';
 
 // Color palette by node type (WCAG AA compliant against #1a1a2e background)
 const nodeColors = {
@@ -5579,7 +5578,7 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
         }
       } else if (state.activeView === 'diagram') {
         // Route file changes to diagram renderer for real-time updates
-        onDiagramFilesChanged(data);
+        callDiagramFilesChangedHandler(data);
       }
 
       // Always apply incremental graph update (update data regardless of view)

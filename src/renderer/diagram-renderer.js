@@ -7,7 +7,7 @@
 
 import * as d3 from 'd3';
 import dagre from '@dagrejs/dagre';
-import { state, subscribe } from './state-manager.js';
+import { state, subscribe, registerDiagramFilesChangedHandler } from './state-manager.js';
 import { parsePipelineState, GSD_STAGES } from './gsd-pipeline-parser.js';
 import { openFileInspector, formatFileSize, formatRelativeTime, highlightNodeInGraph } from './graph-renderer.js';
 
@@ -1235,3 +1235,6 @@ export function onFilesChanged(data) {
     fileChangeDebounceTimer = null;
   }, FILE_CHANGE_DEBOUNCE_MS);
 }
+
+// Register handler with state-manager to break circular dependency
+registerDiagramFilesChangedHandler(onFilesChanged);

@@ -241,6 +241,35 @@ function getDefaultState() {
 }
 
 // ============================================================================
+// HANDLER REGISTRY (breaks circular dependencies between renderers)
+// ============================================================================
+
+/**
+ * Registry for cross-view handlers to avoid circular imports
+ */
+const handlers = {
+  onDiagramFilesChanged: null
+};
+
+/**
+ * Register a handler for diagram file changes
+ * Called by diagram-renderer.js during initialization
+ */
+function registerDiagramFilesChangedHandler(handler) {
+  handlers.onDiagramFilesChanged = handler;
+}
+
+/**
+ * Call the registered diagram files changed handler
+ * Called by graph-renderer.js when routing file changes
+ */
+function callDiagramFilesChangedHandler(data) {
+  if (handlers.onDiagramFilesChanged) {
+    handlers.onDiagramFilesChanged(data);
+  }
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
@@ -251,5 +280,7 @@ module.exports = {
   setState,
   initializeState,
   resetViewState,
-  getDefaultState
+  getDefaultState,
+  registerDiagramFilesChangedHandler,
+  callDiagramFilesChangedHandler
 };
