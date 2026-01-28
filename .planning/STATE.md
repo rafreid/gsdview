@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 ## Current Position
 
 Phase: 33 - Interactivity
-Plan: 01 of 02
-Status: In progress
-Last activity: 2026-01-28 — Completed 33-01-PLAN.md
+Plan: 02 of 02
+Status: Phase complete
+Last activity: 2026-01-28 — Completed 33-02-PLAN.md
 
 Progress: [██████░░░░░░░░░░░░░░] 3/6 phases (50%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 75 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 9)
+- Total plans completed: 76 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 10)
 - Average duration: 5min
-- Total execution time: 2 days + 131m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m, v1.5: 23m)
+- Total execution time: 2 days + 135m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m, v1.5: 27m)
 
 **By Milestone:**
 
@@ -46,8 +46,8 @@ Progress: [██████░░░░░░░░░░░░░░] 3/6 pha
 - Status: Shipped 2026-01-25 (All phases complete)
 
 *v1.5 (In Progress):*
-- 6 phases, 9 plans complete
-- Status: Phase 33 in progress (1/2 plans complete)
+- 6 phases, 10 plans complete
+- Status: Phase 33 complete (2/2 plans)
 
 ## Accumulated Context
 
@@ -311,6 +311,13 @@ Recent decisions affecting current work:
 - D3.js event handlers (.on) for SVG interactivity pattern established (33-01)
 - Shared function exports between graph-renderer and diagram-renderer for code reuse (33-01)
 - Separate #diagram-tooltip element to avoid view conflicts (33-01)
+- highlightNodeInGraph exported from graph-renderer for cross-module access (33-02)
+- state.selectedNode as single source of truth for selection state (33-02)
+- Subscribe/unsubscribe pattern in mount/unmount prevents memory leaks (33-02)
+- Selected artifacts show teal (#4ECDC4) border with drop-shadow glow effect (33-02)
+- Bookmark shortcuts (1-9) parse phase numbers from node IDs for diagram navigation (33-02)
+- 500ms ease-out pan animation for bookmark navigation in diagram view (33-02)
+- Local showToast implementation in diagram-renderer for independence (33-02)
 
 ### Pending Todos
 
@@ -350,6 +357,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Completed 33-01-PLAN.md
+Stopped at: Completed 33-02-PLAN.md (Phase 33 complete)
 Resume file: None
-Next action: Execute 33-02-PLAN.md
+Next action: Begin Phase 34
