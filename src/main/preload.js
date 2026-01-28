@@ -1,6 +1,8 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('electronAPI', {
+// With contextIsolation: false, we set window.electronAPI directly
+// (contextBridge is not needed and doesn't work with contextIsolation: false)
+window.electronAPI = {
   selectFolder: () => ipcRenderer.invoke('select-folder'),
   parseRoadmap: (planningPath) => ipcRenderer.invoke('parse-roadmap', planningPath),
   parseRequirements: (planningPath) => ipcRenderer.invoke('parse-requirements', planningPath),
@@ -22,4 +24,4 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getGitCommits: (projectPath, limit) => ipcRenderer.invoke('get-git-commits', projectPath, limit),
   getGitDiff: (projectPath, filePath) => ipcRenderer.invoke('get-git-diff', projectPath, filePath),
   openExternal: (url) => ipcRenderer.invoke('open-external', url)
-});
+};

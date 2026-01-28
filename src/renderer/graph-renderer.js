@@ -1133,19 +1133,19 @@ function updateGraphForTimeline() {
       relativePath = node.path;
     }
 
-    const state = fileState.get(relativePath);
+    const fileStatus = fileState.get(relativePath);
     let targetOpacity = 0.85; // Default opacity for files
 
-    if (state === undefined) {
+    if (fileStatus === undefined) {
       // File not in activity history at this time - show normally
       targetOpacity = 0.85;
-    } else if (state === 'exists') {
+    } else if (fileStatus === 'exists') {
       // File exists at this time - show normally
       targetOpacity = 0.85;
-    } else if (state === 'deleted') {
+    } else if (fileStatus === 'deleted') {
       // File was deleted - show faded
       targetOpacity = 0.3;
-    } else if (state === 'not-yet-created') {
+    } else if (fileStatus === 'not-yet-created') {
       // File hasn't been created yet - show very faded
       targetOpacity = 0.1;
     }
@@ -3134,9 +3134,9 @@ function buildGraphFromProject(projectData) {
   }
 
   // Add blocker links if any
-  const { state } = projectData;
-  if (state && state.blockers && state.blockers.length > 0) {
-    for (const blocker of state.blockers) {
+  const { state: projectState } = projectData;
+  if (projectState && projectState.blockers && projectState.blockers.length > 0) {
+    for (const blocker of projectState.blockers) {
       // Add blocker as a node
       const blockerNode = addNode({
         id: blocker.id,
@@ -3147,8 +3147,8 @@ function buildGraphFromProject(projectData) {
       });
 
       // Link blocker to current phase
-      if (state.currentPhase) {
-        const currentPhaseId = `phase-${state.currentPhase}`;
+      if (projectState.currentPhase) {
+        const currentPhaseId = `phase-${projectState.currentPhase}`;
         if (nodeMap.has(currentPhaseId)) {
           addLink(blockerNode.id, currentPhaseId, 'blocked');
         }
@@ -3297,6 +3297,10 @@ async function loadProject(projectPath) {
   if (selectedPathEl) selectedPathEl.textContent = 'Loading...';
 
   try {
+    // Initialize state FIRST - sets selectedProjectPath and resets all state
+    initializeState(projectPath);
+    console.log('State initialized for:', projectPath);
+
     const projectData = await window.electronAPI.parseProject(projectPath);
 
     if (projectData.error) {
@@ -3318,7 +3322,6 @@ async function loadProject(projectPath) {
     updateGraph(graphData);
 
     if (selectedPathEl) selectedPathEl.textContent = projectPath;
-    state.selectedProjectPath = projectPath;
 
     // Start file watching
     if (window.electronAPI && window.electronAPI.startWatching) {

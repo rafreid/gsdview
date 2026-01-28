@@ -207,7 +207,7 @@ function getContextBarColor(contextUsage) {
  */
 function renderContextBar(stageGroup, contextUsage) {
   const barY = STAGE_HEADER_HEIGHT + 5;
-  const barHeight = 8;
+  const barHeight = 14;  // Taller bar for better visibility
   const barPadding = 10;
   const barWidth = STAGE_WIDTH - (barPadding * 2);
 
@@ -220,30 +220,32 @@ function renderContextBar(stageGroup, contextUsage) {
   contextBarGroup.append('rect')
     .attr('width', barWidth)
     .attr('height', barHeight)
-    .attr('fill', '#333')
-    .attr('rx', 2);
+    .attr('fill', '#2a2a3e')
+    .attr('rx', 3)
+    .attr('stroke', '#444')
+    .attr('stroke-width', 1);
 
   // Foreground rect (percentage filled)
-  const fillWidth = (contextUsage / 100) * barWidth;
+  const fillWidth = Math.max((contextUsage / 100) * barWidth, 2);  // Min 2px for visibility
   const barColor = getContextBarColor(contextUsage);
 
   contextBarGroup.append('rect')
     .attr('width', fillWidth)
     .attr('height', barHeight)
     .attr('fill', barColor)
-    .attr('rx', 2);
+    .attr('rx', 3);
 
-  // Percentage text label (right-aligned)
+  // Percentage text label (centered in bar)
   contextBarGroup.append('text')
-    .attr('x', barWidth)
+    .attr('x', barWidth / 2)
     .attr('y', barHeight / 2)
-    .attr('text-anchor', 'end')
+    .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'middle')
-    .attr('fill', '#888')
-    .attr('font-size', '10px')
+    .attr('fill', '#fff')
+    .attr('font-size', '11px')
     .attr('font-weight', 'bold')
-    .attr('dx', -3)
-    .text(`${contextUsage}%`);
+    .attr('text-shadow', '0 1px 2px rgba(0,0,0,0.8)')
+    .text(`Context: ${contextUsage}%`);
 
   // Add tooltip on hover
   contextBarGroup.append('title')
@@ -269,7 +271,7 @@ function renderAgentLanes(stageGroup, parallelAgents) {
   // Only render if there are multiple agents
   if (!parallelAgents || parallelAgents.length <= 1) return;
 
-  const laneY = STAGE_HEADER_HEIGHT + 5 + 8 + 5; // After header + context bar
+  const laneY = STAGE_HEADER_HEIGHT + 5 + 14 + 5; // After header + context bar (14px bar)
   const laneHeight = 24;
   const lanePadding = 10;
   const laneWidth = STAGE_WIDTH - (lanePadding * 2);
@@ -630,8 +632,8 @@ function renderArtifacts(stageGroups) {
     if (artifacts.length === 0) return;
 
     const group = d3.select(this);
-    // Adjust contentY to account for context bar (STAGE_HEADER_HEIGHT + 5px margin + 8px bar + 5px margin)
-    const contextBarHeight = 18; // 5 + 8 + 5
+    // Adjust contentY to account for context bar (STAGE_HEADER_HEIGHT + 5px margin + 14px bar + 5px margin)
+    const contextBarHeight = 24; // 5 + 14 + 5
 
     // Account for agent lanes if present (24px height + 5px margin)
     const parallelAgents = stage.parallelAgents || [];

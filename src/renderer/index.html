@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
   <title>GSD Viewer</title>
   <style>
     * {
@@ -151,11 +151,10 @@
     }
 
     .stage {
-      transition: transform 0.2s ease, filter 0.2s ease;
+      transition: filter 0.2s ease;
     }
 
     .stage:hover {
-      transform: scale(1.02);
       filter: brightness(1.1);
     }
 
@@ -244,7 +243,7 @@
     }
 
     .commit-markers:hover {
-      transform: scale(1.1);
+      filter: brightness(1.2);
     }
 
     .commit-markers circle {
