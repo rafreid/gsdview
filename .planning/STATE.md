@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 ## Current Position
 
 Phase: 34 - Real-Time Updates
-Plan: 00 of ?
-Status: Planning
-Last activity: 2026-01-28 — Completed Phase 33 (Interactivity)
+Plan: 01 of 01
+Status: Phase complete
+Last activity: 2026-01-28 — Completed 34-01-PLAN.md
 
-Progress: [████████░░░░░░░░░░░░] 4/6 phases (67%)
+Progress: [█████████░░░░░░░░░░░] 5/6 phases (83%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 76 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 10)
+- Total plans completed: 77 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 11)
 - Average duration: 5min
-- Total execution time: 2 days + 135m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m, v1.5: 27m)
+- Total execution time: 2 days + 138m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m, v1.5: 30m)
 
 **By Milestone:**
 
@@ -46,8 +46,8 @@ Progress: [████████░░░░░░░░░░░░] 4/6 pha
 - Status: Shipped 2026-01-25 (All phases complete)
 
 *v1.5 (In Progress):*
-- 6 phases, 10 plans complete
-- Status: Phase 33 complete, Phase 34 next
+- 6 phases, 11 plans complete
+- Status: Phase 34 complete, Phase 35 next
 
 ## Accumulated Context
 
@@ -318,6 +318,13 @@ Recent decisions affecting current work:
 - Bookmark shortcuts (1-9) parse phase numbers from node IDs for diagram navigation (33-02)
 - 500ms ease-out pan animation for bookmark navigation in diagram view (33-02)
 - Local showToast implementation in diagram-renderer for independence (33-02)
+- File change handler in diagram-renderer with 300ms debounce for burst changes (34-01)
+- onFilesChanged export re-parses pipeline and re-renders diagram on planning file changes (34-01)
+- graph-renderer routes file changes to diagram via onDiagramFilesChanged when activeView === 'diagram' (34-01)
+- Diagram flash animations use CSS transform (scale) and filter (drop-shadow) for SVG elements (34-01)
+- 4 pulses for created (green), 3 pulses for modified (amber), 2 pulses for deleted (red) (34-01)
+- flashArtifact function applies CSS animation class with 50ms post-render delay (34-01)
+- Diagram flash respects --flash-duration CSS variable for user preference (34-01)
 
 ### Pending Todos
 
@@ -357,6 +364,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Completed 33-02-PLAN.md (Phase 33 complete)
+Stopped at: Completed 34-01-PLAN.md (Phase 34 complete)
 Resume file: None
-Next action: Begin Phase 34
+Next action: Begin Phase 35
