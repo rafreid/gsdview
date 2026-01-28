@@ -48,8 +48,8 @@ const STAGE_HEADER_HEIGHT = 40;
 // All Files panel constants
 const FILES_PANEL_WIDTH = 300;
 const FILES_PANEL_PADDING = 10;
-const FILE_ITEM_HEIGHT = 28;
-const FILES_PER_PAGE = 20;
+const FILE_ITEM_HEIGHT = 22;
+const FILES_PER_PAGE = 100;
 
 // Color constants
 const STATUS_COLORS = {
