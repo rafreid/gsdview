@@ -5529,12 +5529,16 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
       // Add to activity feed and get entry with mapped event type (always update state)
       const entry = addActivityEntry(data.event, data.path, data.sourceType);
 
+      // Always flash tree item regardless of active view
+      if (entry.nodeId) {
+        flashTreeItem(entry.nodeId, entry.event);
+      }
+
       // Trigger view-specific visual effects
       if (state.activeView === 'graph') {
-        // Flash the node with type-appropriate animation
+        // Flash the 3D node with type-appropriate animation
         if (entry.nodeId) {
           flashNodeWithType(entry.nodeId, entry.event);
-          flashTreeItem(entry.nodeId, entry.event);
 
           // Follow camera to changed file if follow-active is enabled
           if (followActiveEnabled && entry.event !== 'deleted') {
@@ -5610,16 +5614,37 @@ if (window.electronAPI && window.electronAPI.onClaudeOperation) {
       changeType = 'modified'; // Fallback for unknown operations
     }
 
-    // Only trigger visual effects if graph view is active
-    if (state.activeView === 'graph' && event.nodeId) {
-      // Flash the node if we have a valid nodeId
-      flashNodeWithType(event.nodeId, changeType);
+    // Always flash tree item regardless of active view
+    if (event.nodeId) {
       flashTreeItem(event.nodeId, changeType);
+    }
+
+    // Trigger view-specific visual effects
+    if (state.activeView === 'graph' && event.nodeId) {
+      // Flash the 3D node if we have a valid nodeId
+      flashNodeWithType(event.nodeId, changeType);
 
       // Follow camera to file if follow-active is enabled (but not for reads)
       if (followActiveEnabled && changeType !== 'read') {
         flyToNodeSmooth(event.nodeId);
       }
+    } else if (state.activeView === 'diagram' && event.nodeId) {
+      // Route Claude operations to diagram renderer for flash animation
+      // Map changeType values to chokidar event names that diagram expects
+      let diagramEvent;
+      if (changeType === 'created') {
+        diagramEvent = 'add';
+      } else if (changeType === 'deleted') {
+        diagramEvent = 'unlink';
+      } else {
+        diagramEvent = 'change'; // 'modified' and 'read' both map to 'change'
+      }
+
+      callDiagramFilesChangedHandler({
+        event: diagramEvent,
+        path: event.file_path,
+        sourceType: event.file_path.includes('.planning') ? 'planning' : 'src'
+      });
     }
 
     // Note: We don't add to activity feed here since these are Claude operations,
