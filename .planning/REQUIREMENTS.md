@@ -47,11 +47,11 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 - [x] **INTR-05**: Two-way sync: select in graph → highlights corresponding artifact in diagram
 - [x] **INTR-06**: Bookmark shortcuts (1-9) work in diagram view for quick phase navigation
 
-### Real-Time Updates
+### Real-Time Updates ✓
 
-- [ ] **LIVE-01**: File changes detected via existing watcher trigger diagram updates
-- [ ] **LIVE-02**: Flash animation highlights changed artifacts in diagram
-- [ ] **LIVE-03**: Activity feed shows changes from both views
+- [x] **LIVE-01**: File changes detected via existing watcher trigger diagram updates
+- [x] **LIVE-02**: Flash animation highlights changed artifacts in diagram
+- [x] **LIVE-03**: Activity feed shows changes from both views
 
 ## Future Requirements (v2+)
 
@@ -107,9 +107,9 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 | INTR-04 | Phase 33 | Complete |
 | INTR-05 | Phase 33 | Complete |
 | INTR-06 | Phase 33 | Complete |
-| LIVE-01 | Phase 34 | Pending |
-| LIVE-02 | Phase 34 | Pending |
-| LIVE-03 | Phase 34 | Pending |
+| LIVE-01 | Phase 34 | Complete |
+| LIVE-02 | Phase 34 | Complete |
+| LIVE-03 | Phase 34 | Complete |
 
 **Coverage:**
 - v1.5 requirements: 28 total
@@ -118,4 +118,4 @@ Requirements for workflow diagram view. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-01-28*
-*Last updated: 2026-01-28 (Phase 33 requirements complete)*
+*Last updated: 2026-01-28 (Phase 34 requirements complete)*
