@@ -20,6 +20,9 @@ let pipelineData = null;
 let diagramGroup = null;
 let currentTransform = { x: 0, y: 0, scale: 1 };
 
+// State subscription
+let selectionUnsubscribe = null;
+
 // Collapsed stages tracking
 const collapsedStages = new Set();
 
@@ -82,6 +85,13 @@ export function mount() {
     renderPlaceholder(diagramGroup);
   }
 
+  // Subscribe to selection changes from graph view
+  selectionUnsubscribe = subscribe((property, newValue, oldValue) => {
+    if (property === 'selectedNode') {
+      highlightArtifactInDiagram(newValue);
+    }
+  });
+
   console.log('[DiagramRenderer] Mounted');
 }
 
@@ -91,6 +101,12 @@ export function mount() {
  */
 export function unmount() {
   console.log('[DiagramRenderer] Unmounting...');
+
+  // Unsubscribe from selection changes
+  if (selectionUnsubscribe) {
+    selectionUnsubscribe();
+    selectionUnsubscribe = null;
+  }
 
   // Clear SVG reference
   svg = null;
@@ -496,6 +512,97 @@ function updateArtifactSelection() {
           .style('filter', null);
     }
   });
+}
+
+/**
+ * Highlight artifact in diagram based on selected node
+ * Called when selection changes in graph view
+ */
+function highlightArtifactInDiagram(node) {
+  if (!diagramGroup) return;
+
+  // Clear previous selection highlight
+  diagramGroup.selectAll('.artifact').classed('selected', false);
+  diagramGroup.selectAll('.artifact rect:first-of-type').each(function(d) {
+    const rect = d3.select(this);
+    const originalStroke = STATUS_COLORS[d.status] || STATUS_COLORS.missing;
+    rect.attr('stroke', originalStroke)
+        .attr('stroke-width', 1)
+        .style('filter', null);
+  });
+
+  if (!node) return;
+
+  // Extract path from node ID (format: 'planning:/phases/XX-name/file.md')
+  const nodeId = node?.id || node;
+  if (!nodeId || !nodeId.startsWith('planning:')) return;
+
+  const relativePath = nodeId.replace('planning:', '');
+
+  // Find matching artifact and highlight
+  let foundArtifact = null;
+  diagramGroup.selectAll('.artifact').each(function(d) {
+    const artifactPath = d.path.replace(/.*\.planning\//, '');
+    if (artifactPath === relativePath || d.path.includes(relativePath)) {
+      const group = d3.select(this);
+      group.classed('selected', true);
+
+      // Update stroke
+      const rect = group.select('rect:first-of-type');
+      rect.attr('stroke', '#4ECDC4')
+          .attr('stroke-width', 2)
+          .style('filter', 'drop-shadow(0 0 4px rgba(78, 205, 196, 0.5))');
+
+      foundArtifact = this;
+    }
+  });
+
+  // Scroll to make artifact visible
+  if (foundArtifact) {
+    scrollArtifactIntoView(foundArtifact);
+  }
+}
+
+/**
+ * Scroll artifact into view with smooth pan
+ */
+function scrollArtifactIntoView(artifactElement) {
+  if (!artifactElement) return;
+
+  // Get artifact position
+  const artifactGroup = d3.select(artifactElement);
+  const transform = artifactGroup.attr('transform');
+
+  // Parse transform to get position
+  const match = transform?.match(/translate\(([^,]+),\s*([^)]+)\)/);
+  if (!match) return;
+
+  const artifactX = parseFloat(match[1]);
+  const artifactY = parseFloat(match[2]);
+
+  // Get parent stage position
+  const stageGroup = d3.select(artifactElement.parentNode);
+  const stageTransform = stageGroup.attr('transform');
+  const stageMatch = stageTransform?.match(/translate\(([^,]+),\s*([^)]+)\)/);
+  if (!stageMatch) return;
+
+  const stageX = parseFloat(stageMatch[1]);
+  const stageY = parseFloat(stageMatch[2]);
+
+  // Calculate absolute position
+  const targetX = stageX + artifactX;
+  const targetY = stageY + artifactY;
+
+  // Get container dimensions
+  const container = document.getElementById('diagram-container');
+  const containerWidth = container.clientWidth;
+  const containerHeight = container.clientHeight;
+
+  // Pan to center artifact (adjust currentTransform)
+  currentTransform.x = containerWidth / 2 - targetX - STAGE_WIDTH / 2;
+  currentTransform.y = containerHeight / 2 - targetY - ARTIFACT_HEIGHT / 2;
+
+  updateTransform();
 }
 
 /**
