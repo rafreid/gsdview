@@ -9,7 +9,7 @@ import * as d3 from 'd3';
 import dagre from '@dagrejs/dagre';
 import { state, subscribe } from './state-manager.js';
 import { parsePipelineState, GSD_STAGES } from './gsd-pipeline-parser.js';
-import { openFileInspector, formatFileSize, formatRelativeTime } from './graph-renderer.js';
+import { openFileInspector, formatFileSize, formatRelativeTime, highlightNodeInGraph } from './graph-renderer.js';
 
 const fs = window.require('fs');
 const path = window.require('path');
@@ -348,14 +348,27 @@ function renderArtifacts(stageGroups) {
       .style('cursor', 'pointer')
       .on('click', (event, artifact) => {
         event.stopPropagation();
+
         // Build node object matching what openFileInspector expects
+        const nodeId = 'planning:' + artifact.path.replace(/.*\.planning\//, '');
         const node = {
-          id: 'planning:' + artifact.path.replace(/.*\.planning\//, ''),
+          id: nodeId,
           name: artifact.name,
           type: 'file',
           path: artifact.path.replace(/.*\.planning\//, ''),
           sourceType: 'planning'
         };
+
+        // Set selection state (triggers cross-view sync)
+        state.selectedNode = node;
+
+        // Update visual selection in diagram
+        updateArtifactSelection();
+
+        // Highlight in graph view (for when user switches back)
+        highlightNodeInGraph(nodeId);
+
+        // Open file inspector
         openFileInspector(node);
       })
       .on('mouseover', (event, artifact) => {
@@ -448,6 +461,39 @@ function renderArtifacts(stageGroups) {
         .attr('font-size', '11px')
         .text(`+${artifacts.length - maxArtifacts} more`)
         .style('opacity', isCollapsed ? 0 : 1);
+    }
+  });
+}
+
+/**
+ * Update artifact selection styling in diagram
+ */
+function updateArtifactSelection() {
+  if (!diagramGroup) return;
+
+  const selectedNodeId = state.selectedNode?.id;
+
+  // Update all artifact groups with selection class
+  diagramGroup.selectAll('.artifact').each(function(d) {
+    const artifactPath = d.path.replace(/.*\.planning\//, '');
+    const artifactNodeId = 'planning:' + artifactPath;
+    const isSelected = selectedNodeId === artifactNodeId;
+
+    const group = d3.select(this);
+    group.classed('selected', isSelected);
+
+    // Update stroke on the background rect
+    const rect = group.select('rect:first-of-type');
+    if (isSelected) {
+      rect.attr('stroke', '#4ECDC4')
+          .attr('stroke-width', 2)
+          .style('filter', 'drop-shadow(0 0 4px rgba(78, 205, 196, 0.5))');
+    } else {
+      // Restore original stroke
+      const originalStroke = STATUS_COLORS[d.status] || STATUS_COLORS.missing;
+      rect.attr('stroke', originalStroke)
+          .attr('stroke-width', 1)
+          .style('filter', null);
     }
   });
 }

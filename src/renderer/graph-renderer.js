@@ -7822,4 +7822,12 @@ export function getGraph() {
   return Graph;
 }
 
+/**
+ * Highlight a node in the graph view
+ * Used for cross-view synchronization (diagram->graph)
+ *
+ * @param {string} nodeId - Node ID to highlight
+ */
+export { highlightNodeInGraph };
+
 console.log('GSD Viewer initialized - select a project folder to visualize');
