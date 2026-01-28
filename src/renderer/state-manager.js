@@ -311,7 +311,7 @@ function callOpenFileInspectorHandler(node) {
 // EXPORTS
 // ============================================================================
 
-module.exports = {
+export {
   state,
   subscribe,
   getState,

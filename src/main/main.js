@@ -139,7 +139,7 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: true  // Required for diagram-renderer.js to use fs/path
     }
   });
 
