@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-01-28 — Milestone v1.6 started
+Phase: 36 - Live Dashboard View
+Plan: Not started
+Status: Planning milestone v1.6
+Last activity: 2026-01-28 — Roadmap created for v1.6
 
-Progress: [░░░░░░░░░░░░░░░░░░░░] 0/? phases (0%)
+Progress: [░░░░░░░░░░░░░░░░░░░░] 0/6 phases (0%)
 
 ## Performance Metrics
 
@@ -48,6 +48,10 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0/? pha
 *v1.5 (Complete):*
 - 6 phases, 14 plans complete
 - Status: Shipped 2026-01-28 (All phases complete)
+
+*v1.6 (Current):*
+- 6 phases, 0 plans complete
+- Status: Planning (Phase 36 ready to plan)
 
 ## Accumulated Context
 
@@ -375,6 +379,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28 19:52:13 UTC
-Stopped at: Completed 35-02-PLAN.md (Phase 35 Plan 02 complete)
+Stopped at: v1.6 roadmap created
 Resume file: None
-Next action: Continue Phase 35 (1 more plan remaining)
+Next action: Begin Phase 36 planning with `/gsd:plan-phase 36`

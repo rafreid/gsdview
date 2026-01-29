@@ -13,161 +13,110 @@ Transform a GSD project's .planning/ folder into an explorable 3D force-directed
 | v1.2 | File Deep Dive | 13-17 | [v1.2-ROADMAP.md](./milestones/v1.2-ROADMAP.md) |
 | v1.3 | Enhanced Navigation + Smooth Activity | 18-25 | [v1.3-ROADMAP.md](./milestones/v1.3-ROADMAP.md) |
 | v1.4 | Live Activity Sync | 26-29 | [v1.4-ROADMAP.md](./milestones/v1.4-ROADMAP.md) |
+| v1.5 | GSD Workflow Diagram | 30-35 | [v1.5-ROADMAP.md](./milestones/v1.5-ROADMAP.md) |
 
-## Current Milestone: v1.5 GSD Workflow Diagram
+## Current Milestone: v1.6 Live Activity Intelligence
 
-**Goal:** Add a workflow-oriented diagram view that maps the .planning/ folder onto the GSD process model, showing both how the workflow operates and why it's effective through visual indicators.
+**Goal:** Provide real-time visibility into what's happening when GSD is cooking. Users see Claude's activity patterns, file hotspots, operation flow, and context window status through dedicated visualization modes.
 
-### Phase 30: Architecture Foundation ✓
+### Phase 36: Live Dashboard View
 
-**Goal:** Establish clean separation and lifecycle patterns to prevent memory leaks, stale closures, and animation conflicts
+**Goal:** User sees real-time activity status showing what Claude is doing right now
 
-**Dependencies:** None (refactors existing code)
+**Dependencies:** None (extends existing activity tracking)
 
-**Requirements:** ARCH-01, ARCH-02, ARCH-03, ARCH-04
-
-**Plans:** 3 plans ✓
-
-Plans:
-- [x] 30-01-PLAN.md — Create state-manager.js with centralized state
-- [x] 30-02-PLAN.md — Refactor renderer.js to graph-renderer.js with lifecycle methods
-- [x] 30-03-PLAN.md — Verification checkpoint
+**Requirements:** DASH-01, DASH-02, DASH-03, DASH-04, DASH-05, DASH-06
 
 **Success Criteria:**
-1. ✓ User sees graph view working identically after state-manager extraction
-2. ✓ Developer can verify all selection state flows through single state-manager.js module
-3. ✓ Developer can mount/unmount graph renderer without memory leaks (verified by 20+ view switches in DevTools)
-4. ✓ Animation frame IDs properly canceled when switching away from graph view
-
-**Completed:** 2026-01-28
+1. User sees current operation indicator (reading/writing/thinking/idle) updating in real-time
+2. User sees active file highlighted with pulsing animation distinct from history flashes
+3. User sees rolling sparkline chart showing last 5 minutes of operation frequency
+4. User sees session statistics dashboard (files touched, operations count, time active)
+5. User can toggle Dashboard view via tab controls and it preserves state when switching back
 
 ---
 
-### Phase 31: View Switching ✓
+### Phase 37: File Heatmap View
 
-**Goal:** User can toggle between Graph and Diagram views while preserving selection and keyboard shortcuts
+**Goal:** User can visualize which files are receiving the most attention through spatial heatmap
 
-**Dependencies:** Phase 30 (requires state-manager.js)
+**Dependencies:** Phase 36 (shares activity data infrastructure)
 
-**Requirements:** VIEW-01, VIEW-02, VIEW-03, VIEW-04
-
-**Plans:** 3 plans ✓
-
-Plans:
-- [x] 31-01-PLAN.md — View infrastructure (tab controls, diagram container, view-controller.js)
-- [x] 31-02-PLAN.md — Selection persistence and keyboard routing
-- [x] 31-03-PLAN.md — Verification checkpoint
+**Requirements:** HEAT-01, HEAT-02, HEAT-03, HEAT-04, HEAT-05, HEAT-06
 
 **Success Criteria:**
-1. ✓ User can click tab controls to switch between Graph and Diagram views
-2. ✓ User sees their selected node remains highlighted when switching between views
-3. ✓ User presses keyboard shortcuts (1-9 bookmarks, arrow navigation) and correct view responds
-4. ✓ Developer sees file watcher updates route to both views without render conflicts
-5. ✓ User experiences smooth transitions without layout stuttering or flashing
-
-**Completed:** 2026-01-28
+1. User sees treemap visualization where rectangle size represents file size
+2. User sees color intensity showing activity frequency (red=hot files, blue=cold files)
+3. User can click directory rectangles to drill down and explore subdirectories
+4. User can filter heatmap by time range (last hour / this session / all time)
+5. User sees file details and recent operations list on hover tooltip
 
 ---
 
-### Phase 32: Diagram Layout + Artifact Visualization ✓
+### Phase 38: Operation Flow Timeline
 
-**Goal:** User sees workflow pipeline layout with nested phase artifacts showing completion status
+**Goal:** User can scrub through operation history to understand Claude's workflow patterns
 
-**Dependencies:** Phase 31 (requires view containers)
+**Dependencies:** Phase 37 (builds on activity data model)
 
-**Requirements:** DIAG-01, DIAG-02, DIAG-03, DIAG-04, ARTF-01, ARTF-02, ARTF-03, ARTF-04
-
-**Plans:** 2 plans ✓
-
-Plans:
-- [x] 32-01-PLAN.md — Foundation: Dependencies + Parser + Renderer Skeleton
-- [x] 32-02-PLAN.md — SVG Pipeline Layout + Artifact Blocks
+**Requirements:** TIME-01, TIME-02, TIME-03, TIME-04, TIME-05, TIME-06
 
 **Success Criteria:**
-1. ✓ User sees 6 GSD stages (Initialize → Discuss → Plan → Execute → Verify → Complete) in left-to-right pipeline
-2. ✓ User sees stage containers display with distinct status indicators (green/yellow/gray)
-3. ✓ User sees connection lines showing sequential workflow flow
-4. ✓ User can scroll/pan horizontally to navigate the full pipeline
-5. ✓ User sees artifact blocks (CONTEXT.md, RESEARCH.md, PLANs, SUMMARYs) nested within stage containers
-6. ✓ User sees each artifact shows completion status using color coding (green=done, yellow=in-progress, gray=missing)
-7. ✓ User sees current stage/phase highlighted based on STATE.md
-
-**Completed:** 2026-01-28
+1. User sees horizontal timeline with all GSD operations in chronological order
+2. User sees color-coded operation blocks (blue=read, amber=write, green=create, red=delete)
+3. User sees operations grouped by file in swimlanes for pattern recognition
+4. User can scrub timeline to see file state at any historical moment
+5. User sees pattern detection highlights showing read-then-write sequences
+6. User can zoom in/out on timeline to focus on specific time ranges
 
 ---
 
-### Phase 33: Interactivity ✓
+### Phase 39: Context Window Meter
 
-**Goal:** User can interact with diagram artifacts and sync selection between diagram and graph views
+**Goal:** User can see estimated context window usage and what files might fall out
 
-**Dependencies:** Phase 32 (requires diagram rendering)
+**Dependencies:** Phase 38 (requires operation history for context estimation)
 
-**Requirements:** INTR-01, INTR-02, INTR-03, INTR-04, INTR-05, INTR-06
-
-**Plans:** 2 plans ✓
-
-Plans:
-- [x] 33-01-PLAN.md — Diagram click, hover tooltip, stage expand/collapse
-- [x] 33-02-PLAN.md — Two-way selection sync and bookmark navigation
+**Requirements:** CNTX-01, CNTX-02, CNTX-03, CNTX-04
 
 **Success Criteria:**
-1. ✓ User clicks artifact in diagram and file inspector modal opens showing file contents
-2. ✓ User hovers over artifact and sees tooltip with file metadata (name, size, modified date)
-3. ✓ User clicks stage header and sees artifact detail expand/collapse smoothly
-4. ✓ User clicks artifact in diagram and corresponding node highlights in graph view
-5. ✓ User clicks node in graph view and corresponding artifact highlights in diagram view
-6. ✓ User presses bookmark shortcuts (1-9) in diagram view and camera flies to bookmarked phase
-
-**Completed:** 2026-01-28
+1. User sees progress bar showing estimated context usage percentage
+2. User sees list of files currently "in context" based on recent read/write activity
+3. User sees warning indicator when estimated context usage approaches limits
+4. User sees predictions of which files might fall out of context next
 
 ---
 
-### Phase 34: Real-Time Updates ✓
+### Phase 40: Smart Notifications
 
-**Goal:** Diagram view updates automatically when files change, with flash animations showing what changed
+**Goal:** User receives intelligent alerts for significant GSD activity events
 
-**Dependencies:** Phase 33 (requires interactive diagram)
+**Dependencies:** Phase 39 (uses activity pattern detection)
 
-**Requirements:** LIVE-01, LIVE-02, LIVE-03
-
-**Plans:** 1 plan ✓
-
-Plans:
-- [x] 34-01-PLAN.md — File change handler with re-render and flash animations
+**Requirements:** NOTF-01, NOTF-02, NOTF-03, NOTF-04
 
 **Success Criteria:**
-1. ✓ User sees file changes detected by existing watcher trigger immediate diagram updates
-2. ✓ User sees flash animation highlighting changed artifacts in diagram (matching graph flash colors)
-3. ✓ User sees activity feed shows changes from both Graph and Diagram views
-4. ✓ User experiences smooth updates even during rapid file changes (debounced layout recalculation)
-
-**Completed:** 2026-01-28
+1. User sees toast notifications for significant activity events (file creation bursts, rapid edits)
+2. User sees "Claude created N new files in X directory" notifications
+3. User sees "Rapid activity in X directory" alerts during intensive work
+4. User can configure which notification types to show via settings panel
 
 ---
 
-### Phase 35: Advanced Features & Polish ✓
+### Phase 41: Session Recording
 
-**Goal:** Add workflow efficiency indicators showing why GSD process works (context usage, parallel lanes, commit markers)
+**Goal:** User can record, replay, and export GSD sessions for review and sharing
 
-**Dependencies:** Phase 34 (requires stable diagram with updates)
+**Dependencies:** Phase 40 (completes activity intelligence foundation)
 
-**Requirements:** DIAG-05, DIAG-06, ARTF-05
-
-**Plans:** 3 plans ✓
-
-Plans:
-- [x] 35-01-PLAN.md — Context usage bars + responsive layout polish
-- [x] 35-02-PLAN.md — Parallel agent lanes + atomic commit markers
-- [x] 35-03-PLAN.md — Verification checkpoint (final v1.5 verification)
+**Requirements:** SESS-01, SESS-02, SESS-03, SESS-04, SESS-05
 
 **Success Criteria:**
-1. ✓ User sees "Why it works" context usage bars showing utilization percentage per stage
-2. ✓ User sees parallel agent lanes visualizing concurrent research/execution work during multi-agent stages
-3. ✓ User sees atomic commit markers on executed tasks in Execute stage
-4. ✓ User experiences polished diagram with responsive layout adjustments
-5. ✓ Developer verifies no performance degradation with advanced features enabled
-
-**Completed:** 2026-01-28
+1. User can start/stop session recording via prominent record button
+2. System captures all file operations with timestamps during active recording
+3. User can playback recorded sessions at variable speeds (1x, 2x, 4x, 8x)
+4. User can export session as markdown report summarizing activity
+5. User can view list of saved recordings and select one to replay
 
 ---
 
@@ -181,8 +130,9 @@ Plans:
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
 | v1.4 | 4 | 5 | Shipped 2026-01-25 |
 | v1.5 | 6 | 14 | Shipped 2026-01-28 |
-| **Total** | **35** | **80** | |
+| v1.6 | 6 | 0 | Planning |
+| **Total** | **41** | **80** | |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-28 (v1.5 MILESTONE COMPLETE)*
+*Last updated: 2026-01-28 (v1.6 MILESTONE STARTED)*
