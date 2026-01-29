@@ -1,121 +1,124 @@
-# Requirements: GSD Viewer v1.5
+# Requirements: GSD Viewer v1.6
 
 **Defined:** 2026-01-28
-**Core Value:** Make the invisible structure of a GSD project visible and navigable — now including workflow-oriented visualization
+**Core Value:** Real-time visibility into what's happening when GSD is cooking
 
-## v1.5 Requirements
+## v1.6 Requirements
 
-Requirements for workflow diagram view. Each maps to roadmap phases.
+Requirements for Live Activity Intelligence. Each maps to roadmap phases.
 
-### Architecture Foundation ✓
+### Live Dashboard View
 
-- [x] **ARCH-01**: State-manager.js centralizes selection, project data, and activity state
-- [x] **ARCH-02**: Renderer.js refactored to graph-renderer.js with state imports
-- [x] **ARCH-03**: Explicit lifecycle methods (mount/unmount) for view management
-- [x] **ARCH-04**: Animation frame cleanup patterns prevent memory leaks
+- [ ] **DASH-01**: User sees current operation indicator (reading/writing/thinking/idle)
+- [ ] **DASH-02**: User sees active file highlight with pulsing animation
+- [ ] **DASH-03**: User sees rolling activity sparkline (last 5 minutes)
+- [ ] **DASH-04**: User sees session statistics (files touched, operations count, time active)
+- [ ] **DASH-05**: User sees operation breakdown (pie chart: reads vs writes vs creates)
+- [ ] **DASH-06**: User can toggle Dashboard view via tab controls
 
-### View Switching ✓
+### File Heatmap View
 
-- [x] **VIEW-01**: User can toggle between Graph and Diagram views via tab controls
-- [x] **VIEW-02**: Selection persists across view switches
-- [x] **VIEW-03**: Keyboard shortcuts route correctly per active view
-- [x] **VIEW-04**: File watcher updates route to both views without race conditions
+- [ ] **HEAT-01**: User sees treemap visualization where rectangle size = file size
+- [ ] **HEAT-02**: User sees color intensity representing activity frequency (red=hot, blue=cold)
+- [ ] **HEAT-03**: User can click to drill down into directories
+- [ ] **HEAT-04**: User can filter by time range (last hour / this session / all time)
+- [ ] **HEAT-05**: User sees file details and recent operations on hover
+- [ ] **HEAT-06**: User can toggle Heatmap view via tab controls
 
-### Diagram Layout ✓
+### Operation Flow Timeline
 
-- [x] **DIAG-01**: Pipeline shows 6 GSD stages (Initialize → Discuss → Plan → Execute → Verify → Complete)
-- [x] **DIAG-02**: Stages display as distinct containers with status indicators
-- [x] **DIAG-03**: Connection lines show sequential workflow flow
-- [x] **DIAG-04**: Layout supports horizontal scroll/pan for navigation
-- [x] **DIAG-05**: "Why it works" context usage bars show utilization per stage
-- [x] **DIAG-06**: Parallel agent lanes visualize concurrent research/execution work
+- [ ] **TIME-01**: User sees horizontal timeline of all GSD operations
+- [ ] **TIME-02**: User sees color-coded blocks (blue=read, amber=write, green=create, red=delete)
+- [ ] **TIME-03**: User sees operations grouped by file in swimlanes
+- [ ] **TIME-04**: User can scrub timeline to see file state at any moment
+- [ ] **TIME-05**: User sees pattern detection highlights (read-then-write sequences)
+- [ ] **TIME-06**: User can zoom in/out on time ranges
 
-### Artifact Visualization ✓
+### Context Window Meter
 
-- [x] **ARTF-01**: Artifact blocks nest within stage containers (CONTEXT.md, RESEARCH.md, PLANs, SUMMARYs)
-- [x] **ARTF-02**: Each artifact shows completion status (done/in-progress/missing)
-- [x] **ARTF-03**: Status colors: green (done), yellow (in-progress), gray (missing)
-- [x] **ARTF-04**: Current stage/phase highlighted based on STATE.md
-- [x] **ARTF-05**: Execute stage shows atomic commit markers on completed tasks
+- [ ] **CNTX-01**: User sees progress bar showing estimated context usage percentage
+- [ ] **CNTX-02**: User sees list of files currently "in context" (recently read/written)
+- [ ] **CNTX-03**: User sees warning indicator when approaching context limits
+- [ ] **CNTX-04**: User sees prediction of what files might fall out of context
 
-### Interactivity ✓
+### Smart Notifications
 
-- [x] **INTR-01**: Click artifact opens file inspector modal
-- [x] **INTR-02**: Hover shows tooltip with file metadata
-- [x] **INTR-03**: Click stage header to expand/collapse artifact detail
-- [x] **INTR-04**: Two-way sync: select in diagram → highlights corresponding node in graph
-- [x] **INTR-05**: Two-way sync: select in graph → highlights corresponding artifact in diagram
-- [x] **INTR-06**: Bookmark shortcuts (1-9) work in diagram view for quick phase navigation
+- [ ] **NOTF-01**: User sees toast notifications for significant activity events
+- [ ] **NOTF-02**: User sees "Claude created N new files in X" notifications
+- [ ] **NOTF-03**: User sees "Rapid activity in X directory" alerts
+- [ ] **NOTF-04**: User can configure which notification types to show
 
-### Real-Time Updates ✓
+### Session Recording
 
-- [x] **LIVE-01**: File changes detected via existing watcher trigger diagram updates
-- [x] **LIVE-02**: Flash animation highlights changed artifacts in diagram
-- [x] **LIVE-03**: Activity feed shows changes from both views
+- [ ] **SESS-01**: User can start/stop session recording
+- [ ] **SESS-02**: System captures all file operations with timestamps during recording
+- [ ] **SESS-03**: User can playback recorded sessions at 1x, 2x, 4x, 8x speed
+- [ ] **SESS-04**: User can export session report as markdown summary
+- [ ] **SESS-05**: User can view list of saved recordings
 
 ## Future Requirements (v2+)
 
-### Advanced Visualization
+### Advanced Analysis
 
-- **VIS-01**: Timeline replay updates diagram state (historical view)
-- **VIS-02**: Progress rings showing percentage complete per stage
-- **VIS-03**: Minimap adaptation for diagram view
+- **ANLZ-01**: Machine learning pattern detection across sessions
+- **ANLZ-02**: Anomaly detection (unusual activity patterns)
+- **ANLZ-03**: Productivity metrics and insights
 
-### Export
+### Collaboration
 
-- **EXP-01**: Export diagram as SVG
-- **EXP-02**: Export diagram as PNG
+- **COLB-01**: Share session recordings with team
+- **COLB-02**: Real-time multi-viewer mode
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Editable diagram | GSD workflow is fixed, not user-customizable |
-| Freeform flowchart editor | Adds complexity without value; viewer-only app |
-| Vertical swimlanes per file | Too many lanes = visual noise |
-| Heavy transition animations | Distracts from information display |
-| Everything expanded by default | Overwhelming; progressive disclosure preferred |
-| Detailed content preview inline | Use existing inspector modal instead |
-| Diagram zoom in/out | Horizontal scroll/pan sufficient for 2D layout |
+| Actual context window API | Claude doesn't expose this; must estimate |
+| File content in timeline | Privacy/performance; show metadata only |
+| Cross-project analytics | Single project focus for v1.6 |
+| Cloud sync of recordings | Local-first app philosophy |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ARCH-01 | Phase 30 | Complete |
-| ARCH-02 | Phase 30 | Complete |
-| ARCH-03 | Phase 30 | Complete |
-| ARCH-04 | Phase 30 | Complete |
-| VIEW-01 | Phase 31 | Complete |
-| VIEW-02 | Phase 31 | Complete |
-| VIEW-03 | Phase 31 | Complete |
-| VIEW-04 | Phase 31 | Complete |
-| DIAG-01 | Phase 32 | Complete |
-| DIAG-02 | Phase 32 | Complete |
-| DIAG-03 | Phase 32 | Complete |
-| DIAG-04 | Phase 32 | Complete |
-| DIAG-05 | Phase 35 | Complete |
-| DIAG-06 | Phase 35 | Complete |
-| ARTF-01 | Phase 32 | Complete |
-| ARTF-02 | Phase 32 | Complete |
-| ARTF-03 | Phase 32 | Complete |
-| ARTF-04 | Phase 32 | Complete |
-| ARTF-05 | Phase 35 | Complete |
-| INTR-01 | Phase 33 | Complete |
-| INTR-02 | Phase 33 | Complete |
-| INTR-03 | Phase 33 | Complete |
-| INTR-04 | Phase 33 | Complete |
-| INTR-05 | Phase 33 | Complete |
-| INTR-06 | Phase 33 | Complete |
-| LIVE-01 | Phase 34 | Complete |
-| LIVE-02 | Phase 34 | Complete |
-| LIVE-03 | Phase 34 | Complete |
+| DASH-01 | Phase 36 | Pending |
+| DASH-02 | Phase 36 | Pending |
+| DASH-03 | Phase 36 | Pending |
+| DASH-04 | Phase 36 | Pending |
+| DASH-05 | Phase 36 | Pending |
+| DASH-06 | Phase 36 | Pending |
+| HEAT-01 | Phase 37 | Pending |
+| HEAT-02 | Phase 37 | Pending |
+| HEAT-03 | Phase 37 | Pending |
+| HEAT-04 | Phase 37 | Pending |
+| HEAT-05 | Phase 37 | Pending |
+| HEAT-06 | Phase 37 | Pending |
+| TIME-01 | Phase 38 | Pending |
+| TIME-02 | Phase 38 | Pending |
+| TIME-03 | Phase 38 | Pending |
+| TIME-04 | Phase 38 | Pending |
+| TIME-05 | Phase 38 | Pending |
+| TIME-06 | Phase 38 | Pending |
+| CNTX-01 | Phase 39 | Pending |
+| CNTX-02 | Phase 39 | Pending |
+| CNTX-03 | Phase 39 | Pending |
+| CNTX-04 | Phase 39 | Pending |
+| NOTF-01 | Phase 40 | Pending |
+| NOTF-02 | Phase 40 | Pending |
+| NOTF-03 | Phase 40 | Pending |
+| NOTF-04 | Phase 40 | Pending |
+| SESS-01 | Phase 41 | Pending |
+| SESS-02 | Phase 41 | Pending |
+| SESS-03 | Phase 41 | Pending |
+| SESS-04 | Phase 41 | Pending |
+| SESS-05 | Phase 41 | Pending |
 
 **Coverage:**
-- v1.5 requirements: 28 total
-- Mapped to phases: 28
+- v1.6 requirements: 29 total
+- Mapped to phases: 29
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-01-28*
-*Last updated: 2026-01-28 (Phase 35 requirements complete - v1.5 COMPLETE)*
+*Last updated: 2026-01-28 after initial definition*
