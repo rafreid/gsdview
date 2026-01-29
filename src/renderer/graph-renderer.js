@@ -4,6 +4,7 @@ import { state, subscribe, setState, getState, initializeState, resetViewState, 
 import { formatFileSize, formatRelativeTime } from './shared-utils.js';
 import { dispatchClaudeOperation, dispatchFileChange } from './activity-dispatcher.js';
 import { showSettings as showNotificationSettings } from './notification-renderer.js';
+import { toggleRecording, showSessionManager } from './session-recorder.js';
 
 // Color palette by node type (WCAG AA compliant against #1a1a2e background)
 const nodeColors = {
@@ -6270,6 +6271,16 @@ document.getElementById('dimension-toggle')?.addEventListener('click', () => {
 // Notification settings button handler
 document.getElementById('notification-settings-btn')?.addEventListener('click', () => {
   showNotificationSettings();
+});
+
+// Session recording button handler
+document.getElementById('record-session-btn')?.addEventListener('click', () => {
+  toggleRecording();
+});
+
+// Session manager button handler
+document.getElementById('session-manager-btn')?.addEventListener('click', () => {
+  showSessionManager();
 });
 
 // =====================================================

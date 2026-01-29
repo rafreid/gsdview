@@ -4005,6 +4005,53 @@
       color: white;
       font-size: 12px;
     }
+
+    /* Session Recording Button Styles */
+    #record-session-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    #record-session-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    #record-session-btn.recording {
+      background: rgba(231, 76, 60, 0.3);
+      border-color: #E74C3C;
+      color: #E74C3C;
+    }
+    #record-session-btn .record-dot {
+      width: 8px;
+      height: 8px;
+      background: #E74C3C;
+      border-radius: 50%;
+    }
+    #record-session-btn.recording .record-dot {
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    #session-manager-btn {
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    #session-manager-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
   </style>
 </head>
 <body>
@@ -4023,6 +4070,8 @@
     </div>
     <button id="dimension-toggle" title="Toggle between 2D and 3D view">3D</button>
     <button id="notification-settings-btn" title="Notification settings">🔔</button>
+    <button id="record-session-btn" title="Start recording session"><span class="record-dot"></span> Record</button>
+    <button id="session-manager-btn" title="View recorded sessions">📋 Sessions</button>
     <div id="zoom-presets" title="Quick zoom presets">
       <button id="zoom-overview" class="zoom-btn" title="Zoom out to see entire graph">
         <span>&#128269;-</span>

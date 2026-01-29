@@ -10,9 +10,11 @@ import { onClaudeOperation as dashboardOnOperation, onFileChanged as dashboardOn
 import { onFileOperation as heatmapOnOperation } from './heatmap-renderer.js';
 import { recordOperation as timelineRecordOperation } from './timeline-renderer.js';
 import { onFileOperation as notificationOnOperation, init as initNotifications } from './notification-renderer.js';
+import { recordOperation as sessionRecordOperation, init as initSessionRecorder } from './session-recorder.js';
 
-// Initialize notification system
+// Initialize systems
 initNotifications();
+initSessionRecorder();
 
 /**
  * Dispatch a Claude Code operation to all interested renderers
@@ -67,6 +69,16 @@ export function dispatchClaudeOperation(event) {
     });
   } catch (e) {
     console.error('[ActivityDispatcher] Notification error:', e);
+  }
+
+  // Record to session if recording is active
+  try {
+    sessionRecordOperation({
+      operation: normalizedOp,
+      file_path: file_path
+    });
+  } catch (e) {
+    console.error('[ActivityDispatcher] Session recorder error:', e);
   }
 }
 
@@ -124,6 +136,16 @@ export function dispatchFileChange(event) {
     });
   } catch (e) {
     console.error('[ActivityDispatcher] Notification error:', e);
+  }
+
+  // Record to session if recording is active
+  try {
+    sessionRecordOperation({
+      operation: operation,
+      file_path: path
+    });
+  } catch (e) {
+    console.error('[ActivityDispatcher] Session recorder error:', e);
   }
 }
 
