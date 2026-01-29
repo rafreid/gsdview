@@ -52,6 +52,7 @@ Progress: [████████████████████] 6/6 pha
 *v1.6 (Complete):*
 - 6 phases, 6 plans complete
 - Status: Shipped 2026-01-28
+- Patch: v1.6.1 released 2026-01-28 (graph not loading fix)
 
 ## v1.6 Summary
 
