@@ -9,10 +9,11 @@ import { state } from './state-manager.js';
 
 // Heatmap state
 let heatmapMounted = false;
-let activityData = new Map(); // filePath -> { count, lastActivity }
+let activityData = new Map(); // filePath -> { count, lastActivity, recentOps: [] }
 let currentPath = null; // Current directory being viewed (null = root)
 let timeFilter = 'session'; // 'hour' | 'session' | 'all'
 let hoveredFile = null;
+const MAX_RECENT_OPS_PER_FILE = 5;
 
 // Constants
 const HEAT_DECAY_MS = 30 * 60 * 1000; // 30 minutes for full decay
@@ -49,10 +50,16 @@ export function onFileOperation(data) {
   if (!file_path) return;
 
   // Update activity data
-  const existing = activityData.get(file_path) || { count: 0, lastActivity: 0 };
+  const existing = activityData.get(file_path) || { count: 0, lastActivity: 0, recentOps: [] };
+  const recentOps = [
+    { operation, timestamp: Date.now() },
+    ...existing.recentOps
+  ].slice(0, MAX_RECENT_OPS_PER_FILE);
+
   activityData.set(file_path, {
     count: existing.count + 1,
-    lastActivity: Date.now()
+    lastActivity: Date.now(),
+    recentOps
   });
 
   // Re-render if mounted
@@ -405,8 +412,28 @@ function showTooltip(item, x, y) {
     document.body.appendChild(tooltip);
   }
 
-  const activity = item.activity || { count: 0 };
+  const activity = item.activity || { count: 0, recentOps: [] };
   const heat = item.heat || 0;
+  const recentOps = activity.recentOps || [];
+
+  // Operation colors for recent ops list
+  const opColors = {
+    read: '#4488FF',
+    write: '#FFAA00',
+    create: '#00FF88',
+    delete: '#FF3333'
+  };
+
+  const recentOpsHtml = recentOps.length > 0
+    ? `<div style="margin-top: 8px; border-top: 1px solid #333; padding-top: 6px;">
+        <div style="color: #888; font-size: 10px; margin-bottom: 4px;">Recent:</div>
+        ${recentOps.map(op => `
+          <div style="font-size: 10px; color: ${opColors[op.operation] || '#888'};">
+            ${op.operation} - ${formatTimeAgo(op.timestamp)}
+          </div>
+        `).join('')}
+      </div>`
+    : '';
 
   tooltip.innerHTML = `
     <div style="font-weight: bold; margin-bottom: 4px;">${item.name}</div>
@@ -416,6 +443,7 @@ function showTooltip(item, x, y) {
       Activity: ${activity.count} operations
     </div>
     ${activity.lastActivity ? `<div style="color: #666; font-size: 10px;">Last: ${formatTimeAgo(activity.lastActivity)}</div>` : ''}
+    ${recentOpsHtml}
   `;
 
   const container = document.getElementById('heatmap-container');
