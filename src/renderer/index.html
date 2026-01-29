@@ -3726,18 +3726,62 @@
       font-size: 24px;
       font-weight: bold;
       color: #4ECDC4;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
+    }
+    .context-warning-badge {
+      background: rgba(231, 76, 60, 0.2);
+      border: 1px solid rgba(231, 76, 60, 0.5);
+      color: #E74C3C;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .context-warning-badge.yellow {
+      background: rgba(241, 196, 15, 0.2);
+      border-color: rgba(241, 196, 15, 0.5);
+      color: #F1C40F;
+    }
+    .context-section-label {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     #context-files-list {
-      max-height: 150px;
+      max-height: 200px;
       overflow-y: auto;
       font-size: 11px;
       font-family: monospace;
       color: rgba(255, 255, 255, 0.6);
     }
     .context-file {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       padding: 4px 8px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .context-file-path {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .context-file-age {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 10px;
+      margin-left: 8px;
+    }
+    .context-file.at-risk {
+      background: rgba(231, 76, 60, 0.1);
+      border-left: 2px solid #E74C3C;
+    }
+    .context-file-status {
+      color: #E74C3C;
+      font-size: 10px;
     }
 
     /* Heatmap View Styles */
@@ -4190,6 +4234,7 @@
             <div id="context-bar" class="context-bar" style="width: 0%"></div>
           </div>
           <div id="context-percentage">0%</div>
+          <div id="context-warning"></div>
           <div id="context-files-list"></div>
         </div>
       </div>

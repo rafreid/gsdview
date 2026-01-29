@@ -474,38 +474,70 @@ function renderContextMeter() {
   const bar = document.getElementById('context-bar');
   const percentage = document.getElementById('context-percentage');
   const filesList = document.getElementById('context-files-list');
+  const warning = document.getElementById('context-warning');
 
   if (!bar || !percentage || !filesList) return;
 
   // Estimate context usage
   const estimatedTokens = contextFiles.length * AVG_TOKENS_PER_FILE;
   const usagePercent = Math.min((estimatedTokens / CONTEXT_WINDOW_ESTIMATE) * 100, 100);
+  const maxFiles = Math.floor(CONTEXT_WINDOW_ESTIMATE / AVG_TOKENS_PER_FILE);
 
   bar.style.width = `${usagePercent}%`;
   percentage.textContent = `${Math.round(usagePercent)}%`;
 
-  // Color based on usage
+  // Color and warning based on usage
+  let warningHtml = '';
   if (usagePercent > 80) {
     bar.style.background = 'linear-gradient(90deg, #E74C3C, #C0392B)';
     percentage.style.color = '#E74C3C';
+    warningHtml = '<div class="context-warning-badge">⚠️ High context usage - older files may be forgotten</div>';
   } else if (usagePercent > 50) {
     bar.style.background = 'linear-gradient(90deg, #F1C40F, #F39C12)';
     percentage.style.color = '#F1C40F';
+    warningHtml = '<div class="context-warning-badge yellow">📊 Moderate context usage</div>';
   } else {
     bar.style.background = 'linear-gradient(90deg, #2ECC71, #27AE60)';
     percentage.style.color = '#2ECC71';
   }
 
-  // Show context files
-  const filesToShow = contextFiles.slice(0, 10);
-  filesList.innerHTML = filesToShow.map(f => {
+  // Update warning if element exists
+  if (warning) {
+    warning.innerHTML = warningHtml;
+  }
+
+  // Show context files - most recent first
+  const filesToShow = contextFiles.slice(0, 8);
+  let html = '<div class="context-section-label">In Context (most recent):</div>';
+  html += filesToShow.map(f => {
     const shortPath = f.path.split('/').slice(-2).join('/');
-    return `<div class="context-file">${shortPath}</div>`;
+    const age = formatTimeAgo(f.timestamp);
+    return `<div class="context-file">
+      <span class="context-file-path">${shortPath}</span>
+      <span class="context-file-age">${age}</span>
+    </div>`;
   }).join('');
 
-  if (contextFiles.length > 10) {
-    filesList.innerHTML += `<div class="context-file" style="color: #666;">... and ${contextFiles.length - 10} more</div>`;
+  // Show files that might fall out (if approaching limit)
+  if (contextFiles.length > maxFiles * 0.7) {
+    const atRisk = contextFiles.slice(-3); // Last 3 are oldest, might fall out
+    if (atRisk.length > 0) {
+      html += '<div class="context-section-label" style="margin-top: 10px; color: #E74C3C;">May fall out of context:</div>';
+      html += atRisk.map(f => {
+        const shortPath = f.path.split('/').slice(-2).join('/');
+        return `<div class="context-file at-risk">
+          <span class="context-file-path">${shortPath}</span>
+          <span class="context-file-status">⚠️ oldest</span>
+        </div>`;
+      }).join('');
+    }
   }
+
+  if (contextFiles.length > 8) {
+    html += `<div class="context-file" style="color: #666; font-style: italic;">... and ${contextFiles.length - 8} more files</div>`;
+  }
+
+  filesList.innerHTML = html;
 }
 
 /**
