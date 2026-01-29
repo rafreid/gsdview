@@ -8,23 +8,23 @@ A desktop application that visualizes GSD project structure as an interactive 3D
 
 Make the invisible structure of a GSD project visible and navigable — so users always know where they are, what's connected, and what's blocked.
 
-## Current Milestone: v1.5 GSD Workflow Diagram
+## Current Milestone: v1.6 Live Activity Intelligence
 
-**Goal:** Add a workflow-oriented diagram view that maps the `.planning/` folder onto the GSD process model, showing both how the workflow operates and why it's effective through visual indicators.
+**Goal:** Provide real-time visibility into what's happening in the project folder when GSD is cooking — new visualization modes that show Claude's activity patterns, file hotspots, and operation flow.
 
 **Target features:**
-- Flowchart pipeline view (Initialize → Discuss → Plan → Execute → Verify → Complete)
-- Nested phase blocks showing actual project artifacts (CONTEXT.md, RESEARCH.md, PLANs, SUMMARYs)
-- Artifact completion status (done/in-progress/missing) per phase
-- Interactive — click to expand phases, open inspector, sync with graph selection
-- "Why it works" visual indicators: context window usage, parallel agent lanes, atomic commit markers
-- Toggle between Graph view and Diagram view
+- Live Dashboard view showing current Claude operation, active file, rolling sparkline
+- File Heatmap view with treemap visualization of activity intensity
+- Operation Flow Timeline with scrubbing and pattern detection
+- Context Window Meter showing estimated usage and files in context
+- Smart Activity Notifications for significant events
+- Session Recording & Playback for reviewing past GSD sessions
 
 ## Current State
 
-**Shipped:** v1.4 Live Activity Sync (2026-01-25)
+**Shipped:** v1.5 GSD Workflow Diagram (2026-01-28)
 
-Claude Code operations now trigger highly visible flash animations synchronized with real-time file operations. Read operations display distinct blue flash (0x4488FF), enhanced visibility (3.5x emissive, 1.8x scale), animation batching for 60fps during rapid operations, and hook status notification with debug mod
+Added workflow-oriented diagram view mapping .planning/ onto GSD process model. Features 6-stage pipeline (Initialize → Complete), nested artifact blocks with completion status, two-way selection sync with graph, context usage bars, parallel agent lanes, atomic commit markers. Also added All Files panel with pagination and orbit zoom during rotation.
 
 ## Requirements
 
@@ -106,19 +106,21 @@ Claude Code operations now trigger highly visible flash animations synchronized 
 
 ### Active
 
-*v1.5 — GSD Workflow Diagram:*
+*v1.6 — Live Activity Intelligence:*
 
-- [ ] Diagram view toggle (switch between Graph and Diagram views)
-- [ ] Workflow pipeline layout (Initialize → Discuss → Plan → Execute → Verify → Complete)
-- [ ] Phase artifact blocks (CONTEXT.md, RESEARCH.md, PLANs, SUMMARYs grouped by phase)
-- [ ] Artifact completion status indicators (done/in-progress/missing)
-- [ ] Click to expand/collapse phase blocks
-- [ ] Click artifact to open file inspector
-- [ ] Sync selection between diagram and graph views
-- [ ] Context window usage visualization (bars showing % utilization)
-- [ ] Parallel agent lanes during research/execute stages
-- [ ] Atomic commit markers on executed tasks
-- [ ] Real-time updates when artifacts change
+- [ ] Live Dashboard view with current operation indicator and session stats
+- [ ] Rolling activity sparkline showing last 5 minutes of operations
+- [ ] File Heatmap view (treemap) showing activity intensity per file
+- [ ] Heatmap drill-down into directories with time range filters
+- [ ] Operation Flow Timeline with color-coded operation blocks
+- [ ] Timeline scrubbing to see file state at any moment
+- [ ] Pattern detection highlighting read-then-write sequences
+- [ ] Context Window Meter showing estimated usage percentage
+- [ ] Files "in context" list with what's about to fall out
+- [ ] Smart Activity Notifications for significant events
+- [ ] Session Recording capturing all operations with timestamps
+- [ ] Session Playback at variable speeds (1x, 2x, 4x, 8x)
+- [ ] Session export as markdown report
 
 ### Out of Scope
 
@@ -168,4 +170,4 @@ Claude Code operations now trigger highly visible flash animations synchronized 
 | Limit scope to .planning/ + src/ | Performance and relevance balance | — Pending |
 
 ---
-*Last updated: 2026-01-28 after v1.5 milestone started*
+*Last updated: 2026-01-28 after v1.6 milestone started*

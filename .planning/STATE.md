@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.5 COMPLETE — Ready for v1.6 planning
+**Current focus:** v1.6 Live Activity Intelligence
 
 ## Current Position
 
-Phase: 35 - Advanced Features & Polish
-Plan: 03 of 03
-Status: MILESTONE COMPLETE
-Last activity: 2026-01-28 — v1.5 Milestone Complete
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-01-28 — Milestone v1.6 started
 
-Progress: [████████████████████] 6/6 phases (100%)
+Progress: [░░░░░░░░░░░░░░░░░░░░] 0/? phases (0%)
 
 ## Performance Metrics
 
