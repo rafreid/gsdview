@@ -109,5 +109,11 @@ View lifecycle:
 - Each view preserves state when unmounted
 - Graph camera position preserved during view switches
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 024 | Fix graph not loading after project selection | 2026-01-28 | a34b6ae | [024-fix-graph-not-loading](./quick/024-fix-graph-not-loading-after-project-sele/) |
+
 ---
-*Last updated: 2026-01-28 — v1.6 Complete*
+*Last updated: 2026-01-28 — Completed quick task 024: Fix graph not loading*
