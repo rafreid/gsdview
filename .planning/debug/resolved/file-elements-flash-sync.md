@@ -73,3 +73,4 @@ verification:
     8. CSS class applied to artifact group, animation plays (line 1171)
   - File elements will now flash in sync with graph elements when Claude writes/edits/creates files
 files_changed: ['src/renderer/graph-renderer.js']
+ 
