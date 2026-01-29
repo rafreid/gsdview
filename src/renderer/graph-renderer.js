@@ -2,6 +2,7 @@ import ForceGraph3D from '3d-force-graph';
 import * as THREE from 'three';
 import { state, subscribe, setState, getState, initializeState, resetViewState, callDiagramFilesChangedHandler, registerHighlightNodeHandler, registerOpenFileInspectorHandler } from './state-manager.js';
 import { formatFileSize, formatRelativeTime } from './shared-utils.js';
+import { dispatchClaudeOperation, dispatchFileChange } from './activity-dispatcher.js';
 
 // Color palette by node type (WCAG AA compliant against #1a1a2e background)
 const nodeColors = {
@@ -5580,6 +5581,9 @@ if (window.electronAPI && window.electronAPI.onFilesChanged) {
       // This ensures diagram gets real-time updates and flash animations work when switching views
       callDiagramFilesChangedHandler(data);
 
+      // Dispatch to activity intelligence renderers (dashboard, heatmap, timeline)
+      dispatchFileChange(data);
+
       // Always apply incremental graph update (update data regardless of view)
       applyIncrementalUpdate({
         event: data.event,
@@ -5666,9 +5670,8 @@ if (window.electronAPI && window.electronAPI.onClaudeOperation) {
       });
     }
 
-    // Note: We don't add to activity feed here since these are Claude operations,
-    // not file system events. The activity feed tracks file changes, not tool usage.
-    // Could add a separate "Claude Activity" indicator in future if desired.
+    // Dispatch to activity intelligence renderers (dashboard, heatmap, timeline)
+    dispatchClaudeOperation(event);
   });
 }
 

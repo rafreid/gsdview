@@ -3547,6 +3547,420 @@
     .debug-op.delete { color: #FF3333; }
     .debug-time { color: #666; }
     .debug-path { color: #888; }
+
+    /* Dashboard View Styles */
+    #dashboard-container {
+      position: absolute;
+      top: 50px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .dashboard-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .dashboard-card .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .dashboard-card .card-icon {
+      font-size: 20px;
+    }
+    .dashboard-card .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .dashboard-card .card-body {
+      padding: 20px;
+    }
+    .current-operation {
+      grid-column: span 2;
+    }
+    #current-op-indicator {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 32px;
+      margin-bottom: 15px;
+    }
+    #current-op-indicator .op-icon {
+      font-size: 48px;
+    }
+    #current-op-indicator .op-text {
+      font-weight: bold;
+      color: #888;
+    }
+    #current-op-indicator.op-reading .op-text { color: #4488FF; }
+    #current-op-indicator.op-writing .op-text { color: #FFAA00; }
+    #current-op-indicator.op-creating .op-text { color: #00FF88; }
+    #current-op-indicator.op-deleting .op-text { color: #FF3333; }
+    #current-op-file {
+      font-size: 14px;
+      color: #888;
+      font-family: monospace;
+      padding: 10px 15px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      word-break: break-all;
+    }
+    #current-op-file.active {
+      color: #4ECDC4;
+      animation: pulse-glow 1s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 5px rgba(78, 205, 196, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(78, 205, 196, 0.6); }
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-label {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 14px;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4ECDC4;
+    }
+    #op-breakdown-chart {
+      display: block;
+      margin: 0 auto;
+    }
+    #op-breakdown-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    #activity-sparkline-chart {
+      width: 100%;
+      height: 100px;
+    }
+    #recent-ops-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .recent-op-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 12px;
+    }
+    .recent-op-item:last-child { border-bottom: none; }
+    .recent-op-type {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .recent-op-type.read { background: #4488FF; }
+    .recent-op-type.write { background: #FFAA00; }
+    .recent-op-type.create { background: #00FF88; }
+    .recent-op-type.delete { background: #FF3333; }
+    .recent-op-file {
+      flex: 1;
+      color: rgba(255, 255, 255, 0.8);
+      font-family: monospace;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .recent-op-time {
+      color: rgba(255, 255, 255, 0.4);
+    }
+    .context-bar-container {
+      height: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .context-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #2ECC71, #F1C40F, #E74C3C);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+    #context-percentage {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #4ECDC4;
+      margin-bottom: 15px;
+    }
+    #context-files-list {
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 11px;
+      font-family: monospace;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    .context-file {
+      padding: 4px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Heatmap View Styles */
+    #heatmap-container {
+      position: absolute;
+      top: 50px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #1a1a2e;
+      display: flex;
+      flex-direction: column;
+    }
+    .heatmap-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .heatmap-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 13px;
+    }
+    #heatmap-time-range {
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: white;
+      font-size: 13px;
+    }
+    #heatmap-refresh {
+      padding: 6px 12px;
+      background: rgba(78, 205, 196, 0.2);
+      border: 1px solid rgba(78, 205, 196, 0.4);
+      border-radius: 4px;
+      color: #4ECDC4;
+      cursor: pointer;
+    }
+    #heatmap-breadcrumb {
+      flex: 1;
+      text-align: right;
+      color: rgba(255, 255, 255, 0.5);
+      font-family: monospace;
+      font-size: 13px;
+    }
+    #heatmap-canvas-container {
+      flex: 1;
+      position: relative;
+      padding: 20px;
+    }
+    #heatmap-canvas {
+      width: 100%;
+      height: 100%;
+    }
+    #heatmap-tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      padding: 10px 15px;
+      font-size: 12px;
+      color: white;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Timeline View Styles */
+    #timeline-container {
+      position: absolute;
+      top: 50px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #1a1a2e;
+      display: flex;
+      flex-direction: column;
+    }
+    .timeline-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .timeline-controls button {
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .timeline-controls button:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .timeline-time-display {
+      flex: 1;
+      text-align: center;
+      font-family: monospace;
+      font-size: 16px;
+      color: #4ECDC4;
+    }
+    .timeline-legend {
+      display: flex;
+      gap: 15px;
+    }
+    .timeline-legend .legend-item {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .timeline-legend .legend-item.read { color: #4488FF; }
+    .timeline-legend .legend-item.write { color: #FFAA00; }
+    .timeline-legend .legend-item.create { color: #00FF88; }
+    .timeline-legend .legend-item.delete { color: #FF3333; }
+    #timeline-canvas-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    #timeline-canvas {
+      width: 100%;
+      height: 100%;
+    }
+    #timeline-scrubber-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #4ECDC4;
+      pointer-events: none;
+      display: none;
+    }
+
+    /* Heatmap Header and Treemap Styles */
+    .heatmap-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .heatmap-breadcrumb {
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .heatmap-breadcrumb .breadcrumb-item {
+      color: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .heatmap-breadcrumb .breadcrumb-item:hover {
+      color: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .heatmap-breadcrumb .breadcrumb-item.active {
+      color: #4ECDC4;
+    }
+    .heatmap-filters {
+      display: flex;
+      gap: 8px;
+    }
+    .filter-btn {
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .filter-btn.active {
+      background: rgba(78, 205, 196, 0.3);
+      border-color: #4ECDC4;
+      color: #4ECDC4;
+    }
+    .heatmap-treemap {
+      flex: 1;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    /* Timeline Canvas Styles */
+    .timeline-canvas {
+      flex: 1;
+      padding: 10px 20px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .timeline-btn {
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .timeline-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .timeline-btn.active {
+      background: rgba(78, 205, 196, 0.3);
+      border-color: #4ECDC4;
+    }
+    .timeline-speed {
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: white;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
@@ -3557,8 +3971,11 @@
     </select>
     <button id="refresh-btn" title="Refresh graph">↻ Refresh</button>
     <div class="view-tabs">
-      <button id="tab-graph" class="view-tab active" onclick="switchToView('graph')" title="Graph view">Graph</button>
-      <button id="tab-diagram" class="view-tab" onclick="switchToView('diagram')" title="Diagram view">Diagram</button>
+      <button id="tab-graph" class="view-tab active" onclick="switchToView('graph')" title="3D force graph view">Graph</button>
+      <button id="tab-diagram" class="view-tab" onclick="switchToView('diagram')" title="GSD workflow diagram">Diagram</button>
+      <button id="tab-dashboard" class="view-tab" onclick="switchToView('dashboard')" title="Live activity dashboard">Dashboard</button>
+      <button id="tab-heatmap" class="view-tab" onclick="switchToView('heatmap')" title="File activity heatmap">Heatmap</button>
+      <button id="tab-timeline" class="view-tab" onclick="switchToView('timeline')" title="Operation flow timeline">Timeline</button>
     </div>
     <button id="dimension-toggle" title="Toggle between 2D and 3D view">3D</button>
     <div id="zoom-presets" title="Quick zoom presets">
@@ -3699,6 +4116,109 @@
   </div>
   <div id="diagram-container" class="tree-open hidden">
     <p>Diagram view coming in Phase 32</p>
+  </div>
+  <div id="dashboard-container" class="tree-open hidden">
+    <div class="dashboard-grid">
+      <div class="dashboard-card current-operation">
+        <div class="card-header">
+          <span class="card-icon">⚡</span>
+          <span class="card-title">Current Operation</span>
+        </div>
+        <div class="card-body">
+          <div id="current-op-indicator" class="op-idle">
+            <span class="op-icon">💤</span>
+            <span class="op-text">Idle</span>
+          </div>
+          <div id="current-op-file" class="op-file">No active file</div>
+        </div>
+      </div>
+      <div class="dashboard-card session-stats">
+        <div class="card-header">
+          <span class="card-icon">📊</span>
+          <span class="card-title">Session Statistics</span>
+        </div>
+        <div class="card-body">
+          <div class="stat-row">
+            <span class="stat-label">Files Touched</span>
+            <span id="stat-files-touched" class="stat-value">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Operations</span>
+            <span id="stat-operations" class="stat-value">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Session Time</span>
+            <span id="stat-session-time" class="stat-value">0:00</span>
+          </div>
+        </div>
+      </div>
+      <div class="dashboard-card operation-breakdown">
+        <div class="card-header">
+          <span class="card-icon">🥧</span>
+          <span class="card-title">Operation Breakdown</span>
+        </div>
+        <div class="card-body">
+          <canvas id="op-breakdown-chart" width="200" height="200"></canvas>
+          <div id="op-breakdown-legend"></div>
+        </div>
+      </div>
+      <div class="dashboard-card activity-sparkline">
+        <div class="card-header">
+          <span class="card-icon">📈</span>
+          <span class="card-title">Activity (Last 5 min)</span>
+        </div>
+        <div class="card-body">
+          <canvas id="activity-sparkline-chart" width="400" height="100"></canvas>
+        </div>
+      </div>
+      <div class="dashboard-card recent-operations">
+        <div class="card-header">
+          <span class="card-icon">🕐</span>
+          <span class="card-title">Recent Operations</span>
+        </div>
+        <div class="card-body">
+          <div id="recent-ops-list"></div>
+        </div>
+      </div>
+      <div class="dashboard-card context-meter">
+        <div class="card-header">
+          <span class="card-icon">🧠</span>
+          <span class="card-title">Context Window (Est.)</span>
+        </div>
+        <div class="card-body">
+          <div class="context-bar-container">
+            <div id="context-bar" class="context-bar" style="width: 0%"></div>
+          </div>
+          <div id="context-percentage">0%</div>
+          <div id="context-files-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="heatmap-container" class="tree-open hidden">
+    <div class="heatmap-header">
+      <div id="heatmap-breadcrumb" class="heatmap-breadcrumb">
+        <span class="breadcrumb-item active">Root</span>
+      </div>
+      <div id="heatmap-filters" class="heatmap-filters">
+        <button class="filter-btn active">This Session</button>
+      </div>
+    </div>
+    <div id="heatmap-treemap" class="heatmap-treemap"></div>
+  </div>
+  <div id="timeline-container" class="tree-open hidden">
+    <div id="timeline-controls" class="timeline-controls">
+      <button class="timeline-btn">▶️ Play</button>
+      <select class="timeline-speed">
+        <option value="1" selected>1x</option>
+        <option value="2">2x</option>
+        <option value="4">4x</option>
+        <option value="8">8x</option>
+      </select>
+      <button class="timeline-btn">🔍+</button>
+      <button class="timeline-btn">🔍-</button>
+    </div>
+    <div id="timeline-canvas" class="timeline-canvas"></div>
   </div>
   <div id="minimap-panel">
     <div id="minimap-header">

@@ -1,17 +1,32 @@
 /**
  * View Controller
  *
- * Orchestrates switching between Graph and Diagram views.
+ * Orchestrates switching between all views: Graph, Diagram, Dashboard, Heatmap, Timeline.
  * Manages lifecycle (mount/unmount) to prevent memory leaks.
  */
 
 import { mount as mountGraph, unmount as unmountGraph } from './graph-renderer.js';
 import { mount as mountDiagram, unmount as unmountDiagram } from './diagram-renderer.js';
+import { mount as mountDashboard, unmount as unmountDashboard } from './dashboard-renderer.js';
+import { mount as mountHeatmap, unmount as unmountHeatmap } from './heatmap-renderer.js';
+import { mount as mountTimeline, unmount as unmountTimeline } from './timeline-renderer.js';
 import { state, setState } from './state-manager.js';
+
+// All available views
+const VIEWS = ['graph', 'diagram', 'dashboard', 'heatmap', 'timeline'];
+
+// View mount/unmount functions
+const viewLifecycle = {
+  graph: { mount: mountGraph, unmount: unmountGraph },
+  diagram: { mount: mountDiagram, unmount: unmountDiagram },
+  dashboard: { mount: mountDashboard, unmount: unmountDashboard },
+  heatmap: { mount: mountHeatmap, unmount: unmountHeatmap },
+  timeline: { mount: mountTimeline, unmount: unmountTimeline }
+};
 
 /**
  * Get the currently active view
- * @returns {'graph' | 'diagram'}
+ * @returns {'graph' | 'diagram' | 'dashboard' | 'heatmap' | 'timeline'}
  */
 export function getActiveView() {
   return state.activeView;
@@ -19,7 +34,7 @@ export function getActiveView() {
 
 /**
  * Switch to the specified view
- * @param {'graph' | 'diagram'} viewName
+ * @param {'graph' | 'diagram' | 'dashboard' | 'heatmap' | 'timeline'} viewName
  */
 export function switchToView(viewName) {
   if (viewName === state.activeView) {
@@ -27,47 +42,43 @@ export function switchToView(viewName) {
     return;
   }
 
+  if (!VIEWS.includes(viewName)) {
+    console.error(`[ViewCtrl] Unknown view: ${viewName}`);
+    return;
+  }
+
   console.log(`[ViewCtrl] Switching from ${state.activeView} to ${viewName}`);
 
-  const graphContainer = document.getElementById('graph-container');
-  const diagramContainer = document.getElementById('diagram-container');
-  const graphTab = document.getElementById('tab-graph');
-  const diagramTab = document.getElementById('tab-diagram');
+  const previousView = state.activeView;
 
-  if (viewName === 'diagram') {
-    // Unmount graph to stop animations and free resources
-    unmountGraph();
+  // Unmount previous view
+  if (previousView && viewLifecycle[previousView]) {
+    viewLifecycle[previousView].unmount();
+  }
 
-    // Hide graph, show diagram
-    graphContainer.classList.add('hidden');
-    diagramContainer.classList.remove('hidden');
+  // Hide all containers and deactivate all tabs
+  VIEWS.forEach(view => {
+    const container = document.getElementById(`${view}-container`);
+    const tab = document.getElementById(`tab-${view}`);
 
-    // Update tab states
-    graphTab.classList.remove('active');
-    diagramTab.classList.add('active');
+    if (container) container.classList.add('hidden');
+    if (tab) tab.classList.remove('active');
+  });
 
-    // Mount diagram view
-    mountDiagram();
+  // Show new container and activate tab
+  const newContainer = document.getElementById(`${viewName}-container`);
+  const newTab = document.getElementById(`tab-${viewName}`);
 
-  } else if (viewName === 'graph') {
-    // Unmount diagram to clean up resources
-    unmountDiagram();
+  if (newContainer) newContainer.classList.remove('hidden');
+  if (newTab) newTab.classList.add('active');
 
-    // Hide diagram, show graph
-    diagramContainer.classList.add('hidden');
-    graphContainer.classList.remove('hidden');
-
-    // Update tab states
-    diagramTab.classList.remove('active');
-    graphTab.classList.add('active');
-
-    // Mount graph to resume animations
-    mountGraph();
-
-    console.log('[ViewCtrl] Graph view mounted');
+  // Mount new view
+  if (viewLifecycle[viewName]) {
+    viewLifecycle[viewName].mount();
   }
 
   state.activeView = viewName;
+  console.log(`[ViewCtrl] ${viewName} view mounted`);
 }
 
 /**
