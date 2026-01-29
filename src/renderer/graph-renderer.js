@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { state, subscribe, setState, getState, initializeState, resetViewState, callDiagramFilesChangedHandler, registerHighlightNodeHandler, registerOpenFileInspectorHandler } from './state-manager.js';
 import { formatFileSize, formatRelativeTime } from './shared-utils.js';
 import { dispatchClaudeOperation, dispatchFileChange } from './activity-dispatcher.js';
+import { showSettings as showNotificationSettings } from './notification-renderer.js';
 
 // Color palette by node type (WCAG AA compliant against #1a1a2e background)
 const nodeColors = {
@@ -6264,6 +6265,11 @@ document.getElementById('dimension-toggle')?.addEventListener('click', () => {
       Graph.zoomToFit(1000);
     }, 100);
   }
+});
+
+// Notification settings button handler
+document.getElementById('notification-settings-btn')?.addEventListener('click', () => {
+  showNotificationSettings();
 });
 
 // =====================================================

@@ -9,6 +9,10 @@
 import { onClaudeOperation as dashboardOnOperation, onFileChanged as dashboardOnFileChanged } from './dashboard-renderer.js';
 import { onFileOperation as heatmapOnOperation } from './heatmap-renderer.js';
 import { recordOperation as timelineRecordOperation } from './timeline-renderer.js';
+import { onFileOperation as notificationOnOperation, init as initNotifications } from './notification-renderer.js';
+
+// Initialize notification system
+initNotifications();
 
 /**
  * Dispatch a Claude Code operation to all interested renderers
@@ -53,6 +57,16 @@ export function dispatchClaudeOperation(event) {
     });
   } catch (e) {
     console.error('[ActivityDispatcher] Timeline error:', e);
+  }
+
+  // Dispatch to notification renderer
+  try {
+    notificationOnOperation({
+      operation: normalizedOp,
+      file_path: file_path
+    });
+  } catch (e) {
+    console.error('[ActivityDispatcher] Notification error:', e);
   }
 }
 
@@ -100,6 +114,16 @@ export function dispatchFileChange(event) {
     });
   } catch (e) {
     console.error('[ActivityDispatcher] Timeline error:', e);
+  }
+
+  // Dispatch to notification renderer
+  try {
+    notificationOnOperation({
+      operation: operation,
+      file_path: path
+    });
+  } catch (e) {
+    console.error('[ActivityDispatcher] Notification error:', e);
   }
 }
 
