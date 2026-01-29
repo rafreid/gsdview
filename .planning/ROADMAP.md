@@ -130,9 +130,9 @@ Transform a GSD project's .planning/ folder into an explorable 3D force-directed
 | v1.3 | 8 | 17 | Shipped 2026-01-25 |
 | v1.4 | 4 | 5 | Shipped 2026-01-25 |
 | v1.5 | 6 | 14 | Shipped 2026-01-28 |
-| v1.6 | 6 | 0 | Planning |
-| **Total** | **41** | **80** | |
+| v1.6 | 6 | 6 | Shipped 2026-01-28 |
+| **Total** | **41** | **86** | |
 
 ---
 *Roadmap created: 2026-01-22*
-*Last updated: 2026-01-28 (v1.6 MILESTONE STARTED)*
+*Last updated: 2026-01-28 (v1.6 COMPLETE)*

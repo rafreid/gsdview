@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** Make the invisible structure of a GSD project visible and navigable
-**Current focus:** v1.6 Live Activity Intelligence
+**Current focus:** v1.6 Live Activity Intelligence - COMPLETE
 
 ## Current Position
 
-Phase: 36 - Live Dashboard View
-Plan: Not started
-Status: Planning milestone v1.6
-Last activity: 2026-01-28 — Roadmap created for v1.6
+Phase: 41 - Session Recording
+Plan: Complete
+Status: v1.6 milestone complete
+Last activity: 2026-01-28 — All 6 phases implemented
 
-Progress: [░░░░░░░░░░░░░░░░░░░░] 0/6 phases (0%)
+Progress: [████████████████████] 6/6 phases (100%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 80 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 14)
+- Total plans completed: 86 (v1.0: 23, v1.1: 14, v1.2: 7, v1.3: 17, v1.4: 5, v1.5: 14, v1.6: 6)
 - Average duration: 5min
-- Total execution time: 2 days + 146m (v1.0: 1 day, v1.1: 1 day, v1.2: 17m, v1.3: 72m, v1.4: 19m, v1.5: 38m)
+- Total execution time: 2 days + 180m
 
 **By Milestone:**
 
@@ -43,342 +43,71 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0/6 pha
 
 *v1.4 (Complete):*
 - 4 phases, 5 plans complete
-- Status: Shipped 2026-01-25 (All phases complete)
+- Status: Shipped 2026-01-25
 
 *v1.5 (Complete):*
 - 6 phases, 14 plans complete
-- Status: Shipped 2026-01-28 (All phases complete)
+- Status: Shipped 2026-01-28
 
-*v1.6 (Current):*
-- 6 phases, 0 plans complete
-- Status: Planning (Phase 36 ready to plan)
+*v1.6 (Complete):*
+- 6 phases, 6 plans complete
+- Status: Shipped 2026-01-28
+
+## v1.6 Summary
+
+**Live Activity Intelligence** - Real-time visibility into what's happening when GSD is cooking.
+
+### New Features:
+1. **Live Dashboard View** - Current operation indicator, session stats, sparkline, pie chart
+2. **File Heatmap View** - Treemap visualization with activity heat, drill-down
+3. **Operation Flow Timeline** - Swimlanes by file, pattern detection, playback
+4. **Context Window Meter** - Estimated usage, files in context, at-risk warnings
+5. **Smart Notifications** - Toast alerts for file bursts, rapid activity
+6. **Session Recording** - Record, playback, export as markdown
+
+### New Files:
+- `src/renderer/dashboard-renderer.js`
+- `src/renderer/heatmap-renderer.js`
+- `src/renderer/timeline-renderer.js`
+- `src/renderer/activity-dispatcher.js`
+- `src/renderer/notification-renderer.js`
+- `src/renderer/session-recorder.js`
+
+### Modified Files:
+- `src/renderer/view-controller.js` - Extended for 5 views
+- `src/renderer/graph-renderer.js` - Event routing, button handlers
+- `src/renderer/index.html` - New containers, tabs, CSS
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
+Key decisions for v1.6:
+- Dashboard uses Canvas API for pie chart and sparkline
+- Heatmap uses SVG treemap with squarified layout
+- Timeline uses SVG swimlanes with pattern detection
+- Activity dispatcher centralizes event routing to all renderers
+- Notification settings persist to localStorage
+- Session recordings stored in localStorage (up to 10)
+- 5 view tabs: Graph, Diagram, Dashboard, Heatmap, Timeline
+- Recording button shows pulsing animation when active
 
-- Used 3d-force-graph library for visualization
-- Electron app with context isolation for security
-- chokidar for file watching, electron-store for persistence
-- Single unified 3D graph view (not multiple views)
-- esbuild for bundling ES modules
-- Limit file scope to .planning/ + src/ for performance (v1.1: expanding to src/)
-- parseDirectories uses sourceType property for node categorization (07-01)
-- Node IDs prefixed with sourceType to avoid collisions (07-01)
-- File watcher monitors both .planning/ and src/ simultaneously (07-02)
-- sourceType property included in file change events (07-02)
-- src/ files use cooler blue tones (#7EC8E3 for files, #5B9BD5 for directories) (07-03)
-- src/ files use icosahedron geometry, planning/ uses octahedron (07-03)
-- applySourceTint shifts colors toward blue for visual differentiation (07-03)
-- Activity panel height 180px, badge caps at "99+" (08-01)
-- Entry type classes: .created (green), .modified (orange), .deleted (red) (08-01)
-- addActivityEntry maps chokidar events to user-friendly types (08-02)
-- Change type colors: created=#2ECC71, modified=#F39C12, deleted=#E74C3C (08-02)
-- flashNodeWithType for type-specific 3D animations (08-02)
-- MAX_ACTIVITY_ENTRIES=100 to prevent memory issues (08-02)
-- Event delegation on activity-content for entry interactions (08-03)
-- Node highlight 1.3x scale on hover (08-03)
-- Entry click navigates AND opens details panel (08-03)
-- Heat gradient: red (0.0) -> orange (0.3) -> yellow (0.6) -> normal (1.0) (09-01)
-- Default heat decay duration: 5 minutes (300000ms) (09-01)
-- Flash animations take priority over heat colors (09-01)
-- Deleted files excluded from heat tracking (09-01)
-- Heat decay slider range: 30s to 10m, default 5m (09-02)
-- Persist heat decay setting via electron-store (09-02)
-- Use child_process.execSync for git commands, not simple-git (10-01)
-- Git IPC naming: get-git-{operation} pattern (10-01)
-- Non-git directories return empty results gracefully (10-01)
-- Ring geometry (RingGeometry) for git status indicators around file nodes (10-02)
-- Staged=green, modified=orange, untracked=purple color scheme (10-02)
-- Staged takes priority over modified when both apply (10-02)
-- Git status checks use path matching with sourceType prefixes (10-02)
-- Fetch git data before buildGraphFromProject for commit node integration (10-03)
-- Use directory type for "Recent Commits" parent node (10-03)
-- Hexagonal cylinder geometry for commit nodes (10-03)
-- Purple (#9B59B6) for commit nodes (10-03)
-- Statistics panel at 320px width, right side of screen (11-01)
-- File ranking shows top 10 most edited files with bar chart (11-01)
-- Activity chart aggregates changes into 10 time buckets (11-01)
-- Diff compares against HEAD (last committed state) (11-02)
-- Long diffs truncated at 100 lines for UI performance (11-02)
-- refreshDiffSection for efficient targeted diff updates (11-02)
-- Timeline slider range 0-100 mapped to timestamp range (12-01)
-- 500ms playback speed for timeline replay (12-01)
-- null for live mode, timestamp for historical (12-01)
-- File opacity levels: 10% not-created, 30% deleted, 85% existing (12-01)
-- Double-click threshold 300ms for file inspector modal activation (13-01)
-- Modal z-index 500-501 (overlay + modal), above all panels (13-01)
-- Escape key priority: close modal if open, else close details panel (13-01)
-- Modal sections default to expanded state on open (13-01)
-- Session snapshots stored as Map with filePath -> {content, timestamp} (14-01)
-- Default diff mode is Git (vs HEAD), user can toggle to Session (14-01)
-- Basic syntax highlighting for JS/TS, MD, JSON via regex replacement (14-01)
-- Line numbers use git hunk headers for accurate positioning (14-01)
-- Session diff uses simple line-by-line comparison (14-01)
-- parseFileStructure routes by extension to type-specific parsers (15-01)
-- Structure items use { type, name, line, depth } format (15-01)
-- JSON recursion limited to depth 5 for performance (15-01)
-- Brace depth tracking for JS class method scope detection (15-01)
-- Event delegation on structure section for tree click handling (15-02)
-- 12px per depth level indentation for structure tree (15-02)
-- Icon mapping: H=header, f=function, C=class, i=import, e=export, k=key (15-02)
-- Click-to-scroll uses scrollIntoView with block: 'center' (15-02)
-- 1.5s highlight duration for scrolled-to diff lines (15-02)
-- Metadata grid uses 2-column label-value layout for file stats (16-01)
-- Git status badges color-coded (green=staged, orange=modified, purple=untracked, gray=clean) (16-01)
-- Toast notification system for non-intrusive user feedback (16-01)
-- get-file-stats IPC handler for fetching file metadata (size, mtime, ctime) (16-01)
-- Quick actions: Open in Editor, Copy Path, Copy Content with clipboard API (16-01)
-- Recent activity filters global activityEntries by current file path (16-02)
-- Relative timestamps (Just now, X min ago, X hours ago, date) for activity (16-02)
-- Import detection via simple pattern matching (import/require/from keywords) (16-02)
-- Related files scan limited to 50 files for performance (16-02)
-- Code file detection for .js, .ts, .jsx, .tsx, .py, .go extensions (16-02)
-- Event delegation for related file navigation with camera focus (16-02)
-- Search matches highlighted with <mark> tags for semantic HTML (17-01)
-- Case-insensitive search for better UX (17-01)
-- Current match uses teal highlight, other matches use orange (17-01)
-- Escape key priority updated: search -> modal -> details panel (17-01)
-- Ctrl+F/Cmd+F opens search only when modal is open (17-01)
-- applyIncrementalUpdate for surgical graph updates without rebuild (18-01)
-- Camera position save/restore with 0ms duration for instant positioning (18-01)
-- Reuse buildFileNode() for consistent node creation with parent positioning (18-01)
-- storedDirectoryData updated in sync with currentGraphData for tree panel (18-01)
-- Details panel closes gracefully when selected node is deleted (18-01)
-- Use fx/fy/fz properties to lock node positions during incremental updates (18-02)
-- 2-second delay before unfixing nodes to allow settling (18-02)
-- Position new nodes within 20 units of parent with random offset (18-02)
-- storedDirectoryData moved to top of file, duplicate removed (18-02)
-- fadeOutAndRemoveNode() for smooth 500ms deletion animations (18-03)
-- Ease-out curve with opacity fade and scale-down (0.7x) for deletions (18-03)
-- Pending deletions tracking prevents duplicate fade animations (18-03)
-- Mid-animation existence check handles parent directory deletions (18-03)
-- Synchronized fade animations between graph and tree panel (18-03)
-- Enhanced flash colors: neon green (0x00FF88), bright amber (0xFFAA00), bright red (0xFF3333) (19-01)
-- Emissive glow effect pulsing with flash animation (19-01)
-- Scale pulsing from 1.0x to 1.5x during animation peaks (19-01)
-- Sin squared for smoother pulse peaks in flash animation (19-01)
-- Different pulse patterns: created (4 quick), modified (3 steady), deleted (2 slow) (19-01)
-- flashDuration and flashIntensity config variables for future adjustability (19-01)
-- CSS flash animations match 3D with inset shadows and text-shadow (19-01)
-- Flash duration slider range: 500ms to 5000ms, default 2000ms (19-02)
-- Flash intensity slider range: 0.5x to 2x, default 1x (19-02)
-- CSS custom property --flash-duration for dynamic tree animation duration (19-02)
-- Persist flash settings via electron-store (flashDuration, flashIntensity keys) (19-02)
-- Activity trails connect recently changed files with THREE.Line objects (20-01)
-- Trail max age 60000ms (1 minute) before automatic removal (20-01)
-- Maximum 20 trails shown at once to limit visual clutter (20-01)
-- Trail color fades from bright cyan (#4ECDC4) to dim teal over lifetime (20-01)
-- Trail opacity fades from 0.8 to 0.1 based on age ratio (20-01)
-- Trails enabled by default, toggle persisted via electron-store (20-01)
-- Trail duration slider range: 10s to 5min (300s), default 60s (20-02)
-- LineDashedMaterial with 8:4 dash pattern for visual distinction (20-02)
-- Three-phase color gradient: cyan -> teal -> dim blue-gray (20-02)
-- Persist trail fade duration via electron-store (20-02)
-- Follow-active camera mode defaults to off (user opts in) (21-01)
-- Deleted files excluded from follow-active camera pan (21-01)
-- 800ms transition for follow mode (faster than manual 1000ms) (21-01)
-- Orange color theme (#FFA500) for follow toggle to distinguish from trails (21-01)
-- flyToNodeSmooth() for reusable smooth camera transitions (21-01)
-- Cornflower blue (#6495ED) for camera/zoom controls (21-02)
-- Overview zoom calculates bounding box with 1.5x padding (21-02)
-- Focus zoom at 120 units for context, Detail zoom at 40 units for inspection (21-02)
-- Focus/Detail buttons disabled when no node selected (21-02)
-- updateZoomButtonStates() pattern for selection-based UI state (21-02)
-- 9 bookmark slots (1-9 keys) for instant access without number row clutter (22-02)
-- Ctrl/Cmd+1-9 to save, plain 1-9 to jump for minimal friction (22-02)
-- Gold theme (#FFD700) for bookmarks to distinguish from other features (22-02)
-- Store both camera position and selected node for complete context restoration (22-02)
-- Bookmark count badge shows only when >0 for clean UI (22-02)
-- Navigation history with browser-style back/forward buttons (22-01)
-- Max history size 50 entries to prevent memory bloat (22-01)
-- Recent nodes dropdown shows last 10 unique visited nodes (22-01)
-- isNavigating flag prevents duplicate entries during back/forward (22-01)
-- Truncate forward history when navigating back then selecting new node (22-01)
-- Cyan color theme (#4ECDC4) for navigation controls (22-01)
-- Alt+Left/Right keyboard shortcuts for navigation (22-01)
-- pushNavigationHistory called from showDetailsPanel (22-01)
-- Navigation history persists via electron-store (22-01)
-- Breadcrumb trail shows hierarchy path from project root to selected node (23-01)
-- buildBreadcrumbPath parses node IDs to construct ancestor chain (23-01)
-- updateBreadcrumb renders clickable segments with "/" separators (23-01)
-- Breadcrumb segment clicks trigger flyToNodeSmooth + showDetailsPanel navigation (23-01)
-- Teal color scheme (#4ECDC4) for clickable breadcrumb segments (23-01)
-- Current node styled white and non-clickable in breadcrumb trail (23-01)
-- Event delegation on breadcrumb-trail container for click handling (23-01)
-- Minimap panel positioned bottom-right with z-index 100 (24-01)
-- Viewport size estimation based on camera distance (0.5x for width, 0.375x for height) (24-01)
-- 10% padding around node bounds for minimap boundaries (24-01)
-- Continuous RAF update loop for real-time minimap synchronization (24-01)
-- worldToMinimap and minimapToWorld coordinate transformation helpers (24-01)
-- Click navigation uses 800ms animation, drag uses instant (0ms) positioning (24-02)
-- Pointer cursor on minimap canvas with teal hover effects (24-02)
-- minimapDragging flag prevents click navigation after drag (24-02)
-- Global mouseup listener ensures drag ends outside canvas (24-02)
-- PATH_DWELL_TIME=2000ms for 2 seconds at each waypoint (25-02)
-- PATH_TRANSITION_TIME=1500ms for smooth camera transitions (25-02)
-- Path loops continuously until user stops (25-02)
-- Cornflower blue (#6495ED) for path button theme (25-02)
-- Stop path playback on any graph click for user control (25-02)
-- P key toggles path playback (25-02)
-- Orbit mode uses requestAnimationFrame for 60fps smooth rotation (25-01)
-- Orbit radius = 1.5x current camera distance from node (25-01)
-- Orbit speed slider maps 1-10 to 0.1-1.0 radians/sec (25-01)
-- Cornflower blue (#6495ED) for orbit controls (matches camera theme) (25-01)
-- PostToolUse hooks fire after operation with full context (26-01)
-- File-based event communication via .gsd-viewer/events/ directory (26-01)
-- Hook script always exits 0 to never block Claude operations (26-01)
-- Atomic writes with temp file + mv to prevent partial reads (26-01)
-- Event schema v1.0: schema_version, timestamp, operation, file_path, tool, source (26-01)
-- Event files ignored by git (ephemeral, created/consumed/deleted) (26-01)
-- Separate chokidar watcher for Claude events (no debounce unlike file changes) (27-01)
-- 200ms deduplication window for same file_path (hooks can fire twice) (27-01)
-- Serial queue processing to maintain event order and prevent race conditions (27-01)
-- NodeId enrichment matches graph-builder format (sourceType:/relative/path) (27-01)
-- IPC channel 'claude-operation' forwards enriched events to renderer (27-01)
-- Read operations use bright blue flash (0x4488FF) with 2 quick pulses at 0.8x intensity (28-01)
-- Enhanced emissive intensity 3.5x (was 2.0x) for better visibility from overview zoom (28-01)
-- Enhanced scale pulse 0.8 (was 0.5) creating max 1.8x scale (was 1.5x) for pronounced effect (28-01)
-- Flash intensity slider boosted 1.5x to support up to 3x total intensity (28-01)
-- Claude write/edit operations map to 'modified' change type (amber flash) (28-01)
-- onClaudeOperation IPC listener wires Claude operations to flash animations (28-01)
-- Follow-active camera disabled for read operations (non-intrusive) (28-01)
-- MAX_CONCURRENT_FLASHES = 20 limits simultaneous animations for 60fps performance (29-01)
-- Animation batching with pendingFlashes queue for operation burst handling (29-01)
-- 50ms stagger delay prevents frame spikes during batch processing (29-01)
-- Console logging for batching activity (queued, processing, drained) (29-01)
-- 30-second hook detection timeout balances false positives vs. timely notification (29-02)
-- Debug mode off by default to avoid UI clutter, user opts in for troubleshooting (29-02)
-- 50 debug entry limit prevents memory bloat from unbounded growth (29-02)
-- Color-coded debug operations match flash animation colors (29-02)
-- hookStatusTimeout cleared on first Claude event (hooks working) (29-02)
-- IPC handler 'open-external' enables Setup Guide documentation access (29-02)
-- Particle burst effects use THREE.Points for efficient rendering (quick-016)
-- Particle count varies by change type: created=20 (x2), modified=20, deleted=25, read=12 (quick-016)
-- 800ms particle lifetime with gravity (-0.01) and fade-out opacity (quick-016)
-- AdditiveBlending for glowing particle overlap effect (quick-016)
-- Separate RAF loop for particle animation, runs only when particles active (quick-016)
-- particleEffectsEnabled setting defaults to true, persisted via electron-store (quick-016)
-- Link opacity increased from 0.6 to 0.85 for better visibility at all zoom levels (quick-017)
-- Link colors use full node color without '66' opacity suffix for brightness (quick-017)
-- Link widths increased: root 4, phase 3, plan 2.5, directory 2, default 1.5, blocked 4 (quick-017)
-- Link curvature 0.1 for subtle curves that distinguish overlapping connections (quick-017)
-- Legend positioned absolute inside graph-container for viewport-relative positioning (quick-018)
-- Legend moves with graph when tree panel toggles, preventing overlap (quick-018)
-- flashTreeItem auto-expands parent directories and scrolls into view with 50ms delay (quick-020)
-- MeshStandardMaterial used for all 3D nodes to support emissive glow effects (quick-020)
-- Scene lighting: AmbientLight 0.6 + DirectionalLight 0.8 from (100,100,100) (quick-020)
-- Node metalness 0-0.1, roughness 0.7-0.9 to maintain visual appearance (quick-020)
+### Architecture
 
-**v1.5 Architecture Decision (Phase 30):**
-- State management centralized in state-manager.js using Proxy pattern for reactivity (30-01)
-- Proxy pattern for transparent state change tracking without manual setters (30-01)
-- Direct state access (state.property) supported alongside getter/setter API for flexibility (30-01)
-- Listener error handling wraps callbacks in try/catch to prevent cascade failures (30-01)
-- Separate initialization (project load) vs reset (view switch) functions (30-01)
-- Graph renderer refactored to graph-renderer.js importing state from state-manager (30-02)
-- Renderer.js reduced to thin entry point (2 lines) importing graph-renderer.js (30-02)
-- All shared state access uses state.* pattern (277 references in graph-renderer.js) (30-02)
-- AnimationFrameIds registry tracks all RAF loops for centralized cleanup (30-02)
-- Lifecycle methods (mount/unmount/getGraph) exported for view switching integration (30-02)
-- Unmount cleanup: cancel all RAF/intervals/timeouts/flashes, reset view state (30-02)
-- Separate DOM containers for graph (Canvas/WebGL) and diagram (SVG)
-- CSS hide/show view switching to preserve state between toggles
-- Explicit mount/unmount lifecycle methods to prevent memory leaks
-- View-specific animation loops with cancel on switch
-- D3.js ^7.9.0 for SVG manipulation and interactivity
-- @dagrejs/dagre ^2.0.0 for hierarchical workflow layout computation
-- Tab controls placed after refresh button with teal border-bottom active indicator (31-01)
-- diagram-container mirrors all graph-container responsive classes for consistent panel behavior (31-01)
-- unmountGraph() called before hiding to stop animations cleanly (31-01)
-- window.switchToView global function for HTML onclick handlers (31-01)
-- activeView stored in state-manager.js to avoid circular dependencies (31-02)
-- Keyboard handlers check state.activeView !== 'graph' for early return (31-02)
-- File watcher always updates data, conditionally triggers visual effects based on activeView (31-02)
-- Selection restoration uses highlightNodeInGraph() on mount (31-02)
-- Use window.require for Node.js APIs (fs/path) in Electron renderer with nodeIntegration (32-01)
-- GSD pipeline parser scans .planning/phases/ to determine workflow stage per phase (32-01)
-- Artifact status by file size: >50 bytes = done, <50 bytes = in-progress (32-01)
-- Diagram renderer creates SVG container with D3.js, mirrors graph-renderer lifecycle (32-01)
-- Dagre layout with LR rankdir for horizontal stage flow (32-02)
-- Stage dimensions 250x300px fit ~4 artifacts with spacing (32-02)
-- Status colors: green (done), yellow/orange (in-progress), gray (missing) (32-02)
-- Stage colors: unique per stage (blue→purple→red→orange→green→teal) (32-02)
-- Mouse wheel for horizontal scroll, drag for pan (32-02)
-- Current stage pulsing highlight (2s cycle, teal border, opacity 1→0.6→1) (32-02)
-- Artifact blocks with status-colored background (20% opacity) + full color edge bar (32-02)
-- Artifact icons by type (📋 CONTEXT, 📝 PLAN, ✅ SUMMARY) (32-02)
-- +N more indicator when artifacts overflow stage height (32-02)
-- D3.js event handlers (.on) for SVG interactivity pattern established (33-01)
-- Shared function exports between graph-renderer and diagram-renderer for code reuse (33-01)
-- Separate #diagram-tooltip element to avoid view conflicts (33-01)
-- highlightNodeInGraph exported from graph-renderer for cross-module access (33-02)
-- state.selectedNode as single source of truth for selection state (33-02)
-- Subscribe/unsubscribe pattern in mount/unmount prevents memory leaks (33-02)
-- Selected artifacts show teal (#4ECDC4) border with drop-shadow glow effect (33-02)
-- Bookmark shortcuts (1-9) parse phase numbers from node IDs for diagram navigation (33-02)
-- 500ms ease-out pan animation for bookmark navigation in diagram view (33-02)
-- Local showToast implementation in diagram-renderer for independence (33-02)
-- File change handler in diagram-renderer with 300ms debounce for burst changes (34-01)
-- onFilesChanged export re-parses pipeline and re-renders diagram on planning file changes (34-01)
-- graph-renderer routes file changes to diagram via onDiagramFilesChanged when activeView === 'diagram' (34-01)
-- Diagram flash animations use CSS transform (scale) and filter (drop-shadow) for SVG elements (34-01)
-- 4 pulses for created (green), 3 pulses for modified (amber), 2 pulses for deleted (red) (34-01)
-- flashArtifact function applies CSS animation class with 50ms post-render delay (34-01)
-- Diagram flash respects --flash-duration CSS variable for user preference (34-01)
-- Context usage estimated from modified file count (1-2 files=15-25%, 3-5=30-50%, 6+=50-70%) (35-01)
-- Context bar color thresholds: 30%/50%/70% for green/yellow/orange/red transitions (35-01)
-- Context bars positioned 5px below stage header, 8px height, 10px horizontal padding (35-01)
-- Window resize handler re-centers diagram with 300ms D3 transition (35-01)
-- Parallel agent detection: CONTEXT+RESEARCH for discuss stage, wave assignments for execute stage (35-02)
-- Agent color scheme: researcher=purple, executor=orange, discusser=blue (35-02)
-- Agent lanes render below context bar with icon, label, and type-specific color (35-02)
-- Commit markers on SUMMARY artifacts: green checkmark with red count badge for multiple commits (35-02)
-- extractCommitMarkers() parses commits from frontmatter and body sections of SUMMARY files (35-02)
-- Dynamic Y offset calculation accounts for agent lanes (24px + 5px margin) when present (35-02)
+Activity flow:
+1. Claude hook / file watcher → graph-renderer.js
+2. graph-renderer.js → activity-dispatcher.js
+3. activity-dispatcher.js → all activity renderers:
+   - dashboard-renderer.js
+   - heatmap-renderer.js
+   - timeline-renderer.js
+   - notification-renderer.js
+   - session-recorder.js
 
-### Pending Todos
+View lifecycle:
+- view-controller.js manages mount/unmount for all views
+- Each view preserves state when unmounted
+- Graph camera position preserved during view switches
 
-None.
-
-### Blockers/Concerns
-
-None.
-
-### Quick Tasks Completed
-
-| # | Description | Date | Directory |
-|---|-------------|------|-----------|
-| 001 | Enhance file visualization - distinguish dirs from files, show content on click | 2026-01-23 | [001-enhance-file-visualization](./quick/001-enhance-file-visualization-distinguish-d/) |
-| 002 | Add tree structure view with bidirectional graph synchronization | 2026-01-23 | [002-add-tree-structure-view](./quick/002-add-tree-structure-view-of-files-synchro/) |
-| 003 | Flash animate file nodes on change with 2-second yellow pulse | 2026-01-23 | [003-flash-animate-file-nodes](./quick/003-flash-animate-file-nodes-on-change-to-re/) |
-| 004 | Bidirectional flash sync: graph click flashes tree, tree click flashes graph | 2026-01-23 | [004-bidirectional-flash-sync](./quick/004-bidirectional-flash-sync-between-graph-n/) |
-| 005 | Fix flash animation visibility - brighter pulsing effect | 2026-01-23 | [005-fix-flash-animation](./quick/005-fix-flash-animation-visibility-make-more/) |
-| 006 | Add 2D/3D toggle switch to change graph view | 2026-01-23 | [006-add-2d-3d-toggle-switch](./quick/006-add-2d-3d-toggle-switch-to-change-graph-/) |
-| 007 | Fix 2D zoom, file change detection, and color coding | 2026-01-23 | [007-fix-2d-zoom-file-change-detection-and-co](./quick/007-fix-2d-zoom-file-change-detection-and-co/) |
-| 008 | Fix path error - missing sourceType in graph node building | 2026-01-23 | [008-fix-path-error-missing-sourcetype](./quick/008-fix-path-error-missing-sourcetype/) |
-| 009 | Resizable divider between file tree panel and graph | 2026-01-23 | [009-resizable-panel-divider](./quick/009-resizable-panel-divider/) |
-| 010 | File Tree panel open by default on startup | 2026-01-23 | [010-file-tree-open-by-default](./quick/010-file-tree-open-by-default/) |
-| 011 | Fix Open in Editor not launching - missing sourceType in graph-builder | 2026-01-24 | [011-fix-open-in-editor](./quick/011-fix-double-click-and-open-in-editor-not-/) |
-| 012 | Fix Setup Guide button for Claude hooks - add error handling | 2026-01-25 | [012-fix-setup-guidelines-button](./quick/012-fix-setup-guidelines-button-for-claude-h/) |
-| 013 | Implement test suites for application - Jest with parser and graph-builder tests | 2026-01-25 | [013-implement-test-suites](./quick/013-implement-test-suites-for-application/) |
-| 014 | Fix Claude Code hooks detection - add diagnostic logging and verify end-to-end flow | 2026-01-25 | [014-fix-claude-code-hooks-not-detected](./quick/014-fix-claude-code-hooks-not-detected/) |
-| 015 | Add legend to graph - show shapes, flash animations, source types | 2026-01-26 | [015-add-legend-to-graph](./quick/015-add-legend-to-graph/) |
-| 016 | Add particle effects to flash animations | 2026-01-26 | [016-add-particle-effects-to-flash-animations](./quick/016-add-particle-effects-to-flash-animations/) |
-| 017 | Make links between nodes more visible | 2026-01-26 | [017-make-links-between-nodes-more-visible](./quick/017-make-links-between-nodes-more-visible/) |
-| 018 | Move legend to graph screen - position relative to viewport | 2026-01-26 | [018-move-legend-to-graph-screen](./quick/018-move-legend-to-graph-screen/) |
-| 019 | Fix hooks notification X button not closing | 2026-01-26 | [019-fix-hooks-notification-x-button-not-clos](./quick/019-fix-hooks-notification-x-button-not-clos/) |
-| 020 | Fix tree auto-expand and graph flash visibility | 2026-01-26 | [020-fix-tree-auto-expand-and-graph-flash-vis](./quick/020-fix-tree-auto-expand-and-graph-flash-vis/) |
-| 021 | Enhance flash visibility with intensity and null-safe DOM queries | 2026-01-26 | [021-enhance-flash-visibility](./quick/021-enhance-flash-visibility/) |
-| 022 | Simplify node hover tooltip to 2 items (name + type) | 2026-01-26 | [022-when-hovering-over-nodes-tip-display-2-i](./quick/022-when-hovering-over-nodes-tip-display-2-i/) |
-| 023 | Fix Select Project button and File Open not working | 2026-01-28 | [023-fix-select-project-file-open](./quick/023-fix-select-project-file-open/) |
-
-## Session Continuity
-
-Last session: 2026-01-28 19:52:13 UTC
-Stopped at: v1.6 roadmap created
-Resume file: None
-Next action: Begin Phase 36 planning with `/gsd:plan-phase 36`
+---
+*Last updated: 2026-01-28 — v1.6 Complete*
