@@ -38,7 +38,6 @@ export function getActiveView() {
  */
 export function switchToView(viewName) {
   if (viewName === state.activeView) {
-    console.log(`[ViewCtrl] Already on ${viewName} view`);
     return;
   }
 
@@ -46,8 +45,6 @@ export function switchToView(viewName) {
     console.error(`[ViewCtrl] Unknown view: ${viewName}`);
     return;
   }
-
-  console.log(`[ViewCtrl] Switching from ${state.activeView} to ${viewName}`);
 
   const previousView = state.activeView;
 
@@ -78,7 +75,6 @@ export function switchToView(viewName) {
   }
 
   state.activeView = viewName;
-  console.log(`[ViewCtrl] ${viewName} view mounted`);
 }
 
 /**
@@ -86,13 +82,13 @@ export function switchToView(viewName) {
  * Sets up initial state and tab click handlers
  */
 export function initViewSwitching() {
-  // Ensure graph is the default active view
-  state.activeView = 'graph';
-
   // Make switchToView available globally for onclick handlers
   window.switchToView = switchToView;
 
-  console.log('[ViewCtrl] View switching initialized, active view: graph');
+  // Initialize with no active view, then switch to graph
+  // This ensures mount() is called (switchToView returns early if already on the view)
+  state.activeView = null;
+  switchToView('graph');
 }
 
 // Auto-initialize when module loads

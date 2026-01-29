@@ -5,6 +5,8 @@ import { formatFileSize, formatRelativeTime } from './shared-utils.js';
 import { dispatchClaudeOperation, dispatchFileChange } from './activity-dispatcher.js';
 import { showSettings as showNotificationSettings } from './notification-renderer.js';
 import { toggleRecording, showSessionManager } from './session-recorder.js';
+// Note: Use window.switchToView instead of importing to avoid circular dependency
+// (view-controller.js imports from graph-renderer.js)
 
 // Color palette by node type (WCAG AA compliant against #1a1a2e background)
 const nodeColors = {
@@ -2713,7 +2715,10 @@ function getLinkWidth(link, graphData) {
 const container = document.getElementById('graph-container');
 let connectionCounts = calculateConnectionCounts(state.currentGraphData);
 
-const Graph = ForceGraph3D()(container)
+const Graph = ForceGraph3D()(container);
+window.Graph = Graph; // Expose for debugging
+
+Graph
   .graphData(state.currentGraphData)
   .nodeLabel(() => null) // Disable built-in tooltip, use custom #tooltip instead
   .nodeColor(node => getNodeColor(node))
@@ -2996,8 +3001,18 @@ function handleResize() {
   const activityHeight = activityPanel && activityPanel.classList.contains('visible') ? 180 : 0;
   const statisticsPanel = document.getElementById('statistics-panel');
   const statisticsWidth = statisticsPanel && statisticsPanel.classList.contains('visible') ? 320 : 0;
-  Graph.width(window.innerWidth - treeWidth - statisticsWidth);
-  Graph.height(window.innerHeight - toolbarHeight - activityHeight);
+
+  const targetWidth = window.innerWidth - treeWidth - statisticsWidth;
+  const targetHeight = window.innerHeight - toolbarHeight - activityHeight;
+
+  Graph.width(targetWidth);
+  Graph.height(targetHeight);
+
+  // Force WebGL render after resize
+  // When canvas dimensions change, Three.js WebGLRenderer needs explicit render call
+  if (Graph.renderer && Graph.scene && Graph.camera) {
+    Graph.renderer().render(Graph.scene(), Graph.camera());
+  }
 }
 
 window.addEventListener('resize', handleResize);
@@ -3338,6 +3353,9 @@ async function loadProject(projectPath) {
     console.log('Graph built:', graphData.nodes.length, 'nodes,', graphData.links.length, 'links');
 
     updateGraph(graphData);
+
+    // Switch to graph view to show the loaded project
+    if (window.switchToView) window.switchToView('graph');
 
     if (selectedPathEl) selectedPathEl.textContent = projectPath;
 
@@ -7766,7 +7784,15 @@ function logDebugOperation(event) {
  * @param {HTMLElement} containerEl - Optional container element (defaults to current)
  */
 export function mount(containerEl) {
-  console.log('[Lifecycle] Mounting graph renderer');
+  // Resize graph to container dimensions (may have changed while hidden)
+  handleResize();
+
+  // Force scene refresh after container becomes visible
+  // Re-apply graph data to trigger internal re-render
+  if (Graph && state.currentGraphData.nodes.length > 0) {
+    Graph.graphData(state.currentGraphData);
+    setTimeout(() => Graph.zoomToFit(400), 100);
+  }
 
   // Start animation loops that were stopped during unmount
   if (nodeHeatMap.size > 0 && !heatLoopRunning) {
@@ -7784,8 +7810,6 @@ export function mount(containerEl) {
   // Restore selection state if a node was selected before unmount
   const selectedNodeId = state.selectedNode?.id || state.selectedNode;
   if (selectedNodeId && Graph) {
-    console.log('[Lifecycle] Restoring selection:', selectedNodeId);
-
     // Find the node in current graph data
     const node = state.currentGraphData.nodes.find(n => n.id === selectedNodeId);
     if (node) {
@@ -7794,8 +7818,6 @@ export function mount(containerEl) {
       highlightNodeInGraph(selectedNodeId);
     }
   }
-
-  console.log('[Lifecycle] Graph renderer mounted');
 }
 
 /**
