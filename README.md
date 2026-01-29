@@ -56,6 +56,20 @@ A desktop application that visualizes [GSD](https://github.com/glittercowboy/get
 - Click to focus, double-click to inspect
 - Resizable panel divider
 
+### Diagram View
+- Pipeline visualization of GSD workflow stages
+- Artifact cards with status indicators
+- Flash animations synced with graph view
+- Selection sync between diagram and graph
+
+### Live Activity Intelligence (v1.6)
+- **Dashboard View** - Current operation indicator, session stats, sparkline, pie chart
+- **File Heatmap View** - Treemap visualization with activity heat, drill-down navigation
+- **Operation Flow Timeline** - Swimlanes by file, pattern detection, playback controls
+- **Context Window Meter** - Estimated usage tracking, files in context, at-risk warnings
+- **Smart Notifications** - Toast alerts for file bursts, rapid activity patterns
+- **Session Recording** - Record, playback, and export sessions as markdown
+
 ## Installation
 
 ```bash
@@ -116,16 +130,24 @@ Settings are persisted automatically:
 gsdview/
 ├── src/
 │   ├── main/
-│   │   ├── main.js          # Electron main process
-│   │   └── preload.js       # IPC bridge
+│   │   ├── main.js              # Electron main process
+│   │   ├── preload.js           # IPC bridge
+│   │   └── parsers/             # GSD document parsers
 │   └── renderer/
-│       ├── renderer.js      # Graph rendering and UI
-│       ├── graph-builder.js # GSD structure parsing
-│       └── index.html       # Application UI
-├── .planning/               # GSD planning documents
-└── .gsd-viewer/             # Runtime files (auto-generated)
-    ├── hooks/               # Claude hook script
-    └── events/              # Operation event files
+│       ├── graph-renderer.js    # 3D graph visualization
+│       ├── diagram-renderer.js  # Pipeline diagram view
+│       ├── dashboard-renderer.js # Live dashboard view
+│       ├── heatmap-renderer.js  # File heatmap view
+│       ├── timeline-renderer.js # Operation timeline view
+│       ├── view-controller.js   # View switching/lifecycle
+│       ├── activity-dispatcher.js # Event routing
+│       ├── notification-renderer.js # Smart notifications
+│       ├── session-recorder.js  # Session recording/playback
+│       └── index.html           # Application UI
+├── .planning/                   # GSD planning documents
+└── .gsd-viewer/                 # Runtime files (auto-generated)
+    ├── hooks/                   # Claude hook script
+    └── events/                  # Operation event files
 ```
 
 ## Tech Stack
@@ -162,8 +184,10 @@ npm run package
 | v1.2 | File Deep Dive | Shipped | File inspector modal, diff editor |
 | v1.3 | Enhanced Navigation | Shipped | Bookmarks, minimap, orbit mode |
 | v1.4 | Live Activity Sync | Shipped | Claude hooks, enhanced flash effects |
+| v1.5 | Diagram Pipeline View | Shipped | Workflow visualization, selection sync |
+| v1.6 | Live Activity Intelligence | Shipped | Dashboard, heatmap, timeline, notifications, session recording |
 
-**Quick Tasks Completed:** 21
+**Quick Tasks Completed:** 24
 
 See `.planning/MILESTONES.md` for detailed changelog.
 
